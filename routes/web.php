@@ -4,9 +4,11 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ApiKeyController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DashboardPageController;
+use App\Http\Controllers\HealthController;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'welcome')->name('home');
+Route::get('/ready', HealthController::class)->name('ready');
 Route::inertia('/api-catalogue', 'public/api-catalogue')->name('api-catalogue');
 Route::inertia('/pricing', 'public/pricing')->name('pricing');
 Route::inertia('/docs', 'public/docs')->name('docs');

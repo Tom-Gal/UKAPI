@@ -4,6 +4,8 @@ use App\Http\Middleware\AssignApiRequestId;
 use App\Http\Middleware\EnsureUserIsAdmin;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\SetSecurityHeaders;
+use App\Http\Middleware\TrustConfiguredProxies;
 use App\Support\Api\ApiException;
 use App\Support\Api\ApiResponse;
 use Illuminate\Foundation\Application;
@@ -23,6 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
         apiPrefix: '',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->prepend(TrustConfiguredProxies::class);
         $middleware->alias([
             'admin' => EnsureUserIsAdmin::class,
         ]);
@@ -32,10 +35,15 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleAppearance::class,
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
+            SetSecurityHeaders::class,
         ]);
         $middleware->api(prepend: [
             AssignApiRequestId::class,
         ]);
+        $middleware->api(append: [
+            SetSecurityHeaders::class,
+        ]);
+        $middleware->trustHosts();
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

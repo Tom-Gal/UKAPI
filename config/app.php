@@ -56,6 +56,21 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Release version
+    |--------------------------------------------------------------------------
+    |
+    | Set APP_VERSION to the deployed commit SHA or release identifier. It is
+    | deliberately exposed only by the unauthenticated readiness endpoint to
+    | make rollback and incident checks unambiguous.
+    |
+    */
+
+    'version' => env('APP_VERSION', 'dev'),
+
+    'trusted_proxies' => env('TRUSTED_PROXIES'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
     |

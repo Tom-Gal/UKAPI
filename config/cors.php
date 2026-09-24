@@ -13,7 +13,7 @@ return [
             return [];
         }
 
-        return array_values(array_filter(explode(',', $origins)));
+        return array_values(array_filter(array_map('trim', explode(',', $origins))));
     })(),
 
     'allowed_origins_patterns' => [],
