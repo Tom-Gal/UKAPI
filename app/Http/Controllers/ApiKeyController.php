@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ApiKey;
+use App\Notifications\ApiKeyActivityNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -53,6 +54,8 @@ class ApiKeyController extends Controller
             'request_id' => $request->header('X-Request-Id'),
         ]);
 
+        $request->user()->notify(ApiKeyActivityNotification::created($key));
+
         return to_route('api-keys.index')->with('api_key_created', [
             'name' => $key->name,
             'token' => "uk_{$key->environment}_{$key->public_id}.{$secret}",
@@ -74,6 +77,8 @@ class ApiKeyController extends Controller
                 'action' => 'revoked',
                 'request_id' => $request->header('X-Request-Id'),
             ]);
+
+            $request->user()->notify(ApiKeyActivityNotification::revoked($apiKey));
         }
 
         return to_route('api-keys.index');

@@ -4,8 +4,10 @@ namespace Tests\Feature;
 
 use App\Models\ApiKey;
 use App\Models\User;
+use App\Notifications\ApiKeyActivityNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
 class ApiKeyTest extends TestCase
@@ -14,6 +16,7 @@ class ApiKeyTest extends TestCase
 
     public function test_a_verified_user_can_create_a_test_key_and_only_receives_the_secret_once(): void
     {
+        Notification::fake();
         $user = User::factory()->create();
 
         $response = $this->actingAs($user)->post(route('api-keys.store'), [
@@ -36,10 +39,12 @@ class ApiKeyTest extends TestCase
             'actor_user_id' => $user->id,
             'action' => 'created',
         ]);
+        Notification::assertSentTo($user, ApiKeyActivityNotification::class);
     }
 
     public function test_a_user_can_revoke_their_own_key(): void
     {
+        Notification::fake();
         $user = User::factory()->create();
         $key = $user->apiKeys()->create([
             'public_id' => 'k_localtest',
@@ -54,6 +59,7 @@ class ApiKeyTest extends TestCase
         $this->assertSame('revoked', $key->fresh()->status);
         $this->assertNotNull($key->fresh()->revoked_at);
         $this->assertDatabaseHas('api_key_audit_events', ['api_key_id' => $key->id, 'action' => 'revoked']);
+        Notification::assertSentTo($user, ApiKeyActivityNotification::class);
     }
 
     public function test_a_user_cannot_revoke_another_users_key(): void
