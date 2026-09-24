@@ -34,6 +34,7 @@ class BillingController extends Controller
                 'success_url' => route('billing', ['checkout' => 'success']),
                 'cancel_url' => route('billing', ['checkout' => 'cancelled']),
                 'tax_id_collection' => ['enabled' => true],
+                'customer_update' => ['address' => 'auto'],
             ]);
     }
 
