@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
     title: UKAPI.io API
-    version: 1.0.0-draft
+    version: 1.0.0
     description: |
         The UKAPI.io v1 contract. API keys are issued through the customer dashboard
         and must be supplied with the Bearer authentication scheme.

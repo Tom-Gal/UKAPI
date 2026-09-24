@@ -1,9 +1,11 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import { Check } from 'lucide-react';
 import { PageHero } from '@/pages/public/api-catalogue';
 import { plans } from '@/lib/ukapi-content';
 
 export default function Pricing() {
+    const { auth } = usePage().props;
+
     return (
         <>
             <Head title="Pricing">
@@ -52,18 +54,19 @@ export default function Pricing() {
                                 </li>
                             </ul>
                             <Link
-                                href="/register"
+                                href={auth.user ? '/billing' : '/register'}
                                 className={`mt-8 rounded-lg px-4 py-2.5 text-center text-sm font-semibold transition ${plan.emphasis ? 'bg-[#1248e8] text-white hover:bg-[#0f3dc4]' : 'border border-slate-300 bg-white text-slate-900 hover:border-slate-400'}`}
                             >
-                                Choose {plan.name}
+                                {auth.user
+                                    ? `Choose ${plan.name}`
+                                    : 'Create account'}
                             </Link>
                         </article>
                     ))}
                 </div>
                 <p className="mt-8 max-w-2xl text-sm leading-6 text-slate-500">
-                    Billing and upgrades are being prepared for launch. The Free
-                    plan is available on account creation; paid-plan checkout is
-                    intentionally not connected yet.
+                    The Free plan is available when you create an account. Paid
+                    plans are managed securely through Stripe.
                 </p>
             </div>
         </>

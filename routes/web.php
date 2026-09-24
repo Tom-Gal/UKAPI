@@ -6,6 +6,7 @@ use App\Http\Controllers\BillingController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DashboardPageController;
 use App\Http\Controllers\HealthController;
+use App\Http\Controllers\PublicStatusController;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'welcome')->name('home');
@@ -15,7 +16,7 @@ Route::inertia('/pricing', 'public/pricing')->name('pricing');
 Route::inertia('/docs', 'public/docs')->name('docs');
 Route::inertia('/docs/{section}', 'public/docs-section')->name('docs.section');
 Route::inertia('/docs/api/{family}/{endpoint}', 'public/endpoint-reference')->name('docs.endpoint');
-Route::inertia('/status', 'public/status')->name('status');
+Route::get('/status', PublicStatusController::class)->name('status');
 Route::inertia('/terms', 'public/legal')->defaults('document', 'terms')->name('terms');
 Route::inertia('/privacy', 'public/legal')->defaults('document', 'privacy')->name('privacy');
 Route::inertia('/acceptable-use', 'public/legal')->defaults('document', 'acceptable-use')->name('acceptable-use');
@@ -30,16 +31,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('billing', [DashboardPageController::class, 'billing'])->name('billing');
     Route::post('billing/checkout', [BillingController::class, 'checkout'])->name('billing.checkout');
     Route::post('billing/portal', [BillingController::class, 'portal'])->name('billing.portal');
-    Route::get('request-logs', [DashboardPageController::class, 'requestLogs'])->name('request-logs');
 });
 
 Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [AdminController::class, 'overview'])->name('overview');
     Route::get('/users', [AdminController::class, 'users'])->name('users');
-    Route::get('/usage', [AdminController::class, 'usage'])->name('usage');
     Route::get('/providers', [AdminController::class, 'providers'])->name('providers');
-    Route::get('/errors', [AdminController::class, 'errors'])->name('errors');
-    Route::get('/feature-flags', [AdminController::class, 'featureFlags'])->name('feature-flags');
 });
 
 require __DIR__.'/settings.php';

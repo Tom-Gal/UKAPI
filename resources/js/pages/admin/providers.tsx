@@ -13,7 +13,7 @@ export default function AdminProviders({
             <DashboardPageHeader
                 eyebrow="Internal"
                 title="Providers"
-                description="Configuration status is shown here without exposing provider secrets. Scheduled health probes and circuit state follow in the operations pass."
+                description="Current upstream integrations and their configuration state. Credentials are never exposed here."
             />
             <AdminNav />
             <main className="p-5 lg:p-8">
@@ -40,7 +40,7 @@ export default function AdminProviders({
                                     </td>
                                     <td className="px-5 py-4">
                                         <span
-                                            className={`rounded-full px-2 py-1 text-xs font-semibold ${provider.status === 'Credential missing' || provider.status === 'Snapshot missing' ? 'bg-rose-50 text-rose-800' : provider.status === 'Not configured' ? 'bg-amber-50 text-amber-800' : 'bg-emerald-50 text-emerald-800'}`}
+                                            className={`rounded-full px-2 py-1 text-xs font-semibold ${provider.status === 'Credential missing' || provider.status === 'Snapshot missing' ? 'bg-rose-50 text-rose-800' : 'bg-emerald-50 text-emerald-800'}`}
                                         >
                                             {provider.status}
                                         </span>

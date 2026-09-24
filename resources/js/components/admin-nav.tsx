@@ -3,10 +3,7 @@ import { Link } from '@inertiajs/react';
 const items = [
     ['Overview', '/admin'],
     ['Users', '/admin/users'],
-    ['Usage', '/admin/usage'],
     ['Providers', '/admin/providers'],
-    ['Errors', '/admin/errors'],
-    ['Feature flags', '/admin/feature-flags'],
 ];
 
 export function AdminNav() {

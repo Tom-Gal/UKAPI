@@ -23,7 +23,7 @@ export default function Usage({
             <DashboardPageHeader
                 eyebrow="Usage"
                 title="Request usage"
-                description="A running account-level quota is shown here. Endpoint and day breakdowns will follow as more API families are released."
+                description="Track the requests included in your current monthly plan."
             />
             <main className="p-5 lg:p-8">
                 <div className="mb-6 rounded-xl border border-slate-200 bg-white p-6">
@@ -43,17 +43,12 @@ export default function Usage({
                         />
                     </div>
                 </div>
-                <EmptyState
-                    title={
-                        monthlyUsage === 0
-                            ? 'No usage has been recorded'
-                            : 'More usage detail is on the way'
-                    }
-                >
+                <EmptyState title={monthlyUsage === 0 ? 'No usage recorded yet' : 'Keep building'}>
                     <BarChart3 className="mx-auto size-5 text-[#1248e8]" />
                     <p className="mt-2">
-                        VAT requests are live and counted. Endpoint-family and
-                        daily views will arrive with the next API families.
+                        {monthlyUsage === 0
+                            ? 'Make your first API request to start using your monthly allowance.'
+                            : 'Every successful API request counts toward the monthly allowance shown above.'}
                     </p>
                     <Link
                         href="/docs"

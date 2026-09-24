@@ -25,7 +25,6 @@ class DashboardController extends Controller
                 'monthly_requests' => $usageMeter->currentMonthlyUsageForUser($user->id),
                 'monthly_quota' => $plan['monthly_request_quota'],
                 'plan_label' => $plan['label'],
-                'request_logs_available' => false,
             ],
         ]);
     }

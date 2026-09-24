@@ -21,7 +21,7 @@ export default function AdminUsers({ users }: { users: User[] }) {
             <DashboardPageHeader
                 eyebrow="Internal"
                 title="Users"
-                description="The 50 most recently created accounts. Role assignment and account changes remain deliberately outside this read-only scaffold."
+                description="The 50 most recently created accounts. This view is read-only."
             />
             <AdminNav />
             <main className="p-5 lg:p-8">

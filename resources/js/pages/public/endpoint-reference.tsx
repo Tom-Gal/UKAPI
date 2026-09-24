@@ -52,10 +52,8 @@ export default function EndpointReference() {
                     <p className="mt-5 text-lg leading-8 text-slate-600">
                         {endpoint.description}
                     </p>
-                    <span
-                        className={`mt-4 inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${endpoint.live ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'}`}
-                    >
-                        {endpoint.live ? 'Live endpoint' : 'Planned endpoint'}
+                    <span className="mt-4 inline-flex rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-800">
+                        Live endpoint
                     </span>
                 </div>
                 <div className="mt-10 grid gap-4 sm:grid-cols-3">
@@ -181,16 +179,7 @@ export default function EndpointReference() {
                         error envelope.
                     </p>
                 </Section>
-                {endpoint.live ? (
-                    <TryItConsole requestPath={requestPath} />
-                ) : (
-                    <aside className="mt-10 rounded-xl border border-amber-200 bg-amber-50 p-5 text-sm leading-6 text-amber-950">
-                        <LockKeyhole className="mb-2 size-4" />
-                        <strong>Try it is not available yet.</strong> It will be
-                        enabled only when this endpoint and test-key execution
-                        are live.
-                    </aside>
-                )}
+                <TryItConsole requestPath={requestPath} />
             </article>
         </>
     );

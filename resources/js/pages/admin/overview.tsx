@@ -5,9 +5,11 @@ import { DashboardPageHeader } from '@/components/dashboard-page-header';
 export default function AdminOverview({
     usersCount,
     activeKeysCount,
+    providersCount,
 }: {
     usersCount: number;
     activeKeysCount: number;
+    providersCount: number;
 }) {
     return (
         <>
@@ -31,16 +33,11 @@ export default function AdminOverview({
                         link="/api-keys"
                     />
                     <Card
-                        label="Operational data"
-                        value="Pending"
+                        label="Configured providers"
+                        value={providersCount}
                         link="/admin/providers"
                     />
                 </div>
-                <p className="mt-6 max-w-2xl text-sm leading-6 text-slate-500">
-                    Usage rollups, provider probes, error tracking and feature
-                    flags need their corresponding API/operations services
-                    before this area can show live operational telemetry.
-                </p>
             </main>
         </>
     );

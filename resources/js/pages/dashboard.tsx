@@ -11,7 +11,6 @@ type Props = {
         monthly_requests: number;
         monthly_quota: number;
         plan_label: string;
-        request_logs_available: boolean;
     };
 };
 

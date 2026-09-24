@@ -5,7 +5,6 @@ import {
     CreditCard,
     KeyRound,
     LayoutGrid,
-    ScrollText,
     Settings2,
     Shield,
 } from 'lucide-react';
@@ -33,7 +32,6 @@ const mainNavItems: NavItem[] = [
     { title: 'API keys', href: '/api-keys', icon: KeyRound },
     { title: 'Usage', href: '/usage', icon: ChartNoAxesCombined },
     { title: 'Billing', href: '/billing', icon: CreditCard },
-    { title: 'Request logs', href: '/request-logs', icon: ScrollText },
     { title: 'Account & security', href: '/settings/profile', icon: Settings2 },
 ];
 

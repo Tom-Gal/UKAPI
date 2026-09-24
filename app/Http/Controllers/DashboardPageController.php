@@ -30,17 +30,13 @@ class DashboardPageController extends Controller
 
         return Inertia::render('dashboard/billing', [
             'plan' => $plans->forUser($user),
-            'paidPlans' => $plans->paid(),
+            'paidPlans' => array_values(array_filter(
+                $plans->paid(),
+                fn (array $plan): bool => filled($plan['stripe_price']),
+            )),
             'hasStripeCustomer' => $user->hasStripeId(),
             'hasActiveSubscription' => $user->subscribed('default'),
             'checkoutStatus' => $request->query('checkout'),
-        ]);
-    }
-
-    public function requestLogs(): Response
-    {
-        return Inertia::render('dashboard/request-logs', [
-            'requestLogsAvailable' => false,
         ]);
     }
 }

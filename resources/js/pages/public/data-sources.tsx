@@ -1,5 +1,5 @@
 import { Head } from '@inertiajs/react';
-import { ExternalLink, FileWarning } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
 import { PageHero } from '@/pages/public/api-catalogue';
 
 const sources = [
@@ -14,36 +14,6 @@ const sources = [
         'https://developer.company-information.service.gov.uk/',
         'UK',
         'Company profiles, officer and filing metadata; locally refreshed condensed SIC 2007 reference snapshot',
-    ],
-    [
-        'GOV.UK Bank Holidays',
-        'https://www.gov.uk/bank-holidays.json',
-        'UK',
-        'Bank-holiday data',
-    ],
-    [
-        'Food Standards Agency',
-        'https://api.ratings.food.gov.uk/help',
-        'UK',
-        'Food hygiene data',
-    ],
-    [
-        'Police.uk',
-        'https://data.police.uk/docs/',
-        'Provider-specific partial coverage',
-        'Approximate street-level crime data',
-    ],
-    [
-        'Environment Agency',
-        'https://environment.data.gov.uk/flood-monitoring/doc/reference',
-        'England',
-        'Flood warnings and monitoring',
-    ],
-    [
-        'Planning Data',
-        'https://www.planning.data.gov.uk/docs',
-        'England',
-        'Planning constraints; beta source',
     ],
 ];
 
@@ -62,13 +32,6 @@ export default function DataSources() {
                 description="UKAPI.io is a normalisation layer, not the authority for these datasets. Coverage and freshness are exposed alongside endpoint responses."
             />
             <div className="mx-auto max-w-6xl px-5 pb-20 lg:px-8">
-                <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-5 text-sm leading-6 text-amber-950">
-                    <FileWarning className="mb-2 size-5" />
-                    <strong>Pre-launch register.</strong> Source terms, licence
-                    summaries, reuse rights, mandatory attribution wording and
-                    review dates must be completed and legally reviewed before
-                    each provider is activated.
-                </div>
                 <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
                     <table className="w-full min-w-[760px] text-left text-sm">
                         <thead className="bg-slate-50 text-xs tracking-wide text-slate-500 uppercase">
@@ -111,10 +74,8 @@ export default function DataSources() {
                     </table>
                 </div>
                 <p className="mt-6 text-sm leading-6 text-slate-500">
-                    Planning and property results are informational only and are
-                    not a substitute for official searches or professional
-                    advice. “Publicly accessible” does not automatically mean
-                    commercially redistributable.
+                    Data is supplied by the sources shown above. Coverage and
+                    freshness are included in API responses where available.
                 </p>
             </div>
         </>

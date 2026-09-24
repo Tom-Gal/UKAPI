@@ -23,7 +23,7 @@ export type EndpointFamily = {
     endpoints: Endpoint[];
 };
 
-export const endpointFamilies: EndpointFamily[] = [
+const allEndpointFamilies: EndpointFamily[] = [
     {
         slug: 'postcodes',
         name: 'Postcodes & location',
@@ -420,10 +420,9 @@ export const endpointFamilies: EndpointFamily[] = [
         ],
     },
     {
-        slug: 'dates',
-        name: 'Dates & utilities',
-        summary:
-            'Bank holidays and deliberately small UK business-date utilities.',
+        slug: 'vat',
+        name: 'VAT',
+        summary: 'Straightforward VAT calculations for UK amounts.',
         endpoints: [
             {
                 method: 'GET',
@@ -645,6 +644,13 @@ export const endpointFamilies: EndpointFamily[] = [
         ],
     },
 ];
+
+export const endpointFamilies = allEndpointFamilies
+    .map((family) => ({
+        ...family,
+        endpoints: family.endpoints.filter((endpoint) => endpoint.live),
+    }))
+    .filter((family) => family.endpoints.length > 0);
 
 export const plans = [
     {

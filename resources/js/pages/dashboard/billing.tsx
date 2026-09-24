@@ -1,6 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
 import { Check, CreditCard, ExternalLink } from 'lucide-react';
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { DashboardPageHeader } from '@/components/dashboard-page-header';
 
 export default function Billing({
@@ -47,15 +47,13 @@ export default function Billing({
                         requests/second
                     </p>
                     {hasStripeCustomer && (
-                        <Link
-                            href="/billing/portal"
-                            method="post"
-                            as="button"
+                        <StripeRedirectForm
+                            action="/billing/portal"
                             className="mt-6 inline-flex items-center gap-2 rounded-lg border border-slate-300 px-3.5 py-2 text-sm font-semibold text-slate-800 hover:border-slate-400"
                         >
                             Manage billing in Stripe
                             <ExternalLink className="size-4" />
-                        </Link>
+                        </StripeRedirectForm>
                     )}
                 </section>
                 {!hasActiveSubscription && (
@@ -82,19 +80,14 @@ export default function Billing({
                                         {paidPlan.burst_requests_per_second}{' '}
                                         requests/second
                                     </p>
-                                    <Link
-                                        href="/billing/checkout"
-                                        method="post"
-                                        data={{ plan: paidPlan.key }}
-                                        as="button"
-                                        disabled={!paidPlan.stripe_price}
+                                    <StripeRedirectForm
+                                        action="/billing/checkout"
+                                        plan={paidPlan.key}
                                         className="mt-5 inline-flex items-center justify-center gap-2 rounded-lg bg-[#1248e8] px-3.5 py-2 text-sm font-semibold text-white hover:bg-[#0f3dc4] disabled:cursor-not-allowed disabled:bg-slate-300"
                                     >
                                         <CreditCard className="size-4" />
-                                        {paidPlan.stripe_price
-                                            ? `Choose ${paidPlan.label}`
-                                            : 'Temporarily unavailable'}
-                                    </Link>
+                                        Choose {paidPlan.label}
+                                    </StripeRedirectForm>
                                 </article>
                             ))}
                         </div>
@@ -137,5 +130,32 @@ function Notice({ children }: { children: ReactNode }) {
         <div className="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-slate-700">
             {children}
         </div>
+    );
+}
+
+function StripeRedirectForm({
+    action,
+    plan,
+    className,
+    children,
+}: {
+    action: string;
+    plan?: string;
+    className: string;
+    children: ReactNode;
+}) {
+    const [submitting, setSubmitting] = useState(false);
+    const csrfToken = document
+        .querySelector('meta[name="csrf-token"]')
+        ?.getAttribute('content');
+
+    return (
+        <form action={action} method="post" onSubmit={() => setSubmitting(true)}>
+            <input name="_token" type="hidden" value={csrfToken ?? ''} />
+            {plan && <input name="plan" type="hidden" value={plan} />}
+            <button type="submit" disabled={submitting} className={className}>
+                {children}
+            </button>
+        </form>
     );
 }

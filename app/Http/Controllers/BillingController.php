@@ -6,11 +6,10 @@ use App\Domain\Billing\PlanCatalog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-use Laravel\Cashier\Checkout;
 
 class BillingController extends Controller
 {
-    public function checkout(Request $request, PlanCatalog $plans): Checkout|RedirectResponse
+    public function checkout(Request $request, PlanCatalog $plans): RedirectResponse
     {
         $request->validate([
             'plan' => ['required', 'string', Rule::in(array_map(fn (array $plan): string => $plan['key'], $plans->paid()))],
@@ -35,7 +34,7 @@ class BillingController extends Controller
                 'cancel_url' => route('billing', ['checkout' => 'cancelled']),
                 'tax_id_collection' => ['enabled' => true],
                 'customer_update' => ['address' => 'auto'],
-            ]);
+            ])->redirect();
     }
 
     public function portal(Request $request): RedirectResponse
