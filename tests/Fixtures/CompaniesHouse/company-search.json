@@ -1,0 +1,28 @@
+{
+    "items_per_page": 2,
+    "kind": "search#companies",
+    "start_index": 0,
+    "total_results": 2,
+    "items": [
+        {
+            "company_number": "00012345",
+            "title": "EXAMPLE LIMITED",
+            "company_status": "active",
+            "company_type": "ltd",
+            "date_of_creation": "2000-01-01",
+            "address": {
+                "address_line_1": "1 Example Street",
+                "locality": "London",
+                "postal_code": "SW1A 1AA",
+                "country": "England"
+            }
+        },
+        {
+            "company_number": "SC012345",
+            "title": "EXAMPLE TECHNOLOGY LTD",
+            "company_status": "active",
+            "company_type": "ltd",
+            "date_of_creation": "2019-04-12"
+        }
+    ]
+}

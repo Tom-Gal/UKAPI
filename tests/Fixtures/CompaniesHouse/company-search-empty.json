@@ -1,0 +1,7 @@
+{
+    "items_per_page": 25,
+    "kind": "search#companies",
+    "start_index": 0,
+    "total_results": 0,
+    "items": []
+}

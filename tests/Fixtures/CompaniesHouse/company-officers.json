@@ -1,0 +1,26 @@
+{
+    "items_per_page": 25,
+    "kind": "officer-list",
+    "start_index": 0,
+    "total_results": 2,
+    "items": [
+        {
+            "name": "SMITH, Alex",
+            "officer_role": "director",
+            "appointed_on": "2020-01-01",
+            "nationality": "British",
+            "country_of_residence": "Scotland",
+            "occupation": "Software Engineer",
+            "date_of_birth": {
+                "month": 1,
+                "year": 1980
+            }
+        },
+        {
+            "name": "JONES, Morgan",
+            "officer_role": "secretary",
+            "appointed_on": "2020-01-01",
+            "resigned_on": "2022-06-30"
+        }
+    ]
+}

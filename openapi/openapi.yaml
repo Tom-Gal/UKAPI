@@ -1,0 +1,885 @@
+openapi: 3.1.0
+info:
+    title: UKAPI.io API
+    version: 1.0.0-draft
+    description: |
+        The UKAPI.io v1 contract. API keys are issued through the customer dashboard
+        and must be supplied with the Bearer authentication scheme.
+servers:
+    - url: https://api.ukapi.io
+      description: Production
+security:
+    - bearerApiKey: []
+paths:
+    /v1/vat/calculate:
+        get:
+            operationId: calculateVat
+            summary: Calculate VAT to add to a net amount
+            parameters:
+                - $ref: '#/components/parameters/Amount'
+                - $ref: '#/components/parameters/Rate'
+            responses:
+                '200':
+                    description: VAT calculation
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/SuccessEnvelope'
+                '401':
+                    $ref: '#/components/responses/InvalidApiKey'
+                '422':
+                    $ref: '#/components/responses/InvalidParameter'
+                '429':
+                    $ref: '#/components/responses/RateLimited'
+    /v1/vat/remove:
+        get:
+            operationId: removeVat
+            summary: Remove VAT from a gross amount
+            parameters:
+                - $ref: '#/components/parameters/Amount'
+                - $ref: '#/components/parameters/Rate'
+            responses:
+                '200':
+                    description: VAT removal calculation
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/SuccessEnvelope'
+                '401':
+                    $ref: '#/components/responses/InvalidApiKey'
+                '422':
+                    $ref: '#/components/responses/InvalidParameter'
+                '429':
+                    $ref: '#/components/responses/RateLimited'
+    /v1/postcodes/{postcode}:
+        get:
+            operationId: lookupPostcode
+            summary: Look up a normalised UK postcode
+            parameters:
+                - $ref: '#/components/parameters/Postcode'
+            responses:
+                '200':
+                    description: Canonical postcode and selected geography data
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/PostcodeEnvelope'
+                '401':
+                    $ref: '#/components/responses/InvalidApiKey'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '422':
+                    $ref: '#/components/responses/InvalidParameter'
+                '429':
+                    $ref: '#/components/responses/RateLimited'
+                '503':
+                    $ref: '#/components/responses/UpstreamUnavailable'
+    /v1/postcodes/{postcode}/validate:
+        get:
+            operationId: validatePostcode
+            summary: Check whether a normalised postcode has a provider record
+            parameters:
+                - $ref: '#/components/parameters/Postcode'
+            responses:
+                '200':
+                    description: Postcode validation result
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/PostcodeValidationEnvelope'
+                '401':
+                    $ref: '#/components/responses/InvalidApiKey'
+                '422':
+                    $ref: '#/components/responses/InvalidParameter'
+                '429':
+                    $ref: '#/components/responses/RateLimited'
+                '503':
+                    $ref: '#/components/responses/UpstreamUnavailable'
+    /v1/postcodes/{postcode}/nearby:
+        get:
+            operationId: findNearbyPostcodes
+            summary: Find postcodes near a normalised postcode
+            parameters:
+                - $ref: '#/components/parameters/Postcode'
+                - $ref: '#/components/parameters/NearbyLimit'
+                - $ref: '#/components/parameters/NearbyRadius'
+            responses:
+                '200':
+                    description: Nearby postcodes ordered by provider distance
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/NearbyPostcodesEnvelope'
+                '401':
+                    $ref: '#/components/responses/InvalidApiKey'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '422':
+                    $ref: '#/components/responses/InvalidParameter'
+                '429':
+                    $ref: '#/components/responses/RateLimited'
+                '503':
+                    $ref: '#/components/responses/UpstreamUnavailable'
+    /v1/coordinates/{latitude}/{longitude}/postcode:
+        get:
+            operationId: reverseGeocodePostcode
+            summary: Return the nearest postcode to WGS84 coordinates
+            parameters:
+                - $ref: '#/components/parameters/Latitude'
+                - $ref: '#/components/parameters/Longitude'
+            responses:
+                '200':
+                    description: Nearest postcode
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/PostcodeEnvelope'
+                '401':
+                    $ref: '#/components/responses/InvalidApiKey'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '422':
+                    $ref: '#/components/responses/InvalidParameter'
+                '429':
+                    $ref: '#/components/responses/RateLimited'
+                '503':
+                    $ref: '#/components/responses/UpstreamUnavailable'
+    /v1/companies/{companyNumber}:
+        get:
+            operationId: lookupCompany
+            summary: Look up a normalised Companies House company number
+            parameters:
+                - $ref: '#/components/parameters/CompanyNumber'
+            responses:
+                '200':
+                    description: Simplified company profile
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CompanyProfileEnvelope'
+                '401':
+                    $ref: '#/components/responses/InvalidApiKey'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '422':
+                    $ref: '#/components/responses/InvalidParameter'
+                '429':
+                    $ref: '#/components/responses/RateLimited'
+                '502':
+                    $ref: '#/components/responses/UpstreamInvalidResponse'
+                '503':
+                    $ref: '#/components/responses/UpstreamUnavailable'
+    /v1/companies/search:
+        get:
+            operationId: searchCompanies
+            summary: Search Companies House company records
+            parameters:
+                - $ref: '#/components/parameters/CompanyQuery'
+                - $ref: '#/components/parameters/Page'
+                - $ref: '#/components/parameters/PerPage'
+            responses:
+                '200':
+                    description: Paginated company search results
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CompanySearchEnvelope'
+                '401':
+                    $ref: '#/components/responses/InvalidApiKey'
+                '422':
+                    $ref: '#/components/responses/InvalidParameter'
+                '429':
+                    $ref: '#/components/responses/RateLimited'
+                '502':
+                    $ref: '#/components/responses/UpstreamInvalidResponse'
+                '503':
+                    $ref: '#/components/responses/UpstreamUnavailable'
+    /v1/companies/{companyNumber}/officers:
+        get:
+            operationId: listCompanyOfficers
+            summary: List company officers
+            parameters:
+                - $ref: '#/components/parameters/CompanyNumber'
+                - $ref: '#/components/parameters/Page'
+                - $ref: '#/components/parameters/PerPage'
+            responses:
+                '200':
+                    description: Paginated company officer results
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CompanyOfficersEnvelope'
+                '401':
+                    $ref: '#/components/responses/InvalidApiKey'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '422':
+                    $ref: '#/components/responses/InvalidParameter'
+                '429':
+                    $ref: '#/components/responses/RateLimited'
+                '502':
+                    $ref: '#/components/responses/UpstreamInvalidResponse'
+                '503':
+                    $ref: '#/components/responses/UpstreamUnavailable'
+    /v1/companies/{companyNumber}/filings:
+        get:
+            operationId: listCompanyFilings
+            summary: List company filing metadata
+            description: Filing-document links and document contents are intentionally not proxied.
+            parameters:
+                - $ref: '#/components/parameters/CompanyNumber'
+                - $ref: '#/components/parameters/Page'
+                - $ref: '#/components/parameters/PerPage'
+            responses:
+                '200':
+                    description: Paginated company filing metadata
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CompanyFilingsEnvelope'
+                '401':
+                    $ref: '#/components/responses/InvalidApiKey'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '422':
+                    $ref: '#/components/responses/InvalidParameter'
+                '429':
+                    $ref: '#/components/responses/RateLimited'
+                '502':
+                    $ref: '#/components/responses/UpstreamInvalidResponse'
+                '503':
+                    $ref: '#/components/responses/UpstreamUnavailable'
+    /v1/sic/search:
+        get:
+            operationId: searchSicCodes
+            summary: Search the local Companies House condensed SIC 2007 snapshot
+            parameters:
+                - $ref: '#/components/parameters/SicQuery'
+                - $ref: '#/components/parameters/Page'
+                - $ref: '#/components/parameters/PerPage'
+            responses:
+                '200':
+                    description: Paginated SIC search results
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/SicSearchEnvelope'
+                '401':
+                    $ref: '#/components/responses/InvalidApiKey'
+                '422':
+                    $ref: '#/components/responses/InvalidParameter'
+                '429':
+                    $ref: '#/components/responses/RateLimited'
+                '503':
+                    $ref: '#/components/responses/SicReferenceUnavailable'
+    /v1/sic/{code}:
+        get:
+            operationId: lookupSicCode
+            summary: Look up a code from the local Companies House condensed SIC 2007 snapshot
+            parameters:
+                - $ref: '#/components/parameters/SicCode'
+            responses:
+                '200':
+                    description: SIC record
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/SicEnvelope'
+                '401':
+                    $ref: '#/components/responses/InvalidApiKey'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '422':
+                    $ref: '#/components/responses/InvalidParameter'
+                '429':
+                    $ref: '#/components/responses/RateLimited'
+                '503':
+                    $ref: '#/components/responses/SicReferenceUnavailable'
+components:
+    securitySchemes:
+        bearerApiKey:
+            type: http
+            scheme: bearer
+            bearerFormat: uk_live_k_<id>.<secret>
+    parameters:
+        Amount:
+            name: amount
+            in: query
+            required: true
+            schema:
+                type: string
+                pattern: '^(?:0|[1-9]\\d{0,11})(?:\\.\\d{1,2})?$'
+            example: '100.00'
+        Rate:
+            name: rate
+            in: query
+            required: true
+            schema:
+                type: string
+                pattern: '^(?:0|[1-9]\\d{0,2})(?:\\.\\d{1,2})?$'
+            example: '20.00'
+        Postcode:
+            name: postcode
+            in: path
+            required: true
+            description: A UK postcode. Letter case and whitespace are normalised.
+            schema:
+                type: string
+            example: BL2 6XX
+        NearbyLimit:
+            name: limit
+            in: query
+            required: false
+            description: Number of results to return. Defaults to 10.
+            schema:
+                type: integer
+                minimum: 1
+                maximum: 100
+            example: 5
+        NearbyRadius:
+            name: radius
+            in: query
+            required: false
+            description: Search radius in metres. Defaults to 100.
+            schema:
+                type: integer
+                minimum: 1
+                maximum: 2000
+            example: 500
+        Latitude:
+            name: latitude
+            in: path
+            required: true
+            schema:
+                type: number
+                minimum: -90
+                maximum: 90
+            example: 53.5922
+        Longitude:
+            name: longitude
+            in: path
+            required: true
+            schema:
+                type: number
+                minimum: -180
+                maximum: 180
+            example: -2.4117
+        CompanyNumber:
+            name: companyNumber
+            in: path
+            required: true
+            description: Companies House company number. Whitespace is removed and letters are uppercased.
+            schema:
+                type: string
+                pattern: '^(?=.*\\d)[A-Za-z0-9]{1,8}$'
+            example: SC012345
+        CompanyQuery:
+            name: q
+            in: query
+            required: true
+            description: Company-name query.
+            schema:
+                type: string
+                minLength: 2
+                maxLength: 200
+            example: example
+        SicCode:
+            name: code
+            in: path
+            required: true
+            description: A five-digit Companies House condensed SIC 2007 code. Whitespace is removed.
+            schema:
+                type: string
+                pattern: '^\\d{5}$'
+            example: '62012'
+        SicQuery:
+            name: q
+            in: query
+            required: true
+            description: SIC code or description search text.
+            schema:
+                type: string
+                minLength: 2
+                maxLength: 200
+            example: software
+        Page:
+            name: page
+            in: query
+            required: false
+            description: One-based result page. Defaults to 1.
+            schema:
+                type: integer
+                minimum: 1
+            example: 1
+        PerPage:
+            name: per_page
+            in: query
+            required: false
+            description: Results per page. Defaults to 25.
+            schema:
+                type: integer
+                minimum: 1
+                maximum: 100
+            example: 25
+    responses:
+        InvalidApiKey:
+            description: Missing, malformed, invalid, or revoked API key.
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/ErrorEnvelope'
+        InvalidParameter:
+            description: One or more query parameters are invalid.
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/ErrorEnvelope'
+        RateLimited:
+            description: The per-key burst limit or monthly quota has been reached.
+            headers:
+                RateLimit-Limit:
+                    schema:
+                        type: integer
+                RateLimit-Remaining:
+                    schema:
+                        type: integer
+                RateLimit-Reset:
+                    schema:
+                        type: integer
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/ErrorEnvelope'
+        NotFound:
+            description: No geography record was found for the supplied value.
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/ErrorEnvelope'
+        UpstreamUnavailable:
+            description: The source provider is temporarily unavailable.
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/ErrorEnvelope'
+        UpstreamInvalidResponse:
+            description: The source provider returned a response that does not match the expected shape.
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/ErrorEnvelope'
+        SicReferenceUnavailable:
+            description: The local SIC reference snapshot is temporarily unavailable.
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/ErrorEnvelope'
+    schemas:
+        SuccessEnvelope:
+            type: object
+            required: [data, meta]
+            properties:
+                data:
+                    type: object
+                meta:
+                    type: object
+                    required: [request_id]
+                    properties:
+                        request_id:
+                            type: string
+                            example: req_01j8d5s1wdm85crh9b739hw4gd
+                        cached:
+                            type: boolean
+                        source:
+                            type: string
+                        coverage:
+                            type: string
+        ErrorEnvelope:
+            type: object
+            required: [error]
+            properties:
+                error:
+                    type: object
+                    required: [code, message, status, request_id]
+                    properties:
+                        code:
+                            type: string
+                        message:
+                            type: string
+                        status:
+                            type: integer
+                        request_id:
+                            type: string
+        PostcodeEnvelope:
+            type: object
+            required: [data, meta]
+            properties:
+                data:
+                    $ref: '#/components/schemas/Postcode'
+                meta:
+                    $ref: '#/components/schemas/GeographyMeta'
+        PostcodeValidationEnvelope:
+            type: object
+            required: [data, meta]
+            properties:
+                data:
+                    type: object
+                    required: [postcode, valid]
+                    properties:
+                        postcode:
+                            type: string
+                        valid:
+                            type: boolean
+                meta:
+                    $ref: '#/components/schemas/GeographyMeta'
+        NearbyPostcodesEnvelope:
+            type: object
+            required: [data, meta]
+            properties:
+                data:
+                    type: object
+                    required: [postcode, results]
+                    properties:
+                        postcode:
+                            type: string
+                        results:
+                            type: array
+                            items:
+                                $ref: '#/components/schemas/Postcode'
+                meta:
+                    $ref: '#/components/schemas/GeographyMeta'
+        GeographyMeta:
+            type: object
+            required: [request_id, cached, source, coverage]
+            properties:
+                request_id:
+                    type: string
+                cached:
+                    type: boolean
+                source:
+                    type: string
+                    example: postcodes_io
+                source_updated_at:
+                    type: [string, 'null']
+                    format: date-time
+                coverage:
+                    type: string
+                    example: UK
+        Postcode:
+            type: object
+            required:
+                [
+                    postcode,
+                    outcode,
+                    incode,
+                    country,
+                    local_authority,
+                    parliamentary_constituency,
+                    statistical_geography,
+                ]
+            properties:
+                postcode:
+                    type: string
+                    example: BL2 6XX
+                outcode:
+                    type: string
+                    example: BL2
+                incode:
+                    type: string
+                    example: 6XX
+                country:
+                    type: string
+                    example: England
+                region:
+                    type: [string, 'null']
+                latitude:
+                    type: [number, 'null']
+                longitude:
+                    type: [number, 'null']
+                distance_metres:
+                    type: number
+                    description: Present on nearby and reverse-geocode responses.
+                local_authority:
+                    $ref: '#/components/schemas/GeographyReference'
+                parliamentary_constituency:
+                    $ref: '#/components/schemas/GeographyReference'
+                statistical_geography:
+                    type: object
+                    required: [code]
+                    properties:
+                        code:
+                            type: [string, 'null']
+        GeographyReference:
+            type: object
+            required: [name, code]
+            properties:
+                name:
+                    type: [string, 'null']
+                code:
+                    type: [string, 'null']
+        CompanyProfileEnvelope:
+            type: object
+            required: [data, meta]
+            properties:
+                data:
+                    $ref: '#/components/schemas/Company'
+                meta:
+                    $ref: '#/components/schemas/CompanyMeta'
+        CompanySearchEnvelope:
+            type: object
+            required: [data, meta]
+            properties:
+                data:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/CompanySummary'
+                meta:
+                    $ref: '#/components/schemas/CompanyListMeta'
+        CompanyOfficersEnvelope:
+            type: object
+            required: [data, meta]
+            properties:
+                data:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/CompanyOfficer'
+                meta:
+                    $ref: '#/components/schemas/CompanyListMeta'
+        CompanyFilingsEnvelope:
+            type: object
+            required: [data, meta]
+            properties:
+                data:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/CompanyFiling'
+                meta:
+                    $ref: '#/components/schemas/CompanyListMeta'
+        SicEnvelope:
+            type: object
+            required: [data, meta]
+            properties:
+                data:
+                    $ref: '#/components/schemas/Sic'
+                meta:
+                    $ref: '#/components/schemas/SicMeta'
+        SicSearchEnvelope:
+            type: object
+            required: [data, meta]
+            properties:
+                data:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Sic'
+                meta:
+                    allOf:
+                        - $ref: '#/components/schemas/SicMeta'
+                        - type: object
+                          required: [pagination]
+                          properties:
+                              pagination:
+                                  type: object
+                                  required: [page, per_page, total]
+                                  properties:
+                                      page:
+                                          type: integer
+                                      per_page:
+                                          type: integer
+                                      total:
+                                          type: integer
+        CompanyMeta:
+            type: object
+            required: [request_id, cached, stale, source, coverage]
+            properties:
+                request_id:
+                    type: string
+                cached:
+                    type: boolean
+                stale:
+                    type: boolean
+                source:
+                    type: string
+                    example: companies_house
+                source_updated_at:
+                    type: [string, 'null']
+                    format: date-time
+                coverage:
+                    type: string
+                    example: UK
+        CompanyListMeta:
+            allOf:
+                - $ref: '#/components/schemas/CompanyMeta'
+                - type: object
+                  required: [pagination]
+                  properties:
+                      pagination:
+                          type: object
+                          required: [page, per_page, total]
+                          properties:
+                              page:
+                                  type: integer
+                              per_page:
+                                  type: integer
+                              total:
+                                  type: integer
+        Company:
+            type: object
+            required:
+                [
+                    company_number,
+                    name,
+                    sic_codes,
+                    accounts,
+                    confirmation_statement,
+                ]
+            properties:
+                company_number:
+                    type: string
+                name:
+                    type: string
+                status:
+                    type: [string, 'null']
+                type:
+                    type: [string, 'null']
+                jurisdiction:
+                    type: [string, 'null']
+                incorporated_on:
+                    type: [string, 'null']
+                    format: date
+                dissolved_on:
+                    type: [string, 'null']
+                    format: date
+                registered_office_address:
+                    $ref: '#/components/schemas/CompanyAddress'
+                sic_codes:
+                    type: array
+                    items:
+                        type: string
+                has_been_liquidated:
+                    type: [boolean, 'null']
+                accounts:
+                    $ref: '#/components/schemas/CompanyDates'
+                confirmation_statement:
+                    $ref: '#/components/schemas/CompanyDates'
+        CompanySummary:
+            type: object
+            required: [company_number, name]
+            properties:
+                company_number:
+                    type: string
+                name:
+                    type: string
+                status:
+                    type: [string, 'null']
+                type:
+                    type: [string, 'null']
+                incorporated_on:
+                    type: [string, 'null']
+                    format: date
+                address:
+                    $ref: '#/components/schemas/CompanyAddress'
+        CompanyOfficer:
+            type: object
+            required: [name, role]
+            properties:
+                name:
+                    type: string
+                role:
+                    type: string
+                appointed_on:
+                    type: [string, 'null']
+                    format: date
+                resigned_on:
+                    type: [string, 'null']
+                    format: date
+                nationality:
+                    type: [string, 'null']
+                country_of_residence:
+                    type: [string, 'null']
+                occupation:
+                    type: [string, 'null']
+        CompanyFiling:
+            type: object
+            required:
+                [transaction_id, category, type, filed_on, description, pages]
+            properties:
+                transaction_id:
+                    type: [string, 'null']
+                category:
+                    type: [string, 'null']
+                type:
+                    type: [string, 'null']
+                filed_on:
+                    type: string
+                    format: date
+                description:
+                    type: [string, 'null']
+                pages:
+                    type: [integer, 'null']
+            description: Filing metadata only. Source document links, barcodes and contents are not exposed.
+        Sic:
+            type: object
+            required: [code, description]
+            properties:
+                code:
+                    type: string
+                    pattern: '^\\d{5}$'
+                description:
+                    type: string
+        SicMeta:
+            type: object
+            required:
+                [
+                    request_id,
+                    cached,
+                    source,
+                    source_updated_at,
+                    coverage,
+                    reference_version,
+                ]
+            properties:
+                request_id:
+                    type: string
+                cached:
+                    type: boolean
+                source:
+                    type: string
+                    example: companies_house_sic_2007
+                source_updated_at:
+                    type: string
+                    format: date-time
+                    description: Time the local snapshot was retrieved from Companies House.
+                coverage:
+                    type: string
+                    example: UK
+                reference_version:
+                    type: string
+                    example: companies_house_condensed_sic_2007
+        CompanyAddress:
+            type: [object, 'null']
+            properties:
+                address_line_1:
+                    type: [string, 'null']
+                address_line_2:
+                    type: [string, 'null']
+                locality:
+                    type: [string, 'null']
+                region:
+                    type: [string, 'null']
+                postal_code:
+                    type: [string, 'null']
+                country:
+                    type: [string, 'null']
+        CompanyDates:
+            type: object
+            required: [next_due, next_made_up_to, last_made_up_to]
+            properties:
+                next_due:
+                    type: [string, 'null']
+                    format: date
+                next_made_up_to:
+                    type: [string, 'null']
+                    format: date
+                last_made_up_to:
+                    type: [string, 'null']
+                    format: date

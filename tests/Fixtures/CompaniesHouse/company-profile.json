@@ -1,0 +1,27 @@
+{
+    "company_name": "EXAMPLE TECHNOLOGY LTD",
+    "company_status": "active",
+    "type": "ltd",
+    "jurisdiction": "scotland",
+    "date_of_creation": "2019-04-12",
+    "sic_codes": ["62012", "63110"],
+    "has_been_liquidated": false,
+    "registered_office_address": {
+        "address_line_1": "1 Example Street",
+        "address_line_2": "Innovation Quarter",
+        "locality": "Edinburgh",
+        "region": "Lothian",
+        "postal_code": "EH1 1AA",
+        "country": "Scotland"
+    },
+    "accounts": {
+        "next_due": "2027-01-31",
+        "next_made_up_to": "2026-04-30",
+        "last_made_up_to": "2025-04-30"
+    },
+    "confirmation_statement": {
+        "next_due": "2027-04-26",
+        "next_made_up_to": "2026-04-12",
+        "last_made_up_to": "2025-04-12"
+    }
+}

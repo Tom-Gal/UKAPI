@@ -1,0 +1,22 @@
+{
+    "items": [
+        {
+            "transaction_id": "MzAwMDAwMDAwMGFkaXF6a2N4",
+            "category": "accounts",
+            "type": "AA",
+            "date": "2025-03-31",
+            "description": "accounts-with-accounts-type-full",
+            "pages": 12,
+            "barcode": "X1A2B3C4",
+            "links": {
+                "document_metadata": "/document/abc123"
+            }
+        },
+        {
+            "category": "incorporation",
+            "type": "NEWINC",
+            "date": "2019-04-12"
+        }
+    ],
+    "total_count": 42
+}

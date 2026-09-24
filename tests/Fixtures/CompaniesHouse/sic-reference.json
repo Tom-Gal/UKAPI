@@ -1,0 +1,19 @@
+{
+    "version": "companies_house_condensed_sic_2007",
+    "retrieved_at": "2026-09-24T12:00:00+00:00",
+    "checksum": "6dba42d7de887aab5f53c51500e5ec9a6a28a893e5557064c5a1baa7c8cd315d",
+    "records": [
+        {
+            "code": "62012",
+            "description": "Business and domestic software development"
+        },
+        {
+            "code": "62020",
+            "description": "Information technology consultancy activities"
+        },
+        {
+            "code": "99999",
+            "description": "Dormant Company"
+        }
+    ]
+}

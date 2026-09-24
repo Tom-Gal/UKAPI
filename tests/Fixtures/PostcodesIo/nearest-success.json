@@ -1,0 +1,35 @@
+{
+    "status": 200,
+    "result": [
+        {
+            "postcode": "BL2 6XX",
+            "country": "England",
+            "longitude": -2.4117,
+            "latitude": 53.5922,
+            "region": "North West",
+            "parliamentary_constituency": "Bolton North East",
+            "admin_district": "Bolton",
+            "codes": {
+                "admin_district": "E08000001",
+                "parliamentary_constituency": "E14000569",
+                "nuts": "TLD36"
+            },
+            "distance": 0
+        },
+        {
+            "postcode": "BL2 6XY",
+            "country": "England",
+            "longitude": -2.4118,
+            "latitude": 53.5923,
+            "region": "North West",
+            "parliamentary_constituency": "Bolton North East",
+            "admin_district": "Bolton",
+            "codes": {
+                "admin_district": "E08000001",
+                "parliamentary_constituency": "E14000569",
+                "nuts": "TLD36"
+            },
+            "distance": 18.6
+        }
+    ]
+}

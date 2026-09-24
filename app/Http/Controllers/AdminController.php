@@ -1,0 +1,84 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\ApiKey;
+use App\Models\User;
+use Inertia\Inertia;
+use Inertia\Response;
+
+class AdminController extends Controller
+{
+    public function overview(): Response
+    {
+        return Inertia::render('admin/overview', [
+            'usersCount' => User::count(),
+            'activeKeysCount' => ApiKey::query()->where('status', 'active')->count(),
+        ]);
+    }
+
+    public function users(): Response
+    {
+        return Inertia::render('admin/users', [
+            'users' => User::query()
+                ->withCount('apiKeys')
+                ->latest()
+                ->limit(50)
+                ->get()
+                ->map(fn (User $user) => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'is_admin' => $user->is_admin,
+                    'email_verified_at' => $user->email_verified_at?->toIso8601String(),
+                    'api_keys_count' => $user->api_keys_count,
+                    'created_at' => $user->created_at->toIso8601String(),
+                ]),
+        ]);
+    }
+
+    public function usage(): Response
+    {
+        return Inertia::render('admin/usage');
+    }
+
+    public function providers(): Response
+    {
+        $sicSnapshotPath = config('ukapi.sic_reference.snapshot_path');
+        $sicSeedSnapshotPath = config('ukapi.sic_reference.seed_snapshot_path');
+        $sicSnapshotAvailable = (is_string($sicSnapshotPath) && is_file($sicSnapshotPath))
+            || (is_string($sicSeedSnapshotPath) && is_file($sicSeedSnapshotPath));
+
+        return Inertia::render('admin/providers', [
+            'providers' => [
+                ['code' => 'postcodes_io', 'scope' => 'UK', 'status' => 'No credential required'],
+                [
+                    'code' => 'companies_house',
+                    'scope' => 'UK',
+                    'status' => is_string(config('ukapi.companies_house.api_key')) && config('ukapi.companies_house.api_key') !== ''
+                        ? 'Credential set'
+                        : 'Credential missing',
+                ],
+                [
+                    'code' => 'companies_house_sic_2007',
+                    'scope' => 'UK',
+                    'status' => $sicSnapshotAvailable
+                        ? 'Snapshot available'
+                        : 'Snapshot missing',
+                ],
+                ['code' => 'gov_uk', 'scope' => 'UK', 'status' => 'Not configured'],
+                ['code' => 'planning_data', 'scope' => 'England', 'status' => 'Not configured'],
+            ],
+        ]);
+    }
+
+    public function errors(): Response
+    {
+        return Inertia::render('admin/errors');
+    }
+
+    public function featureFlags(): Response
+    {
+        return Inertia::render('admin/feature-flags');
+    }
+}
