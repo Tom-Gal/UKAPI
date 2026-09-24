@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Domain\Billing\PlanCatalog;
 use App\Domain\Usage\Entitlements;
 use App\Domain\Usage\UsageMeter;
 use Illuminate\Http\Request;
@@ -23,12 +24,16 @@ class DashboardPageController extends Controller
         ]);
     }
 
-    public function billing(): Response
+    public function billing(Request $request, PlanCatalog $plans): Response
     {
+        $user = $request->user();
+
         return Inertia::render('dashboard/billing', [
-            'billingEnabled' => false,
-            'plan' => 'Free',
-            'monthlyQuota' => 5000,
+            'plan' => $plans->forUser($user),
+            'paidPlans' => $plans->paid(),
+            'hasStripeCustomer' => $user->hasStripeId(),
+            'hasActiveSubscription' => $user->subscribed('default'),
+            'checkoutStatus' => $request->query('checkout'),
         ]);
     }
 

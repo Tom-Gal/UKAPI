@@ -10,6 +10,7 @@ type Props = {
         active_keys: number;
         monthly_requests: number;
         monthly_quota: number;
+        plan_label: string;
         request_logs_available: boolean;
     };
 };
@@ -39,8 +40,8 @@ export default function Dashboard({ summary }: Props) {
                 <div className="grid gap-4 md:grid-cols-3">
                     <Metric
                         label="Current plan"
-                        value="Free"
-                        detail="5,000 requests/month"
+                        value={summary.plan_label}
+                        detail={`${summary.monthly_quota.toLocaleString()} requests/month`}
                     />
                     <Metric
                         label="Active API keys"

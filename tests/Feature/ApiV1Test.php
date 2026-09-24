@@ -4,8 +4,10 @@ namespace Tests\Feature;
 
 use App\Models\ApiKey;
 use App\Models\User;
+use App\Notifications\UsageLimitNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
@@ -134,6 +136,25 @@ class ApiV1Test extends TestCase
             ->assertHeader('X-Quota-Limit', '1')
             ->assertHeader('X-Quota-Remaining', '0')
             ->assertJsonPath('error.code', 'quota_exceeded');
+    }
+
+    public function test_usage_alerts_are_sent_once_when_a_threshold_is_reached(): void
+    {
+        Notification::fake();
+        config()->set('ukapi.free_plan.monthly_request_quota', 10);
+        config()->set('ukapi.usage_notification_thresholds', '10');
+        $user = User::factory()->create();
+        [, $token] = $this->createApiKey($user);
+
+        $this->getJson('/v1/vat/calculate?amount=100&rate=20', [
+            'Authorization' => "Bearer {$token}",
+        ])->assertOk();
+
+        $this->getJson('/v1/vat/remove?amount=120&rate=20', [
+            'Authorization' => "Bearer {$token}",
+        ])->assertOk();
+
+        Notification::assertSentTo($user, UsageLimitNotification::class, 1);
     }
 
     public function test_the_openapi_contract_is_available_without_an_api_key(): void

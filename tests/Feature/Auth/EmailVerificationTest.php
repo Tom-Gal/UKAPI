@@ -3,9 +3,11 @@
 namespace Tests\Feature\Auth;
 
 use App\Models\User;
+use App\Notifications\VerifyEmailNotification;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\URL;
 use Laravel\Fortify\Features;
 use Tests\TestCase;
@@ -34,9 +36,25 @@ class EmailVerificationTest extends TestCase
     {
         $user = User::factory()->unverified()->create();
 
-        $response = $this->actingAs($user)->get(route('appearance.edit'));
+        $response = $this->actingAs($user)->get(route('dashboard'));
 
         $response->assertRedirect(route('verification.notice'));
+    }
+
+    public function test_unverified_users_receive_the_branded_verification_notification(): void
+    {
+        Notification::fake();
+        $user = User::factory()->unverified()->create();
+
+        $user->sendEmailVerificationNotification();
+
+        Notification::assertSentTo($user, VerifyEmailNotification::class, function (VerifyEmailNotification $notification) use ($user): bool {
+            $message = $notification->toMail($user);
+
+            return $message->subject === 'Verify your UKAPI.io email address'
+                && $message->view['html'] === 'emails.auth.verify-email'
+                && $message->view['text'] === 'emails.auth.verify-email-text';
+        });
     }
 
     public function test_email_can_be_verified()

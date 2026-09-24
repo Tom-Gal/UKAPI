@@ -25,15 +25,39 @@ return [
     | Default runtime entitlements
     |--------------------------------------------------------------------------
     |
-    | Billing is deliberately not consulted on the request path. Until a
-    | subscription/entitlement store is introduced, every account receives the
-    | documented free-plan allowance through this local configuration.
+    | Billing entitlements are resolved from Cashier's locally synchronized
+    | Stripe subscription state. This keeps the API request path independent
+    | of the Stripe API while still applying plan changes quickly after Stripe
+    | sends a webhook.
     |
     */
 
     'free_plan' => [
+        'key' => 'free',
+        'label' => 'Free',
         'monthly_request_quota' => 5_000,
         'burst_requests_per_second' => 5,
+    ],
+
+    'paid_plans' => [
+        'hobby' => [
+            'label' => 'Hobby',
+            'stripe_price' => env('STRIPE_PRICE_HOBBY'),
+            'monthly_request_quota' => 50_000,
+            'burst_requests_per_second' => 10,
+        ],
+        'pro' => [
+            'label' => 'Pro',
+            'stripe_price' => env('STRIPE_PRICE_PRO'),
+            'monthly_request_quota' => 250_000,
+            'burst_requests_per_second' => 25,
+        ],
+        'scale' => [
+            'label' => 'Scale',
+            'stripe_price' => env('STRIPE_PRICE_SCALE'),
+            'monthly_request_quota' => 1_000_000,
+            'burst_requests_per_second' => 50,
+        ],
     ],
 
     /*
@@ -48,6 +72,19 @@ return [
     */
 
     'usage_counter_retention_days' => 35,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Usage notification thresholds
+    |--------------------------------------------------------------------------
+    |
+    | A single alert is sent for each configured percentage in a calendar
+    | month. The notification is deduplicated in Valkey alongside the usage
+    | counters, so multiple API keys cannot produce duplicate account mail.
+    |
+    */
+
+    'usage_notification_thresholds' => env('USAGE_NOTIFICATION_THRESHOLDS', '80,100'),
 
     /*
     |--------------------------------------------------------------------------

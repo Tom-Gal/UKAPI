@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ApiKeyController;
+use App\Http\Controllers\BillingController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DashboardPageController;
 use App\Http\Controllers\HealthController;
@@ -27,6 +28,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('api-keys/{apiKey}', [ApiKeyController::class, 'destroy'])->name('api-keys.destroy');
     Route::get('usage', [DashboardPageController::class, 'usage'])->name('usage');
     Route::get('billing', [DashboardPageController::class, 'billing'])->name('billing');
+    Route::post('billing/checkout', [BillingController::class, 'checkout'])->name('billing.checkout');
+    Route::post('billing/portal', [BillingController::class, 'portal'])->name('billing.portal');
     Route::get('request-logs', [DashboardPageController::class, 'requestLogs'])->name('request-logs');
 });
 

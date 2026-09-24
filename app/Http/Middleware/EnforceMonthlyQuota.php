@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Domain\Usage\Entitlements;
+use App\Domain\Usage\UsageLimitNotifier;
 use App\Domain\Usage\UsageMeter;
 use App\Models\ApiKey;
 use App\Support\Api\ApiException;
@@ -16,6 +17,7 @@ class EnforceMonthlyQuota
     public function __construct(
         private readonly Entitlements $entitlements,
         private readonly UsageMeter $usageMeter,
+        private readonly UsageLimitNotifier $usageLimitNotifier,
     ) {}
 
     /**
@@ -45,6 +47,12 @@ class EnforceMonthlyQuota
         $usage = $response->getStatusCode() === 422
             ? $this->usageMeter->currentMonthlyUsage($apiKey)
             : $this->usageMeter->record($apiKey, $endpointCode);
+        $this->usageLimitNotifier->notifyIfThresholdReached(
+            $apiKey,
+            $usage,
+            $quota,
+            $this->usageMeter->monthlyResetAt(),
+        );
         $response->headers->set('X-Quota-Limit', (string) $quota);
         $response->headers->set('X-Quota-Remaining', (string) max(0, $quota - $usage));
         $response->headers->set('X-Quota-Reset', (string) $this->usageMeter->monthlyResetAt());

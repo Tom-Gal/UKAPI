@@ -3,9 +3,13 @@
 namespace Tests\Feature\Settings;
 
 use App\Models\User;
+use App\Notifications\SecurityAlertNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Notification;
 use Inertia\Testing\AssertableInertia as Assert;
+use Laravel\Fortify\Events\TwoFactorAuthenticationConfirmed;
+use Laravel\Fortify\Events\TwoFactorAuthenticationDisabled;
 use Laravel\Fortify\Features;
 use Tests\TestCase;
 
@@ -80,6 +84,7 @@ class SecurityTest extends TestCase
 
     public function test_password_can_be_updated()
     {
+        Notification::fake();
         $user = User::factory()->create();
 
         $response = $this
@@ -96,6 +101,9 @@ class SecurityTest extends TestCase
             ->assertRedirect(route('security.edit'));
 
         $this->assertTrue(Hash::check('new-password', $user->refresh()->password));
+        Notification::assertSentTo($user, SecurityAlertNotification::class, function (SecurityAlertNotification $notification): bool {
+            return $notification->heading === 'Your password was changed';
+        });
     }
 
     public function test_correct_password_must_be_provided_to_update_password()
@@ -114,5 +122,21 @@ class SecurityTest extends TestCase
         $response
             ->assertSessionHasErrors('current_password')
             ->assertRedirect(route('security.edit'));
+    }
+
+    public function test_two_factor_changes_send_security_alerts(): void
+    {
+        Notification::fake();
+        $user = User::factory()->create();
+
+        TwoFactorAuthenticationConfirmed::dispatch($user);
+        TwoFactorAuthenticationDisabled::dispatch($user);
+
+        Notification::assertSentTo($user, SecurityAlertNotification::class, function (SecurityAlertNotification $notification): bool {
+            return $notification->heading === 'Two-factor authentication is active';
+        });
+        Notification::assertSentTo($user, SecurityAlertNotification::class, function (SecurityAlertNotification $notification): bool {
+            return $notification->heading === 'Two-factor authentication was turned off';
+        });
     }
 }
