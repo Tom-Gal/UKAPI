@@ -375,6 +375,103 @@ paths:
                     $ref: '#/components/responses/UpstreamInvalidResponse'
                 '503':
                     $ref: '#/components/responses/UpstreamUnavailable'
+    /v1/flood/warnings:
+        get:
+            operationId: listFloodWarnings
+            summary: List current Environment Agency flood warnings and alerts
+            description: England-only near-real-time data. This endpoint is not an emergency alert service; follow official Environment Agency advice and warnings.
+            responses:
+                '200':
+                    description: Normalised flood warnings and alerts
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/FloodWarningsEnvelope'
+                '401':
+                    $ref: '#/components/responses/InvalidApiKey'
+                '429':
+                    $ref: '#/components/responses/RateLimited'
+                '502':
+                    $ref: '#/components/responses/UpstreamInvalidResponse'
+                '503':
+                    $ref: '#/components/responses/UpstreamUnavailable'
+    /v1/flood/nearby:
+        get:
+            operationId: findNearbyFloodWarnings
+            summary: Find current flood warnings and alerts near a postcode
+            description: Resolves the postcode to coordinates and searches the England-only Environment Agency source within UKAPI.io's documented nearby distance.
+            parameters:
+                - $ref: '#/components/parameters/FloodPostcode'
+            responses:
+                '200':
+                    description: Normalised nearby flood warnings and alerts
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/FloodNearbyEnvelope'
+                '401':
+                    $ref: '#/components/responses/InvalidApiKey'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '422':
+                    $ref: '#/components/responses/InvalidParameter'
+                '429':
+                    $ref: '#/components/responses/RateLimited'
+                '502':
+                    $ref: '#/components/responses/UpstreamInvalidResponse'
+                '503':
+                    $ref: '#/components/responses/UpstreamUnavailable'
+    /v1/flood/stations/nearby:
+        get:
+            operationId: findNearbyFloodStations
+            summary: Find Environment Agency flood-monitoring stations near a postcode
+            description: Resolves the postcode to coordinates and returns a bounded list of England-only monitoring stations.
+            parameters:
+                - $ref: '#/components/parameters/FloodPostcode'
+            responses:
+                '200':
+                    description: Normalised nearby monitoring stations
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/FloodStationsEnvelope'
+                '401':
+                    $ref: '#/components/responses/InvalidApiKey'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '422':
+                    $ref: '#/components/responses/InvalidParameter'
+                '429':
+                    $ref: '#/components/responses/RateLimited'
+                '502':
+                    $ref: '#/components/responses/UpstreamInvalidResponse'
+                '503':
+                    $ref: '#/components/responses/UpstreamUnavailable'
+    /v1/flood/stations/{id}/readings:
+        get:
+            operationId: listFloodStationReadings
+            summary: List bounded recent readings for an Environment Agency station
+            parameters:
+                - $ref: '#/components/parameters/FloodStationId'
+            responses:
+                '200':
+                    description: Bounded recent readings for a monitoring station
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/FloodReadingsEnvelope'
+                '401':
+                    $ref: '#/components/responses/InvalidApiKey'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '422':
+                    $ref: '#/components/responses/InvalidParameter'
+                '429':
+                    $ref: '#/components/responses/RateLimited'
+                '502':
+                    $ref: '#/components/responses/UpstreamInvalidResponse'
+                '503':
+                    $ref: '#/components/responses/UpstreamUnavailable'
 components:
     securitySchemes:
         bearerApiKey:
@@ -423,6 +520,23 @@ components:
                 type: string
                 pattern: '^\d{4}-(0[1-9]|1[0-2])$'
             example: '2026-07'
+        FloodPostcode:
+            name: postcode
+            in: query
+            required: true
+            description: A UK postcode. Letter case and whitespace are normalised before resolving its coordinates.
+            schema:
+                type: string
+            example: BL2 6XX
+        FloodStationId:
+            name: id
+            in: path
+            required: true
+            description: Environment Agency station identifier. Only letters, numbers, hyphens and underscores are accepted.
+            schema:
+                type: string
+                pattern: '^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$'
+            example: 5380TH
         NearbyLimit:
             name: limit
             in: query
@@ -864,6 +978,184 @@ components:
                     type: string
                 name:
                     type: string
+        FloodWarningsEnvelope:
+            type: object
+            required: [data, meta]
+            properties:
+                data:
+                    type: object
+                    required: [warnings]
+                    properties:
+                        warnings:
+                            type: array
+                            items:
+                                $ref: '#/components/schemas/FloodWarning'
+                meta:
+                    $ref: '#/components/schemas/FloodMeta'
+        FloodNearbyEnvelope:
+            type: object
+            required: [data, meta]
+            properties:
+                data:
+                    type: object
+                    required: [postcode, nearby_distance_kilometres, warnings]
+                    properties:
+                        postcode:
+                            type: string
+                        nearby_distance_kilometres:
+                            type: integer
+                            minimum: 1
+                            maximum: 100
+                        warnings:
+                            type: array
+                            items:
+                                $ref: '#/components/schemas/FloodWarning'
+                meta:
+                    $ref: '#/components/schemas/FloodMeta'
+        FloodStationsEnvelope:
+            type: object
+            required: [data, meta]
+            properties:
+                data:
+                    type: object
+                    required: [postcode, nearby_distance_kilometres, stations]
+                    properties:
+                        postcode:
+                            type: string
+                        nearby_distance_kilometres:
+                            type: integer
+                            minimum: 1
+                            maximum: 100
+                        stations:
+                            type: array
+                            items:
+                                $ref: '#/components/schemas/FloodStation'
+                meta:
+                    $ref: '#/components/schemas/FloodMeta'
+        FloodReadingsEnvelope:
+            type: object
+            required: [data, meta]
+            properties:
+                data:
+                    type: object
+                    required: [station_id, readings]
+                    properties:
+                        station_id:
+                            type: string
+                        readings:
+                            type: array
+                            items:
+                                $ref: '#/components/schemas/FloodReading'
+                meta:
+                    $ref: '#/components/schemas/FloodMeta'
+        FloodMeta:
+            type: object
+            required: [request_id, cached, source, retrieved_at, source_updated_at, coverage, safety_notice]
+            properties:
+                request_id:
+                    type: string
+                cached:
+                    type: boolean
+                source:
+                    type: string
+                    example: environment_agency_flood_monitoring
+                retrieved_at:
+                    type: string
+                    format: date-time
+                source_updated_at:
+                    type: [string, 'null']
+                    format: date-time
+                coverage:
+                    type: string
+                    example: England
+                safety_notice:
+                    type: string
+        FloodWarning:
+            type: object
+            required: [id, severity, severity_level, type, message, description, raised_at, severity_changed_at, message_changed_at, area]
+            properties:
+                id:
+                    type: string
+                severity:
+                    type: [integer, 'null']
+                severity_level:
+                    type: [string, 'null']
+                type:
+                    type: [string, 'null']
+                message:
+                    type: [string, 'null']
+                description:
+                    type: [string, 'null']
+                raised_at:
+                    type: [string, 'null']
+                    format: date-time
+                severity_changed_at:
+                    type: [string, 'null']
+                    format: date-time
+                message_changed_at:
+                    type: [string, 'null']
+                    format: date-time
+                area:
+                    type: object
+                    required: [code, county, river_or_sea, name]
+                    properties:
+                        code:
+                            type: [string, 'null']
+                        county:
+                            type: [string, 'null']
+                        river_or_sea:
+                            type: [string, 'null']
+                        name:
+                            type: [string, 'null']
+        FloodStation:
+            type: object
+            required: [id, name, latitude, longitude, river_name, town, catchment_name, status, measures]
+            properties:
+                id:
+                    type: string
+                name:
+                    type: [string, 'null']
+                latitude:
+                    type: [number, 'null']
+                longitude:
+                    type: [number, 'null']
+                river_name:
+                    type: [string, 'null']
+                town:
+                    type: [string, 'null']
+                catchment_name:
+                    type: [string, 'null']
+                status:
+                    type: [string, 'null']
+                measures:
+                    type: array
+                    items:
+                        type: object
+                        required: [id, parameter, parameter_name, qualifier, unit, period_seconds]
+                        properties:
+                            id:
+                                type: [string, 'null']
+                            parameter:
+                                type: [string, 'null']
+                            parameter_name:
+                                type: [string, 'null']
+                            qualifier:
+                                type: [string, 'null']
+                            unit:
+                                type: [string, 'null']
+                            period_seconds:
+                                type: [integer, 'null']
+        FloodReading:
+            type: object
+            required: [measure_id, recorded_at, value]
+            properties:
+                measure_id:
+                    type: string
+                recorded_at:
+                    type: string
+                    format: date-time
+                value:
+                    type: number
         CompanyProfileEnvelope:
             type: object
             required: [data, meta]

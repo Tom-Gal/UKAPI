@@ -5,7 +5,9 @@ namespace App\Providers;
 use App\Integrations\CompaniesHouse\CompaniesHouseCompanyProvider;
 use App\Integrations\Contracts\CompanyProvider;
 use App\Integrations\Contracts\CrimeProvider;
+use App\Integrations\Contracts\FloodProvider;
 use App\Integrations\Contracts\PostcodeProvider;
+use App\Integrations\EnvironmentAgency\EnvironmentAgencyFloodProvider;
 use App\Integrations\PoliceUk\PoliceUkCrimeProvider;
 use App\Integrations\PostcodesIo\PostcodesIoPostcodeProvider;
 use App\Notifications\SecurityAlertNotification;
@@ -27,6 +29,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->bind(CompanyProvider::class, CompaniesHouseCompanyProvider::class);
         $this->app->bind(CrimeProvider::class, PoliceUkCrimeProvider::class);
+        $this->app->bind(FloodProvider::class, EnvironmentAgencyFloodProvider::class);
         $this->app->bind(PostcodeProvider::class, PostcodesIoPostcodeProvider::class);
     }
 

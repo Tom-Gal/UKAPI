@@ -1,0 +1,14 @@
+{
+    "meta": {
+        "publisher": "Environment Agency",
+        "limit": 1
+    },
+    "items": [
+        {
+            "@id": "http://environment.data.gov.uk/flood-monitoring/data/readings/5380TH-level-stage-i-15_min-mASD/2026-08-27T00-00-00Z",
+            "dateTime": "2026-08-27T00:00:00Z",
+            "measure": "http://environment.data.gov.uk/flood-monitoring/id/measures/5380TH-level-stage-i-15_min-mASD",
+            "value": 0.027
+        }
+    ]
+}

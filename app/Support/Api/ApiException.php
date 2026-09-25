@@ -158,6 +158,15 @@ final class ApiException extends RuntimeException
         );
     }
 
+    public static function floodStationNotFound(): self
+    {
+        return new self(
+            apiCode: 'flood_station_not_found',
+            message: 'No flood-monitoring station was found for the supplied station id.',
+            status: 404,
+        );
+    }
+
     public static function providerUnavailable(): self
     {
         return new self(

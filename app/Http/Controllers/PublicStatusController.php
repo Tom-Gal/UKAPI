@@ -20,6 +20,7 @@ final class PublicStatusController extends Controller
                 ['name' => 'UKAPI v1', 'detail' => 'Available', 'state' => 'available'],
                 ['name' => 'Postcode data', 'detail' => 'Available', 'state' => 'available'],
                 ['name' => 'Crime data', 'detail' => 'Available', 'state' => 'available'],
+                ['name' => 'Flood data', 'detail' => 'Available (England)', 'state' => 'available'],
                 [
                     'name' => 'Company data',
                     'detail' => filled(config('ukapi.companies_house.api_key')) ? 'Available' : 'Unavailable',

@@ -1,0 +1,29 @@
+{
+    "meta": {
+        "publisher": "Environment Agency",
+        "licence": "http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+        "comment": "Status: Beta service"
+    },
+    "items": [
+        {
+            "@id": "http://environment.data.gov.uk/flood-monitoring/id/floods/061WAFSF3A",
+            "description": "Flooding is possible - be prepared",
+            "eaAreaName": "Wessex",
+            "floodArea": {
+                "@id": "http://environment.data.gov.uk/flood-monitoring/id/floodAreas/061WAFSF3A",
+                "county": "Somerset",
+                "notation": "061WAFSF3A",
+                "riverOrSea": "River Tone"
+            },
+            "floodAreaID": "061WAFSF3A",
+            "isTidal": false,
+            "message": "Flooding is possible in low lying areas.",
+            "severity": 2,
+            "severityLevel": "Flood Warning",
+            "timeMessageChanged": "2026-09-25T10:15:00Z",
+            "timeRaised": "2026-09-25T09:00:00Z",
+            "timeSeverityChanged": "2026-09-25T10:10:00Z",
+            "type": "Flood Warning"
+        }
+    ]
+}

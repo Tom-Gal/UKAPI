@@ -56,7 +56,7 @@ const guideCopy: Record<
             ],
             [
                 'Useful codes',
-                'invalid_api_key, api_key_revoked, quota_exceeded, rate_limit_exceeded, invalid_parameter, invalid_postcode, postcode_not_found, invalid_company_number, company_not_found, invalid_sic_code, sic_not_found, sic_reference_unavailable, invalid_coordinates, upstream_unavailable and upstream_invalid_response.',
+                'invalid_api_key, api_key_revoked, quota_exceeded, rate_limit_exceeded, invalid_parameter, invalid_postcode, postcode_not_found, invalid_company_number, company_not_found, invalid_sic_code, sic_not_found, sic_reference_unavailable, invalid_coordinates, flood_station_not_found, upstream_unavailable and upstream_invalid_response.',
             ],
             [
                 'Support context',

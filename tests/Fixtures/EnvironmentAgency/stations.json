@@ -1,0 +1,28 @@
+{
+    "meta": {
+        "publisher": "Environment Agency"
+    },
+    "items": [
+        {
+            "@id": "http://environment.data.gov.uk/flood-monitoring/id/stations/5380TH",
+            "catchmentName": "Lower Lee",
+            "label": "Walthamstow, Low Hall",
+            "lat": 51.574894,
+            "long": -0.043637,
+            "riverName": "River Lee",
+            "stationReference": "5380TH",
+            "status": "http://environment.data.gov.uk/flood-monitoring/def/core/statusActive",
+            "town": "Walthamstow",
+            "measures": [
+                {
+                    "@id": "http://environment.data.gov.uk/flood-monitoring/id/measures/5380TH-level-stage-i-15_min-mASD",
+                    "parameter": "level",
+                    "parameterName": "Water Level",
+                    "period": 900,
+                    "qualifier": "Stage",
+                    "unitName": "mASD"
+                }
+            ]
+        }
+    ]
+}

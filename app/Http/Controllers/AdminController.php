@@ -66,6 +66,11 @@ class AdminController extends Controller
                 'status' => 'No credential required',
             ],
             [
+                'code' => 'environment_agency_flood_monitoring',
+                'scope' => 'England',
+                'status' => 'No credential required',
+            ],
+            [
                 'code' => 'companies_house',
                 'scope' => 'UK',
                 'status' => is_string(config('ukapi.companies_house.api_key')) && config('ukapi.companies_house.api_key') !== ''

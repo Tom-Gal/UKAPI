@@ -178,6 +178,7 @@ export default function EndpointReference() {
                         <code>invalid_sic_code</code>,{' '}
                         <code>sic_not_found</code>,{' '}
                         <code>sic_reference_unavailable</code>,{' '}
+                        <code>flood_station_not_found</code>,{' '}
                         <code>rate_limit_exceeded</code>,{' '}
                         <code>quota_exceeded</code>,{' '}
                         <code>upstream_unavailable</code>,{' '}

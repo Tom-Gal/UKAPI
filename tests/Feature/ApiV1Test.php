@@ -74,6 +74,28 @@ class ApiV1Test extends TestCase
         $this->assertSame('revoked', $apiKey->status);
     }
 
+    public function test_repeated_invalid_api_key_attempts_are_rate_limited_by_client_ip(): void
+    {
+        config()->set('ukapi.api_auth_failure_limit', 2);
+        config()->set('ukapi.api_auth_failure_window_seconds', 60);
+        $headers = [
+            'Authorization' => 'Bearer uk_test_k_abcdefghij.invalidsecretvaluethatislongenough',
+            'REMOTE_ADDR' => '203.0.113.10',
+        ];
+
+        $this->getJson('/v1/vat/calculate?amount=100&rate=20', $headers)
+            ->assertUnauthorized()
+            ->assertJsonPath('error.code', 'invalid_api_key');
+        $this->getJson('/v1/vat/calculate?amount=100&rate=20', $headers)
+            ->assertUnauthorized()
+            ->assertJsonPath('error.code', 'invalid_api_key');
+        $this->getJson('/v1/vat/calculate?amount=100&rate=20', $headers)
+            ->assertTooManyRequests()
+            ->assertHeader('RateLimit-Limit', '2')
+            ->assertHeader('Retry-After')
+            ->assertJsonPath('error.code', 'rate_limit_exceeded');
+    }
+
     public function test_invalid_parameters_use_the_standard_error_envelope_without_consuming_quota(): void
     {
         [$apiKey, $token] = $this->createApiKey();

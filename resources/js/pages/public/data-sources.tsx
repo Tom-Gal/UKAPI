@@ -21,6 +21,12 @@ const sources = [
         'England, Wales and Northern Ireland; Scotland has British Transport Police data only',
         'Approximate, anonymised street-level crime records and crime categories (Open Government Licence v3.0)',
     ],
+    [
+        'Environment Agency flood-monitoring',
+        'https://environment.data.gov.uk/flood-monitoring/doc/reference',
+        'England',
+        'Near-real-time warnings, monitoring stations and bounded station readings (Open Government Licence v3.0; beta source; not an emergency alert service)',
+    ],
 ];
 
 export default function DataSources() {

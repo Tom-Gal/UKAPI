@@ -671,34 +671,95 @@ const allEndpointFamilies: EndpointFamily[] = [
             {
                 method: 'GET',
                 path: '/v1/flood/warnings',
-                description: 'List flood warnings and alerts.',
+                examplePath: '/v1/flood/warnings',
+                exampleResponse: `{
+  "data": {
+    "warnings": [{ "id": "061WAFSF3A", "severity": 2, "severity_level": "Flood Warning", "type": "Flood Warning", "message": "Flooding is possible in low lying areas.", "description": "Flooding is possible - be prepared", "raised_at": "2026-09-25T09:00:00+00:00", "severity_changed_at": "2026-09-25T10:10:00+00:00", "message_changed_at": "2026-09-25T10:15:00+00:00", "area": { "code": "061WAFSF3A", "county": "Somerset", "river_or_sea": "River Tone", "name": null } }]
+  },
+  "meta": { "request_id": "req_01…", "cached": false, "source": "environment_agency_flood_monitoring", "retrieved_at": "2026-09-25T10:20:00+00:00", "source_updated_at": "2026-09-25T10:15:00+00:00", "coverage": "England", "safety_notice": "This data is not an emergency alert service. Follow official Environment Agency advice and warnings." }
+}`,
+                description:
+                    'List current England flood warnings and alerts. This is not an emergency alert service.',
                 coverage: 'England',
                 source: 'Environment Agency',
                 freshness: '5 minutes',
+                live: true,
             },
             {
                 method: 'GET',
                 path: '/v1/flood/nearby?postcode=',
-                description: 'Find nearby flood information.',
+                examplePath: '/v1/flood/nearby?postcode=BL2%206XX',
+                parameters: [
+                    {
+                        name: 'postcode',
+                        location: 'query',
+                        required: true,
+                        description:
+                            'A UK postcode. It is normalised and resolved to coordinates before the Environment Agency request.',
+                    },
+                ],
+                description:
+                    'Find current England flood warnings and alerts within UKAPI.io’s configured nearby radius (returned in the response).',
                 coverage: 'England',
                 source: 'Environment Agency',
                 freshness: '5 minutes',
+                live: true,
             },
             {
                 method: 'GET',
                 path: '/v1/flood/stations/nearby?postcode=',
-                description: 'Find nearby stations.',
+                examplePath:
+                    '/v1/flood/stations/nearby?postcode=BL2%206XX',
+                exampleResponse: `{
+  "data": {
+    "postcode": "BL2 6XX",
+    "nearby_distance_kilometres": 10,
+    "stations": [{ "id": "5380TH", "name": "Walthamstow, Low Hall", "latitude": 51.574894, "longitude": -0.043637, "river_name": "River Lee", "town": "Walthamstow", "catchment_name": "Lower Lee", "status": "statusActive", "measures": [{ "id": "…/5380TH-level-stage-i-15_min-mASD", "parameter": "level", "parameter_name": "Water Level", "qualifier": "Stage", "unit": "mASD", "period_seconds": 900 }] }]
+  },
+  "meta": { "request_id": "req_01…", "cached": false, "source": "environment_agency_flood_monitoring", "retrieved_at": "2026-09-25T10:20:00+00:00", "source_updated_at": null, "coverage": "England", "safety_notice": "This data is not an emergency alert service. Follow official Environment Agency advice and warnings." }
+}`,
+                parameters: [
+                    {
+                        name: 'postcode',
+                        location: 'query',
+                        required: true,
+                        description:
+                            'A UK postcode. It is normalised and resolved to coordinates before the Environment Agency request.',
+                    },
+                ],
+                description:
+                    'Find a bounded list of England Environment Agency monitoring stations near a postcode; the fixed nearby radius is returned in the response.',
                 coverage: 'England',
                 source: 'Environment Agency',
                 freshness: '5 minutes',
+                live: true,
             },
             {
                 method: 'GET',
                 path: '/v1/flood/stations/{id}/readings',
-                description: 'Get station readings.',
+                examplePath: '/v1/flood/stations/5380TH/readings',
+                exampleResponse: `{
+  "data": {
+    "station_id": "5380TH",
+    "readings": [{ "measure_id": "…/5380TH-level-stage-i-15_min-mASD", "recorded_at": "2026-08-27T00:00:00+00:00", "value": 0.027 }]
+  },
+  "meta": { "request_id": "req_01…", "cached": false, "source": "environment_agency_flood_monitoring", "retrieved_at": "2026-09-25T10:20:00+00:00", "source_updated_at": "2026-08-27T00:00:00+00:00", "coverage": "England", "safety_notice": "This data is not an emergency alert service. Follow official Environment Agency advice and warnings." }
+}`,
+                parameters: [
+                    {
+                        name: 'id',
+                        location: 'path',
+                        required: true,
+                        description:
+                            'An Environment Agency station id. Only letters, numbers, hyphens and underscores are accepted.',
+                    },
+                ],
+                description:
+                    'Get a bounded recent set of England Environment Agency station readings.',
                 coverage: 'England',
                 source: 'Environment Agency',
                 freshness: '5 minutes',
+                live: true,
             },
         ],
     },

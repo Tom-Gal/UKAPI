@@ -88,6 +88,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | API key authentication abuse control
+    |--------------------------------------------------------------------------
+    |
+    | Key-scoped burst limits apply after authentication. This separate
+    | per-IP limiter bounds database/hash work from credential guessing before
+    | an API key can be identified.
+    |
+    */
+
+    'api_auth_failure_limit' => (int) env('API_AUTH_FAILURE_LIMIT', 30),
+    'api_auth_failure_window_seconds' => (int) env('API_AUTH_FAILURE_WINDOW_SECONDS', 60),
+
+    /*
+    |--------------------------------------------------------------------------
     | Postcodes.io provider
     |--------------------------------------------------------------------------
     */
@@ -147,6 +161,30 @@ return [
         'categories_cache_ttl_hours' => (int) env('POLICE_UK_CATEGORIES_CACHE_TTL_HOURS', 24),
         'provider_request_limit' => (int) env('POLICE_UK_PROVIDER_REQUEST_LIMIT', 120),
         'provider_limit_window_seconds' => (int) env('POLICE_UK_PROVIDER_LIMIT_WINDOW_SECONDS', 60),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Environment Agency flood-monitoring provider
+    |--------------------------------------------------------------------------
+    |
+    | This England-only public source needs short caches. Warning responses are
+    | deliberately not served stale: callers must receive a controlled 503
+    | rather than an old safety-relevant warning state when the source fails.
+    |
+    */
+
+    'environment_agency' => [
+        'base_url' => env('ENVIRONMENT_AGENCY_BASE_URL', 'https://environment.data.gov.uk/flood-monitoring'),
+        'user_agent' => env('ENVIRONMENT_AGENCY_USER_AGENT', 'UKAPI.io/1.0'),
+        'connect_timeout_seconds' => (int) env('ENVIRONMENT_AGENCY_CONNECT_TIMEOUT', 2),
+        'timeout_seconds' => (int) env('ENVIRONMENT_AGENCY_TIMEOUT', 5),
+        'cache_ttl_minutes' => (int) env('ENVIRONMENT_AGENCY_CACHE_TTL_MINUTES', 5),
+        'nearby_distance_kilometres' => (int) env('ENVIRONMENT_AGENCY_NEARBY_DISTANCE_KILOMETRES', 10),
+        'max_results' => (int) env('ENVIRONMENT_AGENCY_MAX_RESULTS', 100),
+        'max_readings' => (int) env('ENVIRONMENT_AGENCY_MAX_READINGS', 100),
+        'provider_request_limit' => (int) env('ENVIRONMENT_AGENCY_PROVIDER_REQUEST_LIMIT', 120),
+        'provider_limit_window_seconds' => (int) env('ENVIRONMENT_AGENCY_PROVIDER_LIMIT_WINDOW_SECONDS', 60),
     ],
 
     /*

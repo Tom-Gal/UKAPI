@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\OpenApiController;
 use App\Http\Controllers\Api\V1\CompanyController;
 use App\Http\Controllers\Api\V1\CrimeController;
+use App\Http\Controllers\Api\V1\FloodController;
 use App\Http\Controllers\Api\V1\PostcodeController;
 use App\Http\Controllers\Api\V1\SicController;
 use App\Http\Controllers\Api\V1\VatController;
@@ -56,6 +57,19 @@ Route::prefix('v1')
         Route::get('crime/categories', [CrimeController::class, 'categories'])
             ->defaults('ukapi_endpoint', 'crime.categories')
             ->name('api.v1.crime.categories');
+
+        Route::get('flood/warnings', [FloodController::class, 'warnings'])
+            ->defaults('ukapi_endpoint', 'flood.warnings')
+            ->name('api.v1.flood.warnings');
+        Route::get('flood/nearby', [FloodController::class, 'nearby'])
+            ->defaults('ukapi_endpoint', 'flood.nearby')
+            ->name('api.v1.flood.nearby');
+        Route::get('flood/stations/nearby', [FloodController::class, 'stationsNearby'])
+            ->defaults('ukapi_endpoint', 'flood.stations.nearby')
+            ->name('api.v1.flood.stations.nearby');
+        Route::get('flood/stations/{station}/readings', [FloodController::class, 'readings'])
+            ->defaults('ukapi_endpoint', 'flood.stations.readings')
+            ->name('api.v1.flood.stations.readings');
 
         Route::get('postcodes/{postcode}/validate', [PostcodeController::class, 'validate'])
             ->defaults('ukapi_endpoint', 'postcodes.validate')
