@@ -1,0 +1,41 @@
+[
+    {
+        "category": "anti-social-behaviour",
+        "persistent_id": "",
+        "location_subtype": "",
+        "id": 100001,
+        "location": {
+            "latitude": "53.592132",
+            "street": {
+                "id": 123456,
+                "name": "On or near Example Street"
+            },
+            "longitude": "-2.411624"
+        },
+        "context": "",
+        "month": "2026-07",
+        "location_type": "Force",
+        "outcome_status": null
+    },
+    {
+        "category": "violent-crime",
+        "persistent_id": "9b1795d3e8f14531",
+        "location_subtype": "",
+        "id": 100002,
+        "location": {
+            "latitude": "53.592132",
+            "street": {
+                "id": 123456,
+                "name": "On or near Example Street"
+            },
+            "longitude": "-2.411624"
+        },
+        "context": "",
+        "month": "2026-07",
+        "location_type": "Force",
+        "outcome_status": {
+            "category": "Under investigation",
+            "date": "2026-07"
+        }
+    }
+]

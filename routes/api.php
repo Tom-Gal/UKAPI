@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\OpenApiController;
 use App\Http\Controllers\Api\V1\CompanyController;
+use App\Http\Controllers\Api\V1\CrimeController;
 use App\Http\Controllers\Api\V1\PostcodeController;
 use App\Http\Controllers\Api\V1\SicController;
 use App\Http\Controllers\Api\V1\VatController;
@@ -45,6 +46,16 @@ Route::prefix('v1')
         Route::get('sic/{code}', [SicController::class, 'show'])
             ->defaults('ukapi_endpoint', 'sic.show')
             ->name('api.v1.sic.show');
+
+        Route::get('crime/nearby', [CrimeController::class, 'nearby'])
+            ->defaults('ukapi_endpoint', 'crime.nearby')
+            ->name('api.v1.crime.nearby');
+        Route::get('crime/summary', [CrimeController::class, 'summary'])
+            ->defaults('ukapi_endpoint', 'crime.summary')
+            ->name('api.v1.crime.summary');
+        Route::get('crime/categories', [CrimeController::class, 'categories'])
+            ->defaults('ukapi_endpoint', 'crime.categories')
+            ->name('api.v1.crime.categories');
 
         Route::get('postcodes/{postcode}/validate', [PostcodeController::class, 'validate'])
             ->defaults('ukapi_endpoint', 'postcodes.validate')

@@ -15,7 +15,7 @@ export default function Docs() {
             <PageHero
                 eyebrow="Documentation"
                 title="Designed for the first successful request."
-                description="Start with a test key, then make a real VAT, postcode or company request. Each endpoint shows its availability, source, freshness and exact parameters."
+                description="Start with a test key, then make a real VAT, postcode, company or crime request. Each endpoint shows its availability, source, freshness and exact parameters."
             />
             <div className="mx-auto grid max-w-6xl gap-10 px-5 pb-20 lg:grid-cols-[.72fr_1.28fr] lg:px-8">
                 <aside>
@@ -38,9 +38,9 @@ export default function Docs() {
                     </nav>
                     <div className="mt-8 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm leading-6 text-emerald-950">
                         <CircleCheck className="mb-2 size-4" />
-                        VAT, postcode and company endpoints are live. Use a test
-                        key in their reference page to send a request from this
-                        browser.
+                        VAT, postcode, company and Police.uk crime endpoints are
+                        live. Use a test key in their reference page to send a
+                        request from this browser.
                     </div>
                 </aside>
                 <section>

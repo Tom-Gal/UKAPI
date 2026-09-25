@@ -76,6 +76,16 @@ final class ApiException extends RuntimeException
         );
     }
 
+    public static function invalidParameter(string $field, string $message): self
+    {
+        return new self(
+            apiCode: 'invalid_parameter',
+            message: $message,
+            status: 422,
+            details: ['fields' => [$field => [$message]]],
+        );
+    }
+
     public static function postcodeNotFound(): self
     {
         return new self(

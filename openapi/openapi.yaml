@@ -295,6 +295,86 @@ paths:
                     $ref: '#/components/responses/RateLimited'
                 '503':
                     $ref: '#/components/responses/SicReferenceUnavailable'
+    /v1/crime/nearby:
+        get:
+            operationId: findNearbyCrime
+            summary: Find approximate street-level crime records near a postcode
+            description: |
+                Resolves the postcode to coordinates, then returns Police.uk's
+                anonymised street-level records. Coverage is England, Wales and
+                Northern Ireland; in Scotland only British Transport Police data is available.
+            parameters:
+                - $ref: '#/components/parameters/CrimePostcode'
+                - $ref: '#/components/parameters/CrimeMonth'
+            responses:
+                '200':
+                    description: Normalised approximate crime records
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CrimeNearbyEnvelope'
+                '401':
+                    $ref: '#/components/responses/InvalidApiKey'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '422':
+                    $ref: '#/components/responses/InvalidParameter'
+                '429':
+                    $ref: '#/components/responses/RateLimited'
+                '502':
+                    $ref: '#/components/responses/UpstreamInvalidResponse'
+                '503':
+                    $ref: '#/components/responses/UpstreamUnavailable'
+    /v1/crime/summary:
+        get:
+            operationId: summariseNearbyCrime
+            summary: Summarise approximate street-level crime near a postcode
+            description: Uses the same approximate, anonymised Police.uk records as the nearby endpoint and aggregates them by category.
+            parameters:
+                - $ref: '#/components/parameters/CrimePostcode'
+                - $ref: '#/components/parameters/CrimeMonth'
+            responses:
+                '200':
+                    description: Crime count and category breakdown
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CrimeSummaryEnvelope'
+                '401':
+                    $ref: '#/components/responses/InvalidApiKey'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '422':
+                    $ref: '#/components/responses/InvalidParameter'
+                '429':
+                    $ref: '#/components/responses/RateLimited'
+                '502':
+                    $ref: '#/components/responses/UpstreamInvalidResponse'
+                '503':
+                    $ref: '#/components/responses/UpstreamUnavailable'
+    /v1/crime/categories:
+        get:
+            operationId: listCrimeCategories
+            summary: List Police.uk crime categories
+            parameters:
+                - $ref: '#/components/parameters/CrimeMonth'
+            responses:
+                '200':
+                    description: Normalised Police.uk crime categories
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CrimeCategoriesEnvelope'
+                '401':
+                    $ref: '#/components/responses/InvalidApiKey'
+                '422':
+                    $ref: '#/components/responses/InvalidParameter'
+                '429':
+                    $ref: '#/components/responses/RateLimited'
+                '502':
+                    $ref: '#/components/responses/UpstreamInvalidResponse'
+                '503':
+                    $ref: '#/components/responses/UpstreamUnavailable'
 components:
     securitySchemes:
         bearerApiKey:
@@ -326,6 +406,23 @@ components:
             schema:
                 type: string
             example: BL2 6XX
+        CrimePostcode:
+            name: postcode
+            in: query
+            required: true
+            description: A UK postcode. Letter case and whitespace are normalised before resolving its coordinates.
+            schema:
+                type: string
+            example: BL2 6XX
+        CrimeMonth:
+            name: month
+            in: query
+            required: false
+            description: A non-future month in YYYY-MM format. Omit for the latest available provider data.
+            schema:
+                type: string
+                pattern: '^\d{4}-(0[1-9]|1[0-2])$'
+            example: '2026-07'
         NearbyLimit:
             name: limit
             in: query
@@ -617,6 +714,156 @@ components:
                     type: [string, 'null']
                 code:
                     type: [string, 'null']
+        CrimeNearbyEnvelope:
+            type: object
+            required: [data, meta]
+            properties:
+                data:
+                    type: object
+                    required: [postcode, crimes]
+                    properties:
+                        postcode:
+                            type: string
+                        crimes:
+                            type: array
+                            items:
+                                $ref: '#/components/schemas/Crime'
+                meta:
+                    $ref: '#/components/schemas/CrimeMeta'
+        CrimeSummaryEnvelope:
+            type: object
+            required: [data, meta]
+            properties:
+                data:
+                    type: object
+                    required: [postcode, month, total, by_category]
+                    properties:
+                        postcode:
+                            type: string
+                        month:
+                            type: [string, 'null']
+                            pattern: '^\d{4}-(0[1-9]|1[0-2])$'
+                        total:
+                            type: integer
+                            minimum: 0
+                        by_category:
+                            type: array
+                            items:
+                                type: object
+                                required: [category, count]
+                                properties:
+                                    category:
+                                        type: string
+                                    count:
+                                        type: integer
+                                        minimum: 0
+                meta:
+                    $ref: '#/components/schemas/CrimeMeta'
+        CrimeCategoriesEnvelope:
+            type: object
+            required: [data, meta]
+            properties:
+                data:
+                    type: object
+                    required: [categories]
+                    properties:
+                        categories:
+                            type: array
+                            items:
+                                $ref: '#/components/schemas/CrimeCategory'
+                meta:
+                    $ref: '#/components/schemas/CrimeMeta'
+        CrimeMeta:
+            type: object
+            required:
+                [
+                    request_id,
+                    cached,
+                    source,
+                    source_updated_at,
+                    coverage,
+                    requested_month,
+                    data_is_approximate,
+                ]
+            properties:
+                request_id:
+                    type: string
+                cached:
+                    type: boolean
+                source:
+                    type: string
+                    example: police_uk
+                source_updated_at:
+                    type: [string, 'null']
+                    format: date-time
+                coverage:
+                    type: string
+                    example: England, Wales and Northern Ireland; Scotland has British Transport Police data only.
+                requested_month:
+                    type: [string, 'null']
+                    pattern: '^\d{4}-(0[1-9]|1[0-2])$'
+                data_is_approximate:
+                    type: boolean
+                    example: true
+        Crime:
+            type: object
+            required: [category, persistent_id, month, location, outcome]
+            properties:
+                category:
+                    type: string
+                persistent_id:
+                    type: [string, 'null']
+                month:
+                    type: [string, 'null']
+                    pattern: '^\d{4}-(0[1-9]|1[0-2])$'
+                location:
+                    type: object
+                    required:
+                        [
+                            latitude,
+                            longitude,
+                            street,
+                            type,
+                            subtype,
+                            approximate,
+                        ]
+                    properties:
+                        latitude:
+                            type: [number, 'null']
+                        longitude:
+                            type: [number, 'null']
+                        street:
+                            type: object
+                            required: [id, name]
+                            properties:
+                                id:
+                                    type: [integer, 'null']
+                                name:
+                                    type: [string, 'null']
+                        type:
+                            type: [string, 'null']
+                        subtype:
+                            type: [string, 'null']
+                        approximate:
+                            type: boolean
+                            example: true
+                outcome:
+                    type: object
+                    required: [category, month]
+                    properties:
+                        category:
+                            type: [string, 'null']
+                        month:
+                            type: [string, 'null']
+                            pattern: '^\d{4}-(0[1-9]|1[0-2])$'
+        CrimeCategory:
+            type: object
+            required: [code, name]
+            properties:
+                code:
+                    type: string
+                name:
+                    type: string
         CompanyProfileEnvelope:
             type: object
             required: [data, meta]

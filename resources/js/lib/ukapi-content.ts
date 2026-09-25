@@ -557,26 +557,109 @@ const allEndpointFamilies: EndpointFamily[] = [
             {
                 method: 'GET',
                 path: '/v1/crime/nearby?postcode=&month=',
-                description: 'Find nearby crime records.',
-                coverage: 'Provider-specific partial coverage',
+                examplePath:
+                    '/v1/crime/nearby?postcode=BL2%206XX&month=2026-07',
+                exampleResponse: `{
+  "data": {
+    "postcode": "BL2 6XX",
+    "crimes": [{
+      "category": "anti-social-behaviour",
+      "persistent_id": null,
+      "month": "2026-07",
+      "location": { "latitude": 53.592132, "longitude": -2.411624, "street": { "id": 123456, "name": "On or near Example Street" }, "type": "Force", "subtype": null, "approximate": true },
+      "outcome": { "category": null, "month": null }
+    }]
+  },
+  "meta": { "request_id": "req_01…", "cached": false, "source": "police_uk", "source_updated_at": null, "coverage": "England, Wales and Northern Ireland; Scotland has British Transport Police data only.", "requested_month": "2026-07", "data_is_approximate": true }
+}`,
+                parameters: [
+                    {
+                        name: 'postcode',
+                        location: 'query',
+                        required: true,
+                        description:
+                            'A UK postcode. It is normalised and resolved to coordinates before the Police.uk request.',
+                    },
+                    {
+                        name: 'month',
+                        location: 'query',
+                        required: false,
+                        description:
+                            'A non-future YYYY-MM month. Omit to request the latest provider data.',
+                    },
+                ],
+                description:
+                    'Find approximate, anonymised street-level crime records near a postcode.',
+                coverage:
+                    'England, Wales and Northern Ireland; Scotland has British Transport Police data only',
                 source: 'Police.uk',
                 freshness: '24 hours',
+                live: true,
             },
             {
                 method: 'GET',
                 path: '/v1/crime/summary?postcode=&month=',
-                description: 'Get a postcode crime summary.',
-                coverage: 'Provider-specific partial coverage',
+                examplePath:
+                    '/v1/crime/summary?postcode=BL2%206XX&month=2026-07',
+                exampleResponse: `{
+  "data": {
+    "postcode": "BL2 6XX",
+    "month": "2026-07",
+    "total": 2,
+    "by_category": [{ "category": "anti-social-behaviour", "count": 1 }, { "category": "violent-crime", "count": 1 }]
+  },
+  "meta": { "request_id": "req_01…", "cached": false, "source": "police_uk", "source_updated_at": null, "coverage": "England, Wales and Northern Ireland; Scotland has British Transport Police data only.", "requested_month": "2026-07", "data_is_approximate": true }
+}`,
+                parameters: [
+                    {
+                        name: 'postcode',
+                        location: 'query',
+                        required: true,
+                        description:
+                            'A UK postcode. It is normalised and resolved to coordinates before the Police.uk request.',
+                    },
+                    {
+                        name: 'month',
+                        location: 'query',
+                        required: false,
+                        description:
+                            'A non-future YYYY-MM month. Omit to request the latest provider data.',
+                    },
+                ],
+                description:
+                    'Get a category count from approximate, anonymised street-level crime records.',
+                coverage:
+                    'England, Wales and Northern Ireland; Scotland has British Transport Police data only',
                 source: 'Police.uk',
                 freshness: '24 hours',
+                live: true,
             },
             {
                 method: 'GET',
                 path: '/v1/crime/categories',
-                description: 'List crime categories.',
-                coverage: 'Provider-specific partial coverage',
+                examplePath: '/v1/crime/categories?month=2026-07',
+                exampleResponse: `{
+  "data": {
+    "categories": [{ "code": "all-crime", "name": "All crime and anti-social behaviour" }]
+  },
+  "meta": { "request_id": "req_01…", "cached": false, "source": "police_uk", "source_updated_at": null, "coverage": "England, Wales and Northern Ireland; Scotland has British Transport Police data only.", "requested_month": "2026-07", "data_is_approximate": true }
+}`,
+                parameters: [
+                    {
+                        name: 'month',
+                        location: 'query',
+                        required: false,
+                        description:
+                            'A non-future YYYY-MM month. Omit to request the latest provider categories.',
+                    },
+                ],
+                description:
+                    'List the Police.uk crime categories used by the crime endpoints.',
+                coverage:
+                    'England, Wales and Northern Ireland; Scotland has British Transport Police data only',
                 source: 'Police.uk',
-                freshness: 'Provider dependent',
+                freshness: '24 hours',
+                live: true,
             },
         ],
     },

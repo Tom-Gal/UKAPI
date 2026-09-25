@@ -61,6 +61,11 @@ class AdminController extends Controller
         return [
             ['code' => 'postcodes_io', 'scope' => 'UK', 'status' => 'No credential required'],
             [
+                'code' => 'police_uk',
+                'scope' => 'England, Wales and Northern Ireland; Scotland partial',
+                'status' => 'No credential required',
+            ],
+            [
                 'code' => 'companies_house',
                 'scope' => 'UK',
                 'status' => is_string(config('ukapi.companies_house.api_key')) && config('ukapi.companies_house.api_key') !== ''

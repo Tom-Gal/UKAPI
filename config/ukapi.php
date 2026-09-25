@@ -129,6 +129,28 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Police.uk provider
+    |--------------------------------------------------------------------------
+    |
+    | Police.uk's public API requires no upstream credential. The local
+    | limiter is still retained to protect both the source and our own retry
+    | budget. Customer calls remain protected by their UKAPI API key.
+    |
+    */
+
+    'police_uk' => [
+        'base_url' => env('POLICE_UK_BASE_URL', 'https://data.police.uk/api'),
+        'user_agent' => env('POLICE_UK_USER_AGENT', 'UKAPI.io/1.0'),
+        'connect_timeout_seconds' => (int) env('POLICE_UK_CONNECT_TIMEOUT', 2),
+        'timeout_seconds' => (int) env('POLICE_UK_TIMEOUT', 5),
+        'crime_cache_ttl_hours' => (int) env('POLICE_UK_CRIME_CACHE_TTL_HOURS', 24),
+        'categories_cache_ttl_hours' => (int) env('POLICE_UK_CATEGORIES_CACHE_TTL_HOURS', 24),
+        'provider_request_limit' => (int) env('POLICE_UK_PROVIDER_REQUEST_LIMIT', 120),
+        'provider_limit_window_seconds' => (int) env('POLICE_UK_PROVIDER_LIMIT_WINDOW_SECONDS', 60),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Companies House SIC 2007 reference snapshot
     |--------------------------------------------------------------------------
     |

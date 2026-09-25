@@ -4,7 +4,9 @@ namespace App\Providers;
 
 use App\Integrations\CompaniesHouse\CompaniesHouseCompanyProvider;
 use App\Integrations\Contracts\CompanyProvider;
+use App\Integrations\Contracts\CrimeProvider;
 use App\Integrations\Contracts\PostcodeProvider;
+use App\Integrations\PoliceUk\PoliceUkCrimeProvider;
 use App\Integrations\PostcodesIo\PostcodesIoPostcodeProvider;
 use App\Notifications\SecurityAlertNotification;
 use Carbon\CarbonImmutable;
@@ -24,6 +26,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(CompanyProvider::class, CompaniesHouseCompanyProvider::class);
+        $this->app->bind(CrimeProvider::class, PoliceUkCrimeProvider::class);
         $this->app->bind(PostcodeProvider::class, PostcodesIoPostcodeProvider::class);
     }
 

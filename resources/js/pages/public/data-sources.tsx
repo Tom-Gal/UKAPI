@@ -15,6 +15,12 @@ const sources = [
         'UK',
         'Company profiles, officer and filing metadata; locally refreshed condensed SIC 2007 reference snapshot',
     ],
+    [
+        'Police.uk',
+        'https://data.police.uk/docs/',
+        'England, Wales and Northern Ireland; Scotland has British Transport Police data only',
+        'Approximate, anonymised street-level crime records and crime categories (Open Government Licence v3.0)',
+    ],
 ];
 
 export default function DataSources() {

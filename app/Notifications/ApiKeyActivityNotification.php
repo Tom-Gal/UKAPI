@@ -36,17 +36,23 @@ final class ApiKeyActivityNotification extends Notification
     public function toMail(User $notifiable): MailMessage
     {
         $created = $this->activity === 'created';
+        $message = (new MailMessage)
+            ->subject($created ? 'New API key created · UKAPI.io' : 'API key revoked · UKAPI.io');
+        $data = [
+            'name' => $notifiable->name,
+            'keyName' => $this->apiKey->name,
+            'environment' => ucfirst($this->apiKey->environment),
+            'apiKeysUrl' => url('/api-keys'),
+        ];
 
-        return (new MailMessage)
-            ->subject($created ? 'New API key created · UKAPI.io' : 'API key revoked · UKAPI.io')
-            ->view([
-                'html' => "emails.api-keys.{$this->activity}",
-                'text' => "emails.api-keys.{$this->activity}-text",
-            ], [
-                'name' => $notifiable->name,
-                'keyName' => $this->apiKey->name,
-                'environment' => ucfirst($this->apiKey->environment),
-                'apiKeysUrl' => url('/api-keys'),
-            ]);
+        if ($created) {
+            return $message
+                ->view('emails.api-keys.created', $data)
+                ->text('emails.api-keys.created-text', $data);
+        }
+
+        return $message
+            ->view('emails.api-keys.revoked', $data)
+            ->text('emails.api-keys.revoked-text', $data);
     }
 }

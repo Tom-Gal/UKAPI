@@ -19,6 +19,7 @@ final class PublicStatusController extends Controller
                 ['name' => 'Account dashboard', 'detail' => 'Available', 'state' => 'available'],
                 ['name' => 'UKAPI v1', 'detail' => 'Available', 'state' => 'available'],
                 ['name' => 'Postcode data', 'detail' => 'Available', 'state' => 'available'],
+                ['name' => 'Crime data', 'detail' => 'Available', 'state' => 'available'],
                 [
                     'name' => 'Company data',
                     'detail' => filled(config('ukapi.companies_house.api_key')) ? 'Available' : 'Unavailable',

@@ -23,6 +23,7 @@ export default function EndpointReference() {
     const requestPath =
         endpoint.examplePath ?? endpoint.path.replace(/\{[^}]+\}/g, 'EXAMPLE');
     const requestUrl = `https://api.ukapi.io${requestPath}`;
+    const isLive = endpoint.live === true;
     const curl = [
         `curl ${requestUrl}`,
         '-H "Authorization: Bearer uk_test_…"',
@@ -52,9 +53,15 @@ export default function EndpointReference() {
                     <p className="mt-5 text-lg leading-8 text-slate-600">
                         {endpoint.description}
                     </p>
-                    <span className="mt-4 inline-flex rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-800">
-                        Live endpoint
-                    </span>
+                    {isLive ? (
+                        <span className="mt-4 inline-flex rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-800">
+                            Live endpoint
+                        </span>
+                    ) : (
+                        <span className="mt-4 inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
+                            Planned endpoint
+                        </span>
+                    )}
                 </div>
                 <div className="mt-10 grid gap-4 sm:grid-cols-3">
                     <Fact label="Coverage" value={endpoint.coverage} />
@@ -179,7 +186,17 @@ export default function EndpointReference() {
                         error envelope.
                     </p>
                 </Section>
-                <TryItConsole requestPath={requestPath} />
+                {isLive ? (
+                    <TryItConsole requestPath={requestPath} />
+                ) : (
+                    <Section title="Availability">
+                        <p>
+                            This route is documented as a planned contract but
+                            is not deployed yet. Do not send production traffic
+                            to it until it is marked live.
+                        </p>
+                    </Section>
+                )}
             </article>
         </>
     );
