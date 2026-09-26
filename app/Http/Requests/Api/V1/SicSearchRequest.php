@@ -29,6 +29,29 @@ class SicSearchRequest extends FormRequest
         ];
     }
 
+    /**
+     * Query parameters for Scribe.
+     *
+     * @return array<string, array<string, int|string>>
+     */
+    public function queryParameters(): array
+    {
+        return [
+            'q' => [
+                'description' => 'SIC code or description search text, between 2 and 200 characters.',
+                'example' => 'software',
+            ],
+            'page' => [
+                'description' => 'One-based result page. Defaults to 1.',
+                'example' => 1,
+            ],
+            'per_page' => [
+                'description' => 'Results to return per page, from 1 to 100. Defaults to 25.',
+                'example' => 25,
+            ],
+        ];
+    }
+
     public function queryText(): string
     {
         return (string) $this->validated('q');

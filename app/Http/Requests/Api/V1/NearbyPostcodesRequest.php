@@ -20,6 +20,25 @@ class NearbyPostcodesRequest extends FormRequest
         ];
     }
 
+    /**
+     * Query parameters for Scribe.
+     *
+     * @return array<string, array<string, int|string>>
+     */
+    public function queryParameters(): array
+    {
+        return [
+            'limit' => [
+                'description' => 'Number of results to return, from 1 to 100. Defaults to 10.',
+                'example' => 5,
+            ],
+            'radius' => [
+                'description' => 'Search radius in metres, from 1 to 2,000. Defaults to 100.',
+                'example' => 500,
+            ],
+        ];
+    }
+
     public function limit(): int
     {
         return (int) ($this->validated('limit') ?? 10);

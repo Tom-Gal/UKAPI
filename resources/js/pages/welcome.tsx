@@ -93,7 +93,7 @@ export default function Welcome() {
                     {endpointFamilies.map((family, index) => (
                         <Link
                             key={family.slug}
-                            href={`/docs/${family.slug}`}
+                            href="/docs"
                             className="group bg-white p-5 transition duration-300 hover:-translate-y-1 hover:bg-blue-50 hover:shadow-lg hover:shadow-blue-950/5 focus-visible:relative focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#1248e8]"
                         >
                             <div className="flex items-center justify-between">

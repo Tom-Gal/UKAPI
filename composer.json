@@ -11,6 +11,7 @@
     "require": {
         "php": "^8.3",
         "inertiajs/inertia-laravel": "^3.0",
+        "knuckleswtf/scribe": "^5.11",
         "laravel/cashier": "^16.8",
         "laravel/chisel": "^0.1.0",
         "laravel/fortify": "^1.37.2",
@@ -55,6 +56,7 @@
             "Composer\\Config::disableProcessTimeout",
             "@php artisan dev"
         ],
+        "docs:generate": "@php artisan scribe:generate --force",
         "lint": [
             "pint --parallel"
         ],

@@ -34,6 +34,7 @@ composer install --no-dev --prefer-dist --optimize-autoloader
 npm ci
 npm run build
 php artisan migrate --force
+php artisan scribe:generate --force --no-interaction
 php artisan optimize
 php artisan ukapi:production:check --probe
 ```

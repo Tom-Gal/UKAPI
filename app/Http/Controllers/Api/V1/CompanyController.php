@@ -17,9 +17,50 @@ use App\Http\Requests\Api\V1\CompanySearchRequest;
 use App\Support\Api\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Knuckles\Scribe\Attributes\Response;
+use Knuckles\Scribe\Attributes\UrlParam;
 
+/**
+ * @group Companies & SIC
+ *
+ * Simplified Companies House profiles, officers and filing metadata with predictable pagination.
+ */
+#[Response(content: [
+    'error' => [
+        'code' => 'invalid_api_key',
+        'message' => 'The API key is invalid.',
+        'status' => 401,
+        'request_id' => 'req_01j8d5s1wdm85crh9b739hw4gd',
+    ],
+], status: 401, description: 'Missing, invalid or revoked API key')]
+#[Response(content: [
+    'error' => [
+        'code' => 'upstream_unavailable',
+        'message' => 'The upstream data provider is temporarily unavailable. Please retry shortly.',
+        'status' => 503,
+        'request_id' => 'req_01j8d5s1wdm85crh9b739hw4gd',
+    ],
+], status: 503, description: 'Companies House is temporarily unavailable')]
 final class CompanyController extends Controller
 {
+    /**
+     * Look up a company.
+     *
+     * Returns a simplified Companies House company profile.
+     */
+    #[UrlParam('companyNumber', 'string', 'Companies House company number. Whitespace is removed and letters are uppercased.', example: 'SC012345')]
+    #[Response(content: [
+        'data' => [
+            'company_number' => 'SC012345',
+            'name' => 'Example Technology Ltd',
+            'status' => 'active',
+            'type' => 'ltd',
+            'jurisdiction' => 'scotland',
+            'incorporated_on' => '2019-04-12',
+            'sic_codes' => ['62012', '63110'],
+        ],
+        'meta' => ['request_id' => 'req_01j8d5s1wdm85crh9b739hw4gd', 'cached' => false, 'stale' => false, 'source' => 'companies_house', 'coverage' => 'UK'],
+    ], description: 'Company profile')]
     public function show(Request $request, string $companyNumber, CompanyLookup $companies): JsonResponse
     {
         $result = $companies->find(CompanyNumber::from($companyNumber));
@@ -27,6 +68,18 @@ final class CompanyController extends Controller
         return ApiResponse::success($request, $result->company->toArray(), $this->meta($result));
     }
 
+    /**
+     * Search companies.
+     *
+     * Searches Companies House company records by name.
+     */
+    #[Response(content: [
+        'data' => [['company_number' => 'SC012345', 'name' => 'Example Technology Ltd', 'status' => 'active', 'type' => 'ltd']],
+        'meta' => [
+            'request_id' => 'req_01j8d5s1wdm85crh9b739hw4gd', 'cached' => false, 'stale' => false, 'source' => 'companies_house', 'coverage' => 'UK',
+            'pagination' => ['page' => 1, 'per_page' => 25, 'total' => 42],
+        ],
+    ], description: 'Paginated company search results')]
     public function search(CompanySearchRequest $request, CompanyLookup $companies): JsonResponse
     {
         $page = $request->pageNumber();
@@ -40,6 +93,19 @@ final class CompanyController extends Controller
         );
     }
 
+    /**
+     * List company officers.
+     *
+     * Returns a company's officers without date-of-birth data.
+     */
+    #[UrlParam('companyNumber', 'string', 'Companies House company number whose officers are requested.', example: 'SC012345')]
+    #[Response(content: [
+        'data' => [['name' => 'Alex Example', 'role' => 'director', 'appointed_on' => '2020-01-15', 'nationality' => 'British']],
+        'meta' => [
+            'request_id' => 'req_01j8d5s1wdm85crh9b739hw4gd', 'cached' => false, 'stale' => false, 'source' => 'companies_house', 'coverage' => 'UK',
+            'pagination' => ['page' => 1, 'per_page' => 25, 'total' => 2],
+        ],
+    ], description: 'Paginated company officers')]
     public function officers(
         CompanyCollectionRequest $request,
         string $companyNumber,
@@ -56,6 +122,22 @@ final class CompanyController extends Controller
         );
     }
 
+    /**
+     * List company filings.
+     *
+     * Returns filing metadata; documents, links and contents are intentionally not proxied.
+     */
+    #[UrlParam('companyNumber', 'string', 'Companies House company number whose filing history is requested.', example: 'SC012345')]
+    #[Response(content: [
+        'data' => [[
+            'transaction_id' => 'MzAwMDAwMDAwMGFkaXF6a2N4', 'category' => 'accounts', 'type' => 'AA',
+            'filed_on' => '2025-03-31', 'description' => 'accounts-with-accounts-type-full', 'pages' => 12,
+        ]],
+        'meta' => [
+            'request_id' => 'req_01j8d5s1wdm85crh9b739hw4gd', 'cached' => false, 'stale' => false, 'source' => 'companies_house', 'coverage' => 'UK',
+            'pagination' => ['page' => 1, 'per_page' => 25, 'total' => 42],
+        ],
+    ], description: 'Paginated company filing metadata')]
     public function filings(
         CompanyCollectionRequest $request,
         string $companyNumber,

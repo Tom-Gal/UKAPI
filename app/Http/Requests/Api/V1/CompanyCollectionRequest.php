@@ -20,6 +20,25 @@ class CompanyCollectionRequest extends FormRequest
         ];
     }
 
+    /**
+     * Query parameters for Scribe.
+     *
+     * @return array<string, array<string, int|string>>
+     */
+    public function queryParameters(): array
+    {
+        return [
+            'page' => [
+                'description' => 'One-based result page. Defaults to 1.',
+                'example' => 1,
+            ],
+            'per_page' => [
+                'description' => 'Results to return per page, from 1 to 100. Defaults to 25.',
+                'example' => 25,
+            ],
+        ];
+    }
+
     public function pageNumber(): int
     {
         return (int) ($this->validated('page') ?? 1);

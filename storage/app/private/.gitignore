@@ -1,2 +1,5 @@
 *
 !.gitignore
+!scribe/
+!scribe/collection.json
+!scribe/openapi.yaml

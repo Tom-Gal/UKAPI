@@ -22,6 +22,25 @@ class VatRequest extends FormRequest
         ];
     }
 
+    /**
+     * Query parameters for Scribe.
+     *
+     * @return array<string, array<string, string>>
+     */
+    public function queryParameters(): array
+    {
+        return [
+            'amount' => [
+                'description' => 'Amount in GBP, with up to two decimal places. Use the net amount for calculate and the gross amount for remove.',
+                'example' => '100.00',
+            ],
+            'rate' => [
+                'description' => 'VAT rate as a percentage, from 0 to 100, with up to two decimal places.',
+                'example' => '20.00',
+            ],
+        ];
+    }
+
     public function amount(): string
     {
         return (string) $this->validated('amount');

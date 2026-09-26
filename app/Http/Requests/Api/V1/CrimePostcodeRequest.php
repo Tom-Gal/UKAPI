@@ -22,6 +22,25 @@ final class CrimePostcodeRequest extends FormRequest
         ];
     }
 
+    /**
+     * Query parameters for Scribe.
+     *
+     * @return array<string, array<string, string>>
+     */
+    public function queryParameters(): array
+    {
+        return [
+            'postcode' => [
+                'description' => 'A UK postcode. It is normalised and resolved to coordinates before the Police.uk request.',
+                'example' => 'BL2 6XX',
+            ],
+            'month' => [
+                'description' => 'A non-future month in YYYY-MM format. Omit it to use the latest provider data.',
+                'example' => '2026-07',
+            ],
+        ];
+    }
+
     public function postcode(): UkPostcode
     {
         return UkPostcode::from((string) $this->validated('postcode'));

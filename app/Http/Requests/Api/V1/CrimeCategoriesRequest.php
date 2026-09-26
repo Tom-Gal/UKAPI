@@ -20,6 +20,21 @@ final class CrimeCategoriesRequest extends FormRequest
         ];
     }
 
+    /**
+     * Query parameters for Scribe.
+     *
+     * @return array<string, array<string, string>>
+     */
+    public function queryParameters(): array
+    {
+        return [
+            'month' => [
+                'description' => 'A non-future month in YYYY-MM format. Omit it to use the latest provider categories.',
+                'example' => '2026-07',
+            ],
+        ];
+    }
+
     public function month(): ?YearMonth
     {
         $month = $this->validated('month');

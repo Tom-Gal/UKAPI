@@ -52,7 +52,7 @@ export default function ApiCatalogue() {
                                     ))}
                             </div>
                             <Link
-                                href={`/docs/${family.slug}`}
+                                href="/docs"
                                 className="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-[#1248e8] hover:text-[#0f3dc4]"
                             >
                                 Read reference <ArrowRight className="size-4" />
