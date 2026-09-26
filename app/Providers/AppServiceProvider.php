@@ -17,7 +17,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
-use Knuckles\Scribe\Scribe;
 use Laravel\Fortify\Events\TwoFactorAuthenticationConfirmed;
 use Laravel\Fortify\Events\TwoFactorAuthenticationDisabled;
 
@@ -41,7 +40,6 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->configureDefaults();
         $this->configureSecurityNotifications();
-        $this->configureScribe();
     }
 
     /**
@@ -78,23 +76,5 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(TwoFactorAuthenticationDisabled::class, function (TwoFactorAuthenticationDisabled $event): void {
             $event->user->notify(SecurityAlertNotification::twoFactorDisabled());
         });
-    }
-
-    /**
-     * Keep externally documented paths identical to the public API contract.
-     *
-     * Scribe normally converts Laravel resource-style parameters to generic
-     * identifiers, which would turn the real `{postcode}` placeholder into
-     * `{id}` for the named `postcodes.show` route.
-     */
-    protected function configureScribe(): void
-    {
-        if (! class_exists(Scribe::class)) {
-            return;
-        }
-
-        Scribe::normalizeEndpointUrlUsing(
-            static fn (string $uri): string => $uri,
-        );
     }
 }

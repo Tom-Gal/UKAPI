@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Http\Middleware\HandleInertiaRequests;
 use Tests\TestCase;
 
 class PublicPagesTest extends TestCase
@@ -12,7 +13,8 @@ class PublicPagesTest extends TestCase
             route('home'),
             route('api-catalogue'),
             route('pricing'),
-            route('scribe'),
+            route('docs'),
+            route('docs', ['section' => 'getting-started']),
             route('status'),
             route('terms'),
             route('privacy'),
@@ -21,5 +23,18 @@ class PublicPagesTest extends TestCase
         ] as $url) {
             $this->get($url)->assertOk();
         }
+    }
+
+    public function test_documentation_section_is_passed_to_the_inertia_page(): void
+    {
+        $this->withHeader('X-Inertia', 'true')
+            ->withHeader(
+                'X-Inertia-Version',
+                app(HandleInertiaRequests::class)->version(request()),
+            )
+            ->get('/docs/getting-started')
+            ->assertOk()
+            ->assertJsonPath('component', 'public/docs')
+            ->assertJsonPath('props.section', 'getting-started');
     }
 }

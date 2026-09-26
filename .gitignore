@@ -1,5 +1,4 @@
 /.phpunit.cache
-/.scribe
 /bootstrap/ssr
 /node_modules
 /public/build

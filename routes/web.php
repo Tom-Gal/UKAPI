@@ -8,10 +8,14 @@ use App\Http\Controllers\DashboardPageController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\PublicStatusController;
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 
 Route::inertia('/', 'welcome')->name('home');
 Route::get('/ready', HealthController::class)->name('ready');
 Route::inertia('/api-catalogue', 'public/api-catalogue')->name('api-catalogue');
+Route::get('/docs/{section?}', function (?string $section = null) {
+    return Inertia::render('public/docs', ['section' => $section]);
+})->name('docs');
 Route::inertia('/pricing', 'public/pricing')->name('pricing');
 Route::get('/status', PublicStatusController::class)->name('status');
 Route::inertia('/terms', 'public/legal')->defaults('document', 'terms')->name('terms');

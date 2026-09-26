@@ -826,12 +826,3 @@ export const plans = [
         emphasis: false,
     },
 ];
-
-export const documentationGuides = [
-    ['quickstart', 'Quickstart'],
-    ['authentication', 'Authentication'],
-    ['errors', 'Errors'],
-    ['rate-limits', 'Rate limits'],
-    ['pagination', 'Pagination'],
-    ['sources-and-coverage', 'Sources & coverage'],
-] as const;
