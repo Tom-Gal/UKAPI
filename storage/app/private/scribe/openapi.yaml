@@ -1,0 +1,3446 @@
+openapi: 3.1.0
+info:
+  title: 'UKAPI.io API reference'
+  description: 'A focused, interactive reference for every live UKAPI.io v1 endpoint.'
+  version: 1.0.0
+servers:
+  -
+    url: 'http://localhost:8000'
+tags:
+  -
+    name: 'Postcodes & location'
+    description: "\nCanonical UK postcode, nearby-postcode and coordinate lookup data from Postcodes.io."
+  -
+    name: 'Companies & SIC'
+    description: "\nSimplified Companies House profiles, officers and filing metadata with predictable pagination."
+  -
+    name: 'Crime data'
+    description: "\nApproximate, anonymised street-level crime data from Police.uk. Coverage is England, Wales and Northern Ireland; Scotland includes British Transport Police data only."
+  -
+    name: 'Flood monitoring'
+    description: "\nNear-real-time England flood warnings, stations and readings from the Environment Agency. This data is not an emergency alert service."
+  -
+    name: VAT
+    description: "\nDeterministic VAT calculations for GBP amounts. Calculations are provided for convenience and are not tax advice."
+components:
+  securitySchemes:
+    default:
+      type: http
+      scheme: bearer
+      description: 'Create a test or live key in your <a href="/api-keys">dashboard</a>, then send <code>Authorization: Bearer {YOUR_API_KEY}</code>. Keys are shown only when created and should never be placed in client-side code.'
+security:
+  -
+    default: []
+paths:
+  '/v1/postcodes/{postcode}':
+    get:
+      summary: 'Look up a postcode.'
+      operationId: lookUpAPostcode
+      description: 'Returns a normalised UK postcode and selected geographic references.'
+      parameters: []
+      responses:
+        200:
+          description: 'Postcode found'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      postcode:
+                        type: string
+                        examples:
+                          - 'BL2 6XX'
+                      country:
+                        type: string
+                        examples:
+                          - England
+                      region:
+                        type: string
+                        examples:
+                          - 'North West'
+                      latitude:
+                        type: number
+                        examples:
+                          - 53.5922
+                      longitude:
+                        type: number
+                        examples:
+                          - -2.4117
+                      local_authority:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                            examples:
+                              - Bolton
+                          code:
+                            type: string
+                            examples:
+                              - E08000001
+                  meta:
+                    type: object
+                    properties:
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                      cached:
+                        type: boolean
+                        examples:
+                          - false
+                      source:
+                        type: string
+                        examples:
+                          - postcodes_io
+                      coverage:
+                        type: string
+                        examples:
+                          - UK
+                examples:
+                  -
+                    data:
+                      postcode: 'BL2 6XX'
+                      country: England
+                      region: 'North West'
+                      latitude: 53.5922
+                      longitude: -2.4117
+                      local_authority:
+                        name: Bolton
+                        code: E08000001
+                    meta:
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+                      cached: false
+                      source: postcodes_io
+                      coverage: UK
+        401:
+          description: 'Missing, invalid or revoked API key'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        examples:
+                          - invalid_api_key
+                      message:
+                        type: string
+                        examples:
+                          - 'The API key is invalid.'
+                      status:
+                        type: integer
+                        examples:
+                          - 401
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                examples:
+                  -
+                    error:
+                      code: invalid_api_key
+                      message: 'The API key is invalid.'
+                      status: 401
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+        429:
+          description: 'Burst limit or monthly quota reached'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        examples:
+                          - rate_limit_exceeded
+                      message:
+                        type: string
+                        examples:
+                          - 'Too many requests. Please retry shortly.'
+                      status:
+                        type: integer
+                        examples:
+                          - 429
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                examples:
+                  -
+                    error:
+                      code: rate_limit_exceeded
+                      message: 'Too many requests. Please retry shortly.'
+                      status: 429
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+      tags:
+        - 'Postcodes & location'
+    parameters:
+      -
+        in: path
+        name: postcode
+        description: 'UK postcode to look up. Spacing and case are normalised.'
+        required: true
+        schema:
+          type: string
+          examples:
+            - 'BL2 6XX'
+  '/v1/postcodes/{postcode}/validate':
+    get:
+      summary: 'Validate a postcode.'
+      operationId: validateAPostcode
+      description: 'Checks whether a normalised UK postcode has a provider record.'
+      parameters: []
+      responses:
+        200:
+          description: 'Postcode validation result'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      postcode:
+                        type: string
+                        examples:
+                          - 'BL2 6XX'
+                      valid:
+                        type: boolean
+                        examples:
+                          - true
+                  meta:
+                    type: object
+                    properties:
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                      cached:
+                        type: boolean
+                        examples:
+                          - true
+                      source:
+                        type: string
+                        examples:
+                          - postcodes_io
+                      coverage:
+                        type: string
+                        examples:
+                          - UK
+                examples:
+                  -
+                    data:
+                      postcode: 'BL2 6XX'
+                      valid: true
+                    meta:
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+                      cached: true
+                      source: postcodes_io
+                      coverage: UK
+        401:
+          description: 'Missing, invalid or revoked API key'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        examples:
+                          - invalid_api_key
+                      message:
+                        type: string
+                        examples:
+                          - 'The API key is invalid.'
+                      status:
+                        type: integer
+                        examples:
+                          - 401
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                examples:
+                  -
+                    error:
+                      code: invalid_api_key
+                      message: 'The API key is invalid.'
+                      status: 401
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+        429:
+          description: 'Burst limit or monthly quota reached'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        examples:
+                          - rate_limit_exceeded
+                      message:
+                        type: string
+                        examples:
+                          - 'Too many requests. Please retry shortly.'
+                      status:
+                        type: integer
+                        examples:
+                          - 429
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                examples:
+                  -
+                    error:
+                      code: rate_limit_exceeded
+                      message: 'Too many requests. Please retry shortly.'
+                      status: 429
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+      tags:
+        - 'Postcodes & location'
+    parameters:
+      -
+        in: path
+        name: postcode
+        description: 'UK postcode to validate. Spacing and case are normalised.'
+        required: true
+        schema:
+          type: string
+          examples:
+            - 'BL2 6XX'
+  '/v1/postcodes/{postcode}/nearby':
+    get:
+      summary: 'Find nearby postcodes.'
+      operationId: findNearbyPostcodes
+      description: 'Results are ordered by distance in metres.'
+      parameters:
+        -
+          in: query
+          name: limit
+          description: 'Number of results to return, from 1 to 100. Defaults to 10. Must be between 1 and 100.'
+          required: false
+          schema:
+            type: integer
+            description: 'Number of results to return, from 1 to 100. Defaults to 10. Must be between 1 and 100.'
+            examples:
+              - 5
+        -
+          in: query
+          name: radius
+          description: 'Search radius in metres, from 1 to 2,000. Defaults to 100. Must be between 1 and 2000.'
+          required: false
+          schema:
+            type: integer
+            description: 'Search radius in metres, from 1 to 2,000. Defaults to 100. Must be between 1 and 2000.'
+            examples:
+              - 500
+      responses:
+        200:
+          description: 'Nearby postcodes'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      postcode:
+                        type: string
+                        examples:
+                          - 'BL2 6XX'
+                      results:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            postcode:
+                              type: string
+                              examples:
+                                - 'BL2 6XY'
+                            distance_metres:
+                              type: number
+                              examples:
+                                - 152.4
+                            latitude:
+                              type: number
+                              examples:
+                                - 53.5931
+                            longitude:
+                              type: number
+                              examples:
+                                - -2.4108
+                        examples:
+                          -
+                            -
+                              postcode: 'BL2 6XY'
+                              distance_metres: 152.4
+                              latitude: 53.5931
+                              longitude: -2.4108
+                  meta:
+                    type: object
+                    properties:
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                      cached:
+                        type: boolean
+                        examples:
+                          - false
+                      source:
+                        type: string
+                        examples:
+                          - postcodes_io
+                      coverage:
+                        type: string
+                        examples:
+                          - UK
+                examples:
+                  -
+                    data:
+                      postcode: 'BL2 6XX'
+                      results:
+                        -
+                          postcode: 'BL2 6XY'
+                          distance_metres: 152.4
+                          latitude: 53.5931
+                          longitude: -2.4108
+                    meta:
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+                      cached: false
+                      source: postcodes_io
+                      coverage: UK
+        401:
+          description: 'Missing, invalid or revoked API key'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        examples:
+                          - invalid_api_key
+                      message:
+                        type: string
+                        examples:
+                          - 'The API key is invalid.'
+                      status:
+                        type: integer
+                        examples:
+                          - 401
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                examples:
+                  -
+                    error:
+                      code: invalid_api_key
+                      message: 'The API key is invalid.'
+                      status: 401
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+        429:
+          description: 'Burst limit or monthly quota reached'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        examples:
+                          - rate_limit_exceeded
+                      message:
+                        type: string
+                        examples:
+                          - 'Too many requests. Please retry shortly.'
+                      status:
+                        type: integer
+                        examples:
+                          - 429
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                examples:
+                  -
+                    error:
+                      code: rate_limit_exceeded
+                      message: 'Too many requests. Please retry shortly.'
+                      status: 429
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+      tags:
+        - 'Postcodes & location'
+    parameters:
+      -
+        in: path
+        name: postcode
+        description: 'UK postcode used as the search origin.'
+        required: true
+        schema:
+          type: string
+          examples:
+            - 'BL2 6XX'
+  '/v1/coordinates/{latitude}/{longitude}/postcode':
+    get:
+      summary: 'Reverse geocode coordinates.'
+      operationId: reverseGeocodeCoordinates
+      description: 'Returns the nearest UK postcode for WGS84 coordinates.'
+      parameters: []
+      responses:
+        200:
+          description: 'Nearest postcode'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      postcode:
+                        type: string
+                        examples:
+                          - 'BL2 6XX'
+                      country:
+                        type: string
+                        examples:
+                          - England
+                      latitude:
+                        type: number
+                        examples:
+                          - 53.5922
+                      longitude:
+                        type: number
+                        examples:
+                          - -2.4117
+                  meta:
+                    type: object
+                    properties:
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                      cached:
+                        type: boolean
+                        examples:
+                          - false
+                      source:
+                        type: string
+                        examples:
+                          - postcodes_io
+                      coverage:
+                        type: string
+                        examples:
+                          - UK
+                examples:
+                  -
+                    data:
+                      postcode: 'BL2 6XX'
+                      country: England
+                      latitude: 53.5922
+                      longitude: -2.4117
+                    meta:
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+                      cached: false
+                      source: postcodes_io
+                      coverage: UK
+        401:
+          description: 'Missing, invalid or revoked API key'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        examples:
+                          - invalid_api_key
+                      message:
+                        type: string
+                        examples:
+                          - 'The API key is invalid.'
+                      status:
+                        type: integer
+                        examples:
+                          - 401
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                examples:
+                  -
+                    error:
+                      code: invalid_api_key
+                      message: 'The API key is invalid.'
+                      status: 401
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+        429:
+          description: 'Burst limit or monthly quota reached'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        examples:
+                          - rate_limit_exceeded
+                      message:
+                        type: string
+                        examples:
+                          - 'Too many requests. Please retry shortly.'
+                      status:
+                        type: integer
+                        examples:
+                          - 429
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                examples:
+                  -
+                    error:
+                      code: rate_limit_exceeded
+                      message: 'Too many requests. Please retry shortly.'
+                      status: 429
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+      tags:
+        - 'Postcodes & location'
+    parameters:
+      -
+        in: path
+        name: latitude
+        description: 'WGS84 latitude from -90 to 90.'
+        required: true
+        schema:
+          type: number
+          examples:
+            - 53.5922
+      -
+        in: path
+        name: longitude
+        description: 'WGS84 longitude from -180 to 180.'
+        required: true
+        schema:
+          type: number
+          examples:
+            - -2.4117
+  /v1/companies/search:
+    get:
+      summary: 'Search companies.'
+      operationId: searchCompanies
+      description: 'Searches Companies House company records by name.'
+      parameters:
+        -
+          in: query
+          name: q
+          description: 'Company name search text, between 2 and 200 characters. Must be at least 2 characters. Must not be greater than 200 characters.'
+          required: true
+          schema:
+            type: string
+            description: 'Company name search text, between 2 and 200 characters. Must be at least 2 characters. Must not be greater than 200 characters.'
+            examples:
+              - 'example technology'
+        -
+          in: query
+          name: page
+          description: 'One-based result page. Defaults to 1. Must be at least 1.'
+          required: false
+          schema:
+            type: integer
+            description: 'One-based result page. Defaults to 1. Must be at least 1.'
+            examples:
+              - 1
+        -
+          in: query
+          name: per_page
+          description: 'Results to return per page, from 1 to 100. Defaults to 25. Must be between 1 and 100.'
+          required: false
+          schema:
+            type: integer
+            description: 'Results to return per page, from 1 to 100. Defaults to 25. Must be between 1 and 100.'
+            examples:
+              - 25
+      responses:
+        200:
+          description: 'Paginated company search results'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        company_number:
+                          type: string
+                          examples:
+                            - SC012345
+                        name:
+                          type: string
+                          examples:
+                            - 'Example Technology Ltd'
+                        status:
+                          type: string
+                          examples:
+                            - active
+                        type:
+                          type: string
+                          examples:
+                            - ltd
+                    examples:
+                      -
+                        -
+                          company_number: SC012345
+                          name: 'Example Technology Ltd'
+                          status: active
+                          type: ltd
+                  meta:
+                    type: object
+                    properties:
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                      cached:
+                        type: boolean
+                        examples:
+                          - false
+                      stale:
+                        type: boolean
+                        examples:
+                          - false
+                      source:
+                        type: string
+                        examples:
+                          - companies_house
+                      coverage:
+                        type: string
+                        examples:
+                          - UK
+                      pagination:
+                        type: object
+                        properties:
+                          page:
+                            type: integer
+                            examples:
+                              - 1
+                          per_page:
+                            type: integer
+                            examples:
+                              - 25
+                          total:
+                            type: integer
+                            examples:
+                              - 42
+                examples:
+                  -
+                    data:
+                      -
+                        company_number: SC012345
+                        name: 'Example Technology Ltd'
+                        status: active
+                        type: ltd
+                    meta:
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+                      cached: false
+                      stale: false
+                      source: companies_house
+                      coverage: UK
+                      pagination:
+                        page: 1
+                        per_page: 25
+                        total: 42
+        401:
+          description: 'Missing, invalid or revoked API key'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        examples:
+                          - invalid_api_key
+                      message:
+                        type: string
+                        examples:
+                          - 'The API key is invalid.'
+                      status:
+                        type: integer
+                        examples:
+                          - 401
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                examples:
+                  -
+                    error:
+                      code: invalid_api_key
+                      message: 'The API key is invalid.'
+                      status: 401
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+        503:
+          description: 'Companies House is temporarily unavailable'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        examples:
+                          - upstream_unavailable
+                      message:
+                        type: string
+                        examples:
+                          - 'The upstream data provider is temporarily unavailable. Please retry shortly.'
+                      status:
+                        type: integer
+                        examples:
+                          - 503
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                examples:
+                  -
+                    error:
+                      code: upstream_unavailable
+                      message: 'The upstream data provider is temporarily unavailable. Please retry shortly.'
+                      status: 503
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+      tags:
+        - 'Companies & SIC'
+  '/v1/companies/{companyNumber}':
+    get:
+      summary: 'Look up a company.'
+      operationId: lookUpACompany
+      description: 'Returns a simplified Companies House company profile.'
+      parameters: []
+      responses:
+        200:
+          description: 'Company profile'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      company_number:
+                        type: string
+                        examples:
+                          - SC012345
+                      name:
+                        type: string
+                        examples:
+                          - 'Example Technology Ltd'
+                      status:
+                        type: string
+                        examples:
+                          - active
+                      type:
+                        type: string
+                        examples:
+                          - ltd
+                      jurisdiction:
+                        type: string
+                        examples:
+                          - scotland
+                      incorporated_on:
+                        type: string
+                        examples:
+                          - '2019-04-12'
+                      sic_codes:
+                        type: array
+                        items:
+                          type: string
+                        examples:
+                          -
+                            - '62012'
+                            - '63110'
+                  meta:
+                    type: object
+                    properties:
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                      cached:
+                        type: boolean
+                        examples:
+                          - false
+                      stale:
+                        type: boolean
+                        examples:
+                          - false
+                      source:
+                        type: string
+                        examples:
+                          - companies_house
+                      coverage:
+                        type: string
+                        examples:
+                          - UK
+                examples:
+                  -
+                    data:
+                      company_number: SC012345
+                      name: 'Example Technology Ltd'
+                      status: active
+                      type: ltd
+                      jurisdiction: scotland
+                      incorporated_on: '2019-04-12'
+                      sic_codes:
+                        - '62012'
+                        - '63110'
+                    meta:
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+                      cached: false
+                      stale: false
+                      source: companies_house
+                      coverage: UK
+        401:
+          description: 'Missing, invalid or revoked API key'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        examples:
+                          - invalid_api_key
+                      message:
+                        type: string
+                        examples:
+                          - 'The API key is invalid.'
+                      status:
+                        type: integer
+                        examples:
+                          - 401
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                examples:
+                  -
+                    error:
+                      code: invalid_api_key
+                      message: 'The API key is invalid.'
+                      status: 401
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+        503:
+          description: 'Companies House is temporarily unavailable'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        examples:
+                          - upstream_unavailable
+                      message:
+                        type: string
+                        examples:
+                          - 'The upstream data provider is temporarily unavailable. Please retry shortly.'
+                      status:
+                        type: integer
+                        examples:
+                          - 503
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                examples:
+                  -
+                    error:
+                      code: upstream_unavailable
+                      message: 'The upstream data provider is temporarily unavailable. Please retry shortly.'
+                      status: 503
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+      tags:
+        - 'Companies & SIC'
+    parameters:
+      -
+        in: path
+        name: companyNumber
+        description: 'Companies House company number. Whitespace is removed and letters are uppercased.'
+        required: true
+        schema:
+          type: string
+          examples:
+            - SC012345
+  '/v1/companies/{companyNumber}/officers':
+    get:
+      summary: 'List company officers.'
+      operationId: listCompanyOfficers
+      description: "Returns a company's officers without date-of-birth data."
+      parameters:
+        -
+          in: query
+          name: page
+          description: 'One-based result page. Defaults to 1. Must be at least 1.'
+          required: false
+          schema:
+            type: integer
+            description: 'One-based result page. Defaults to 1. Must be at least 1.'
+            examples:
+              - 1
+        -
+          in: query
+          name: per_page
+          description: 'Results to return per page, from 1 to 100. Defaults to 25. Must be between 1 and 100.'
+          required: false
+          schema:
+            type: integer
+            description: 'Results to return per page, from 1 to 100. Defaults to 25. Must be between 1 and 100.'
+            examples:
+              - 25
+      responses:
+        200:
+          description: 'Paginated company officers'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                          examples:
+                            - 'Alex Example'
+                        role:
+                          type: string
+                          examples:
+                            - director
+                        appointed_on:
+                          type: string
+                          examples:
+                            - '2020-01-15'
+                        nationality:
+                          type: string
+                          examples:
+                            - British
+                    examples:
+                      -
+                        -
+                          name: 'Alex Example'
+                          role: director
+                          appointed_on: '2020-01-15'
+                          nationality: British
+                  meta:
+                    type: object
+                    properties:
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                      cached:
+                        type: boolean
+                        examples:
+                          - false
+                      stale:
+                        type: boolean
+                        examples:
+                          - false
+                      source:
+                        type: string
+                        examples:
+                          - companies_house
+                      coverage:
+                        type: string
+                        examples:
+                          - UK
+                      pagination:
+                        type: object
+                        properties:
+                          page:
+                            type: integer
+                            examples:
+                              - 1
+                          per_page:
+                            type: integer
+                            examples:
+                              - 25
+                          total:
+                            type: integer
+                            examples:
+                              - 2
+                examples:
+                  -
+                    data:
+                      -
+                        name: 'Alex Example'
+                        role: director
+                        appointed_on: '2020-01-15'
+                        nationality: British
+                    meta:
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+                      cached: false
+                      stale: false
+                      source: companies_house
+                      coverage: UK
+                      pagination:
+                        page: 1
+                        per_page: 25
+                        total: 2
+        401:
+          description: 'Missing, invalid or revoked API key'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        examples:
+                          - invalid_api_key
+                      message:
+                        type: string
+                        examples:
+                          - 'The API key is invalid.'
+                      status:
+                        type: integer
+                        examples:
+                          - 401
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                examples:
+                  -
+                    error:
+                      code: invalid_api_key
+                      message: 'The API key is invalid.'
+                      status: 401
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+        503:
+          description: 'Companies House is temporarily unavailable'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        examples:
+                          - upstream_unavailable
+                      message:
+                        type: string
+                        examples:
+                          - 'The upstream data provider is temporarily unavailable. Please retry shortly.'
+                      status:
+                        type: integer
+                        examples:
+                          - 503
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                examples:
+                  -
+                    error:
+                      code: upstream_unavailable
+                      message: 'The upstream data provider is temporarily unavailable. Please retry shortly.'
+                      status: 503
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+      tags:
+        - 'Companies & SIC'
+    parameters:
+      -
+        in: path
+        name: companyNumber
+        description: 'Companies House company number whose officers are requested.'
+        required: true
+        schema:
+          type: string
+          examples:
+            - SC012345
+  '/v1/companies/{companyNumber}/filings':
+    get:
+      summary: 'List company filings.'
+      operationId: listCompanyFilings
+      description: 'Returns filing metadata; documents, links and contents are intentionally not proxied.'
+      parameters:
+        -
+          in: query
+          name: page
+          description: 'One-based result page. Defaults to 1. Must be at least 1.'
+          required: false
+          schema:
+            type: integer
+            description: 'One-based result page. Defaults to 1. Must be at least 1.'
+            examples:
+              - 1
+        -
+          in: query
+          name: per_page
+          description: 'Results to return per page, from 1 to 100. Defaults to 25. Must be between 1 and 100.'
+          required: false
+          schema:
+            type: integer
+            description: 'Results to return per page, from 1 to 100. Defaults to 25. Must be between 1 and 100.'
+            examples:
+              - 25
+      responses:
+        200:
+          description: 'Paginated company filing metadata'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        transaction_id:
+                          type: string
+                          examples:
+                            - MzAwMDAwMDAwMGFkaXF6a2N4
+                        category:
+                          type: string
+                          examples:
+                            - accounts
+                        type:
+                          type: string
+                          examples:
+                            - AA
+                        filed_on:
+                          type: string
+                          examples:
+                            - '2025-03-31'
+                        description:
+                          type: string
+                          examples:
+                            - accounts-with-accounts-type-full
+                        pages:
+                          type: integer
+                          examples:
+                            - 12
+                    examples:
+                      -
+                        -
+                          transaction_id: MzAwMDAwMDAwMGFkaXF6a2N4
+                          category: accounts
+                          type: AA
+                          filed_on: '2025-03-31'
+                          description: accounts-with-accounts-type-full
+                          pages: 12
+                  meta:
+                    type: object
+                    properties:
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                      cached:
+                        type: boolean
+                        examples:
+                          - false
+                      stale:
+                        type: boolean
+                        examples:
+                          - false
+                      source:
+                        type: string
+                        examples:
+                          - companies_house
+                      coverage:
+                        type: string
+                        examples:
+                          - UK
+                      pagination:
+                        type: object
+                        properties:
+                          page:
+                            type: integer
+                            examples:
+                              - 1
+                          per_page:
+                            type: integer
+                            examples:
+                              - 25
+                          total:
+                            type: integer
+                            examples:
+                              - 42
+                examples:
+                  -
+                    data:
+                      -
+                        transaction_id: MzAwMDAwMDAwMGFkaXF6a2N4
+                        category: accounts
+                        type: AA
+                        filed_on: '2025-03-31'
+                        description: accounts-with-accounts-type-full
+                        pages: 12
+                    meta:
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+                      cached: false
+                      stale: false
+                      source: companies_house
+                      coverage: UK
+                      pagination:
+                        page: 1
+                        per_page: 25
+                        total: 42
+        401:
+          description: 'Missing, invalid or revoked API key'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        examples:
+                          - invalid_api_key
+                      message:
+                        type: string
+                        examples:
+                          - 'The API key is invalid.'
+                      status:
+                        type: integer
+                        examples:
+                          - 401
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                examples:
+                  -
+                    error:
+                      code: invalid_api_key
+                      message: 'The API key is invalid.'
+                      status: 401
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+        503:
+          description: 'Companies House is temporarily unavailable'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        examples:
+                          - upstream_unavailable
+                      message:
+                        type: string
+                        examples:
+                          - 'The upstream data provider is temporarily unavailable. Please retry shortly.'
+                      status:
+                        type: integer
+                        examples:
+                          - 503
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                examples:
+                  -
+                    error:
+                      code: upstream_unavailable
+                      message: 'The upstream data provider is temporarily unavailable. Please retry shortly.'
+                      status: 503
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+      tags:
+        - 'Companies & SIC'
+    parameters:
+      -
+        in: path
+        name: companyNumber
+        description: 'Companies House company number whose filing history is requested.'
+        required: true
+        schema:
+          type: string
+          examples:
+            - SC012345
+  /v1/sic/search:
+    get:
+      summary: 'Search SIC codes.'
+      operationId: searchSICCodes
+      description: 'Searches the SIC reference by code or description.'
+      parameters:
+        -
+          in: query
+          name: q
+          description: 'SIC code or description search text, between 2 and 200 characters. Must be at least 2 characters. Must not be greater than 200 characters.'
+          required: true
+          schema:
+            type: string
+            description: 'SIC code or description search text, between 2 and 200 characters. Must be at least 2 characters. Must not be greater than 200 characters.'
+            examples:
+              - software
+        -
+          in: query
+          name: page
+          description: 'One-based result page. Defaults to 1. Must be at least 1.'
+          required: false
+          schema:
+            type: integer
+            description: 'One-based result page. Defaults to 1. Must be at least 1.'
+            examples:
+              - 1
+        -
+          in: query
+          name: per_page
+          description: 'Results to return per page, from 1 to 100. Defaults to 25. Must be between 1 and 100.'
+          required: false
+          schema:
+            type: integer
+            description: 'Results to return per page, from 1 to 100. Defaults to 25. Must be between 1 and 100.'
+            examples:
+              - 25
+      responses:
+        200:
+          description: 'Paginated SIC results'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          examples:
+                            - '62012'
+                        description:
+                          type: string
+                          examples:
+                            - 'Business and domestic software development'
+                    examples:
+                      -
+                        -
+                          code: '62012'
+                          description: 'Business and domestic software development'
+                  meta:
+                    type: object
+                    properties:
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                      cached:
+                        type: boolean
+                        examples:
+                          - false
+                      source:
+                        type: string
+                        examples:
+                          - companies_house_sic_2007
+                      source_updated_at:
+                        type: string
+                        examples:
+                          - '2026-09-24T12:00:00+00:00'
+                      coverage:
+                        type: string
+                        examples:
+                          - UK
+                      reference_version:
+                        type: string
+                        examples:
+                          - companies_house_condensed_sic_2007
+                      pagination:
+                        type: object
+                        properties:
+                          page:
+                            type: integer
+                            examples:
+                              - 1
+                          per_page:
+                            type: integer
+                            examples:
+                              - 25
+                          total:
+                            type: integer
+                            examples:
+                              - 18
+                examples:
+                  -
+                    data:
+                      -
+                        code: '62012'
+                        description: 'Business and domestic software development'
+                    meta:
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+                      cached: false
+                      source: companies_house_sic_2007
+                      source_updated_at: '2026-09-24T12:00:00+00:00'
+                      coverage: UK
+                      reference_version: companies_house_condensed_sic_2007
+                      pagination:
+                        page: 1
+                        per_page: 25
+                        total: 18
+        401:
+          description: 'Missing, invalid or revoked API key'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        examples:
+                          - invalid_api_key
+                      message:
+                        type: string
+                        examples:
+                          - 'The API key is invalid.'
+                      status:
+                        type: integer
+                        examples:
+                          - 401
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                examples:
+                  -
+                    error:
+                      code: invalid_api_key
+                      message: 'The API key is invalid.'
+                      status: 401
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+        503:
+          description: 'The SIC snapshot is temporarily unavailable'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        examples:
+                          - sic_reference_unavailable
+                      message:
+                        type: string
+                        examples:
+                          - 'The SIC reference snapshot is temporarily unavailable. Please retry shortly.'
+                      status:
+                        type: integer
+                        examples:
+                          - 503
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                examples:
+                  -
+                    error:
+                      code: sic_reference_unavailable
+                      message: 'The SIC reference snapshot is temporarily unavailable. Please retry shortly.'
+                      status: 503
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+      tags:
+        - 'Companies & SIC'
+  '/v1/sic/{code}':
+    get:
+      summary: 'Look up a SIC code.'
+      operationId: lookUpASICCode
+      description: 'Retrieves a five-digit Companies House condensed SIC 2007 code.'
+      parameters: []
+      responses:
+        200:
+          description: 'SIC record'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        examples:
+                          - '62012'
+                      description:
+                        type: string
+                        examples:
+                          - 'Business and domestic software development'
+                  meta:
+                    type: object
+                    properties:
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                      cached:
+                        type: boolean
+                        examples:
+                          - false
+                      source:
+                        type: string
+                        examples:
+                          - companies_house_sic_2007
+                      source_updated_at:
+                        type: string
+                        examples:
+                          - '2026-09-24T12:00:00+00:00'
+                      coverage:
+                        type: string
+                        examples:
+                          - UK
+                      reference_version:
+                        type: string
+                        examples:
+                          - companies_house_condensed_sic_2007
+                examples:
+                  -
+                    data:
+                      code: '62012'
+                      description: 'Business and domestic software development'
+                    meta:
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+                      cached: false
+                      source: companies_house_sic_2007
+                      source_updated_at: '2026-09-24T12:00:00+00:00'
+                      coverage: UK
+                      reference_version: companies_house_condensed_sic_2007
+        401:
+          description: 'Missing, invalid or revoked API key'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        examples:
+                          - invalid_api_key
+                      message:
+                        type: string
+                        examples:
+                          - 'The API key is invalid.'
+                      status:
+                        type: integer
+                        examples:
+                          - 401
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                examples:
+                  -
+                    error:
+                      code: invalid_api_key
+                      message: 'The API key is invalid.'
+                      status: 401
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+        503:
+          description: 'The SIC snapshot is temporarily unavailable'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        examples:
+                          - sic_reference_unavailable
+                      message:
+                        type: string
+                        examples:
+                          - 'The SIC reference snapshot is temporarily unavailable. Please retry shortly.'
+                      status:
+                        type: integer
+                        examples:
+                          - 503
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                examples:
+                  -
+                    error:
+                      code: sic_reference_unavailable
+                      message: 'The SIC reference snapshot is temporarily unavailable. Please retry shortly.'
+                      status: 503
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+      tags:
+        - 'Companies & SIC'
+    parameters:
+      -
+        in: path
+        name: code
+        description: 'Five-digit Companies House condensed SIC 2007 code. Whitespace is removed.'
+        required: true
+        schema:
+          type: string
+          examples:
+            - '62012'
+  /v1/crime/nearby:
+    get:
+      summary: 'Find crime near a postcode.'
+      operationId: findCrimeNearAPostcode
+      description: 'Returns approximate street-level crime records near a postcode.'
+      parameters:
+        -
+          in: query
+          name: postcode
+          description: 'A UK postcode. It is normalised and resolved to coordinates before the Police.uk request. Must not be greater than 16 characters.'
+          required: true
+          schema:
+            type: string
+            description: 'A UK postcode. It is normalised and resolved to coordinates before the Police.uk request. Must not be greater than 16 characters.'
+            examples:
+              - 'BL2 6XX'
+        -
+          in: query
+          name: month
+          description: 'A non-future month in YYYY-MM format. Omit it to use the latest provider data. Must be a valid date in the format <code>Y-m</code>.'
+          required: false
+          schema:
+            type:
+              - string
+              - 'null'
+            description: 'A non-future month in YYYY-MM format. Omit it to use the latest provider data. Must be a valid date in the format <code>Y-m</code>.'
+            examples:
+              - 2026-07
+      responses:
+        200:
+          description: 'Approximate crime records'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      postcode:
+                        type: string
+                        examples:
+                          - 'BL2 6XX'
+                      crimes:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            category:
+                              type: string
+                              examples:
+                                - anti-social-behaviour
+                            persistent_id:
+                              type:
+                                - string
+                                - 'null'
+                              examples:
+                                - null
+                            month:
+                              type: string
+                              examples:
+                                - 2026-07
+                            location:
+                              type: object
+                              properties:
+                                latitude:
+                                  type: number
+                                  examples:
+                                    - 53.592132
+                                longitude:
+                                  type: number
+                                  examples:
+                                    - -2.411624
+                                street:
+                                  type: object
+                                  properties:
+                                    id:
+                                      type: integer
+                                      examples: [123456]
+                                    name:
+                                      type: string
+                                      examples: ['On or near Example Street']
+                                approximate:
+                                  type: boolean
+                                  examples:
+                                    - true
+                            outcome:
+                              type: object
+                              properties:
+                                category:
+                                  type:
+                                    - string
+                                    - 'null'
+                                  examples:
+                                    - null
+                                month:
+                                  type:
+                                    - string
+                                    - 'null'
+                                  examples:
+                                    - null
+                        examples:
+                          -
+                            -
+                              category: anti-social-behaviour
+                              persistent_id: null
+                              month: 2026-07
+                              location:
+                                latitude: 53.592132
+                                longitude: -2.411624
+                                street:
+                                  id: 123456
+                                  name: 'On or near Example Street'
+                                approximate: true
+                              outcome:
+                                category: null
+                                month: null
+                  meta:
+                    type: object
+                    properties:
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                      cached:
+                        type: boolean
+                        examples:
+                          - false
+                      source:
+                        type: string
+                        examples:
+                          - police_uk
+                      coverage:
+                        type: string
+                        examples:
+                          - 'England, Wales and Northern Ireland; Scotland has British Transport Police data only.'
+                      requested_month:
+                        type: string
+                        examples:
+                          - 2026-07
+                      data_is_approximate:
+                        type: boolean
+                        examples:
+                          - true
+                examples:
+                  -
+                    data:
+                      postcode: 'BL2 6XX'
+                      crimes:
+                        -
+                          category: anti-social-behaviour
+                          persistent_id: null
+                          month: 2026-07
+                          location:
+                            latitude: 53.592132
+                            longitude: -2.411624
+                            street:
+                              id: 123456
+                              name: 'On or near Example Street'
+                            approximate: true
+                          outcome:
+                            category: null
+                            month: null
+                    meta:
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+                      cached: false
+                      source: police_uk
+                      coverage: 'England, Wales and Northern Ireland; Scotland has British Transport Police data only.'
+                      requested_month: 2026-07
+                      data_is_approximate: true
+        401:
+          description: 'Missing, invalid or revoked API key'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        examples:
+                          - invalid_api_key
+                      message:
+                        type: string
+                        examples:
+                          - 'The API key is invalid.'
+                      status:
+                        type: integer
+                        examples:
+                          - 401
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                examples:
+                  -
+                    error:
+                      code: invalid_api_key
+                      message: 'The API key is invalid.'
+                      status: 401
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+        503:
+          description: 'Police.uk is temporarily unavailable'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        examples:
+                          - upstream_unavailable
+                      message:
+                        type: string
+                        examples:
+                          - 'The upstream data provider is temporarily unavailable. Please retry shortly.'
+                      status:
+                        type: integer
+                        examples:
+                          - 503
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                examples:
+                  -
+                    error:
+                      code: upstream_unavailable
+                      message: 'The upstream data provider is temporarily unavailable. Please retry shortly.'
+                      status: 503
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+      tags:
+        - 'Crime data'
+  /v1/crime/summary:
+    get:
+      summary: 'Summarise crime near a postcode.'
+      operationId: summariseCrimeNearAPostcode
+      description: 'Aggregates approximate street-level crime records by category.'
+      parameters:
+        -
+          in: query
+          name: postcode
+          description: 'A UK postcode. It is normalised and resolved to coordinates before the Police.uk request. Must not be greater than 16 characters.'
+          required: true
+          schema:
+            type: string
+            description: 'A UK postcode. It is normalised and resolved to coordinates before the Police.uk request. Must not be greater than 16 characters.'
+            examples:
+              - 'BL2 6XX'
+        -
+          in: query
+          name: month
+          description: 'A non-future month in YYYY-MM format. Omit it to use the latest provider data. Must be a valid date in the format <code>Y-m</code>.'
+          required: false
+          schema:
+            type:
+              - string
+              - 'null'
+            description: 'A non-future month in YYYY-MM format. Omit it to use the latest provider data. Must be a valid date in the format <code>Y-m</code>.'
+            examples:
+              - 2026-07
+      responses:
+        200:
+          description: 'Crime category summary'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      postcode:
+                        type: string
+                        examples:
+                          - 'BL2 6XX'
+                      month:
+                        type: string
+                        examples:
+                          - 2026-07
+                      total:
+                        type: integer
+                        examples:
+                          - 2
+                      by_category:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            category:
+                              type: string
+                              examples:
+                                - anti-social-behaviour
+                            count:
+                              type: integer
+                              examples:
+                                - 1
+                        examples:
+                          -
+                            -
+                              category: anti-social-behaviour
+                              count: 1
+                            -
+                              category: violent-crime
+                              count: 1
+                  meta:
+                    type: object
+                    properties:
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                      cached:
+                        type: boolean
+                        examples:
+                          - false
+                      source:
+                        type: string
+                        examples:
+                          - police_uk
+                      coverage:
+                        type: string
+                        examples:
+                          - 'England, Wales and Northern Ireland; Scotland has British Transport Police data only.'
+                      requested_month:
+                        type: string
+                        examples:
+                          - 2026-07
+                      data_is_approximate:
+                        type: boolean
+                        examples:
+                          - true
+                examples:
+                  -
+                    data:
+                      postcode: 'BL2 6XX'
+                      month: 2026-07
+                      total: 2
+                      by_category:
+                        -
+                          category: anti-social-behaviour
+                          count: 1
+                        -
+                          category: violent-crime
+                          count: 1
+                    meta:
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+                      cached: false
+                      source: police_uk
+                      coverage: 'England, Wales and Northern Ireland; Scotland has British Transport Police data only.'
+                      requested_month: 2026-07
+                      data_is_approximate: true
+        401:
+          description: 'Missing, invalid or revoked API key'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        examples:
+                          - invalid_api_key
+                      message:
+                        type: string
+                        examples:
+                          - 'The API key is invalid.'
+                      status:
+                        type: integer
+                        examples:
+                          - 401
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                examples:
+                  -
+                    error:
+                      code: invalid_api_key
+                      message: 'The API key is invalid.'
+                      status: 401
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+        503:
+          description: 'Police.uk is temporarily unavailable'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        examples:
+                          - upstream_unavailable
+                      message:
+                        type: string
+                        examples:
+                          - 'The upstream data provider is temporarily unavailable. Please retry shortly.'
+                      status:
+                        type: integer
+                        examples:
+                          - 503
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                examples:
+                  -
+                    error:
+                      code: upstream_unavailable
+                      message: 'The upstream data provider is temporarily unavailable. Please retry shortly.'
+                      status: 503
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+      tags:
+        - 'Crime data'
+  /v1/crime/categories:
+    get:
+      summary: 'List crime categories.'
+      operationId: listCrimeCategories
+      description: 'Lists Police.uk crime categories for an optional month.'
+      parameters:
+        -
+          in: query
+          name: month
+          description: 'A non-future month in YYYY-MM format. Omit it to use the latest provider categories. Must be a valid date in the format <code>Y-m</code>.'
+          required: false
+          schema:
+            type:
+              - string
+              - 'null'
+            description: 'A non-future month in YYYY-MM format. Omit it to use the latest provider categories. Must be a valid date in the format <code>Y-m</code>.'
+            examples:
+              - 2026-07
+      responses:
+        200:
+          description: 'Crime categories'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      categories:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            code:
+                              type: string
+                              examples:
+                                - all-crime
+                            name:
+                              type: string
+                              examples:
+                                - 'All crime and anti-social behaviour'
+                        examples:
+                          -
+                            -
+                              code: all-crime
+                              name: 'All crime and anti-social behaviour'
+                  meta:
+                    type: object
+                    properties:
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                      cached:
+                        type: boolean
+                        examples:
+                          - false
+                      source:
+                        type: string
+                        examples:
+                          - police_uk
+                      coverage:
+                        type: string
+                        examples:
+                          - 'England, Wales and Northern Ireland; Scotland has British Transport Police data only.'
+                      requested_month:
+                        type: string
+                        examples:
+                          - 2026-07
+                      data_is_approximate:
+                        type: boolean
+                        examples:
+                          - true
+                examples:
+                  -
+                    data:
+                      categories:
+                        -
+                          code: all-crime
+                          name: 'All crime and anti-social behaviour'
+                    meta:
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+                      cached: false
+                      source: police_uk
+                      coverage: 'England, Wales and Northern Ireland; Scotland has British Transport Police data only.'
+                      requested_month: 2026-07
+                      data_is_approximate: true
+        401:
+          description: 'Missing, invalid or revoked API key'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        examples:
+                          - invalid_api_key
+                      message:
+                        type: string
+                        examples:
+                          - 'The API key is invalid.'
+                      status:
+                        type: integer
+                        examples:
+                          - 401
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                examples:
+                  -
+                    error:
+                      code: invalid_api_key
+                      message: 'The API key is invalid.'
+                      status: 401
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+        503:
+          description: 'Police.uk is temporarily unavailable'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        examples:
+                          - upstream_unavailable
+                      message:
+                        type: string
+                        examples:
+                          - 'The upstream data provider is temporarily unavailable. Please retry shortly.'
+                      status:
+                        type: integer
+                        examples:
+                          - 503
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                examples:
+                  -
+                    error:
+                      code: upstream_unavailable
+                      message: 'The upstream data provider is temporarily unavailable. Please retry shortly.'
+                      status: 503
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+      tags:
+        - 'Crime data'
+  /v1/flood/warnings:
+    get:
+      summary: 'List current flood warnings.'
+      operationId: listCurrentFloodWarnings
+      description: 'Lists current England flood warnings and alerts. This endpoint is not an emergency alert service.'
+      parameters: []
+      responses:
+        200:
+          description: 'Current flood warnings'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      warnings:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              examples:
+                                - 061WAFSF3A
+                            severity:
+                              type: integer
+                              examples:
+                                - 2
+                            severity_level:
+                              type: string
+                              examples:
+                                - 'Flood Warning'
+                            type:
+                              type: string
+                              examples:
+                                - 'Flood Warning'
+                            message:
+                              type: string
+                              examples:
+                                - 'Flooding is possible in low lying areas.'
+                            raised_at:
+                              type: string
+                              examples:
+                                - '2026-09-25T09:00:00+00:00'
+                            area:
+                              type: object
+                              properties:
+                                code:
+                                  type: string
+                                  examples:
+                                    - 061WAFSF3A
+                                county:
+                                  type: string
+                                  examples:
+                                    - Somerset
+                                river_or_sea:
+                                  type: string
+                                  examples:
+                                    - 'River Tone'
+                        examples:
+                          -
+                            -
+                              id: 061WAFSF3A
+                              severity: 2
+                              severity_level: 'Flood Warning'
+                              type: 'Flood Warning'
+                              message: 'Flooding is possible in low lying areas.'
+                              raised_at: '2026-09-25T09:00:00+00:00'
+                              area:
+                                code: 061WAFSF3A
+                                county: Somerset
+                                river_or_sea: 'River Tone'
+                  meta:
+                    type: object
+                    properties:
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                      cached:
+                        type: boolean
+                        examples:
+                          - false
+                      source:
+                        type: string
+                        examples:
+                          - environment_agency_flood_monitoring
+                      retrieved_at:
+                        type: string
+                        examples:
+                          - '2026-09-25T10:20:00+00:00'
+                      source_updated_at:
+                        type: string
+                        examples:
+                          - '2026-09-25T10:15:00+00:00'
+                      coverage:
+                        type: string
+                        examples:
+                          - England
+                      safety_notice:
+                        type: string
+                        examples:
+                          - 'This data is not an emergency alert service. Follow official Environment Agency advice and warnings.'
+                examples:
+                  -
+                    data:
+                      warnings:
+                        -
+                          id: 061WAFSF3A
+                          severity: 2
+                          severity_level: 'Flood Warning'
+                          type: 'Flood Warning'
+                          message: 'Flooding is possible in low lying areas.'
+                          raised_at: '2026-09-25T09:00:00+00:00'
+                          area:
+                            code: 061WAFSF3A
+                            county: Somerset
+                            river_or_sea: 'River Tone'
+                    meta:
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+                      cached: false
+                      source: environment_agency_flood_monitoring
+                      retrieved_at: '2026-09-25T10:20:00+00:00'
+                      source_updated_at: '2026-09-25T10:15:00+00:00'
+                      coverage: England
+                      safety_notice: 'This data is not an emergency alert service. Follow official Environment Agency advice and warnings.'
+        401:
+          description: 'Missing, invalid or revoked API key'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        examples:
+                          - invalid_api_key
+                      message:
+                        type: string
+                        examples:
+                          - 'The API key is invalid.'
+                      status:
+                        type: integer
+                        examples:
+                          - 401
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                examples:
+                  -
+                    error:
+                      code: invalid_api_key
+                      message: 'The API key is invalid.'
+                      status: 401
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+        503:
+          description: 'Environment Agency data is temporarily unavailable'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        examples:
+                          - upstream_unavailable
+                      message:
+                        type: string
+                        examples:
+                          - 'The upstream data provider is temporarily unavailable. Please retry shortly.'
+                      status:
+                        type: integer
+                        examples:
+                          - 503
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                examples:
+                  -
+                    error:
+                      code: upstream_unavailable
+                      message: 'The upstream data provider is temporarily unavailable. Please retry shortly.'
+                      status: 503
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+      tags:
+        - 'Flood monitoring'
+  /v1/flood/nearby:
+    get:
+      summary: 'Find flood warnings near a postcode.'
+      operationId: findFloodWarningsNearAPostcode
+      description: 'Finds current England flood warnings and alerts near a postcode.'
+      parameters:
+        -
+          in: query
+          name: postcode
+          description: 'A UK postcode. It is normalised and resolved to coordinates before querying the Environment Agency. Must not be greater than 16 characters.'
+          required: true
+          schema:
+            type: string
+            description: 'A UK postcode. It is normalised and resolved to coordinates before querying the Environment Agency. Must not be greater than 16 characters.'
+            examples:
+              - 'BL2 6XX'
+      responses:
+        200:
+          description: 'Nearby flood warnings'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      postcode:
+                        type: string
+                        examples:
+                          - 'BL2 6XX'
+                      nearby_distance_kilometres:
+                        type: integer
+                        examples:
+                          - 10
+                      warnings:
+                        type: array
+                        examples:
+                          - []
+                  meta:
+                    type: object
+                    properties:
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                      cached:
+                        type: boolean
+                        examples:
+                          - false
+                      source:
+                        type: string
+                        examples:
+                          - environment_agency_flood_monitoring
+                      retrieved_at:
+                        type: string
+                        examples:
+                          - '2026-09-25T10:20:00+00:00'
+                      source_updated_at:
+                        type: string
+                        examples:
+                          - '2026-09-25T10:15:00+00:00'
+                      coverage:
+                        type: string
+                        examples:
+                          - England
+                      safety_notice:
+                        type: string
+                        examples:
+                          - 'This data is not an emergency alert service. Follow official Environment Agency advice and warnings.'
+                examples:
+                  -
+                    data:
+                      postcode: 'BL2 6XX'
+                      nearby_distance_kilometres: 10
+                      warnings: []
+                    meta:
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+                      cached: false
+                      source: environment_agency_flood_monitoring
+                      retrieved_at: '2026-09-25T10:20:00+00:00'
+                      source_updated_at: '2026-09-25T10:15:00+00:00'
+                      coverage: England
+                      safety_notice: 'This data is not an emergency alert service. Follow official Environment Agency advice and warnings.'
+        401:
+          description: 'Missing, invalid or revoked API key'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        examples:
+                          - invalid_api_key
+                      message:
+                        type: string
+                        examples:
+                          - 'The API key is invalid.'
+                      status:
+                        type: integer
+                        examples:
+                          - 401
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                examples:
+                  -
+                    error:
+                      code: invalid_api_key
+                      message: 'The API key is invalid.'
+                      status: 401
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+        503:
+          description: 'Environment Agency data is temporarily unavailable'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        examples:
+                          - upstream_unavailable
+                      message:
+                        type: string
+                        examples:
+                          - 'The upstream data provider is temporarily unavailable. Please retry shortly.'
+                      status:
+                        type: integer
+                        examples:
+                          - 503
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                examples:
+                  -
+                    error:
+                      code: upstream_unavailable
+                      message: 'The upstream data provider is temporarily unavailable. Please retry shortly.'
+                      status: 503
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+      tags:
+        - 'Flood monitoring'
+  /v1/flood/stations/nearby:
+    get:
+      summary: 'Find flood stations near a postcode.'
+      operationId: findFloodStationsNearAPostcode
+      description: 'Finds Environment Agency monitoring stations near a postcode.'
+      parameters:
+        -
+          in: query
+          name: postcode
+          description: 'A UK postcode. It is normalised and resolved to coordinates before querying the Environment Agency. Must not be greater than 16 characters.'
+          required: true
+          schema:
+            type: string
+            description: 'A UK postcode. It is normalised and resolved to coordinates before querying the Environment Agency. Must not be greater than 16 characters.'
+            examples:
+              - 'BL2 6XX'
+      responses:
+        200:
+          description: 'Nearby flood-monitoring stations'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      postcode:
+                        type: string
+                        examples:
+                          - 'BL2 6XX'
+                      nearby_distance_kilometres:
+                        type: integer
+                        examples:
+                          - 10
+                      stations:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              examples:
+                                - 5380TH
+                            name:
+                              type: string
+                              examples:
+                                - 'Walthamstow, Low Hall'
+                            latitude:
+                              type: number
+                              examples:
+                                - 51.574894
+                            longitude:
+                              type: number
+                              examples:
+                                - -0.043637
+                            river_name:
+                              type: string
+                              examples:
+                                - 'River Lee'
+                            town:
+                              type: string
+                              examples:
+                                - Walthamstow
+                            status:
+                              type: string
+                              examples:
+                                - statusActive
+                            measures:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  parameter:
+                                    type: string
+                                    examples:
+                                      - level
+                                  parameter_name:
+                                    type: string
+                                    examples:
+                                      - 'Water Level'
+                                  unit:
+                                    type: string
+                                    examples:
+                                      - mASD
+                                  period_seconds:
+                                    type: integer
+                                    examples:
+                                      - 900
+                              examples:
+                                -
+                                  -
+                                    parameter: level
+                                    parameter_name: 'Water Level'
+                                    unit: mASD
+                                    period_seconds: 900
+                        examples:
+                          -
+                            -
+                              id: 5380TH
+                              name: 'Walthamstow, Low Hall'
+                              latitude: 51.574894
+                              longitude: -0.043637
+                              river_name: 'River Lee'
+                              town: Walthamstow
+                              status: statusActive
+                              measures:
+                                -
+                                  parameter: level
+                                  parameter_name: 'Water Level'
+                                  unit: mASD
+                                  period_seconds: 900
+                  meta:
+                    type: object
+                    properties:
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                      cached:
+                        type: boolean
+                        examples:
+                          - false
+                      source:
+                        type: string
+                        examples:
+                          - environment_agency_flood_monitoring
+                      retrieved_at:
+                        type: string
+                        examples:
+                          - '2026-09-25T10:20:00+00:00'
+                      source_updated_at:
+                        type:
+                          - string
+                          - 'null'
+                        examples:
+                          - null
+                      coverage:
+                        type: string
+                        examples:
+                          - England
+                      safety_notice:
+                        type: string
+                        examples:
+                          - 'This data is not an emergency alert service. Follow official Environment Agency advice and warnings.'
+                examples:
+                  -
+                    data:
+                      postcode: 'BL2 6XX'
+                      nearby_distance_kilometres: 10
+                      stations:
+                        -
+                          id: 5380TH
+                          name: 'Walthamstow, Low Hall'
+                          latitude: 51.574894
+                          longitude: -0.043637
+                          river_name: 'River Lee'
+                          town: Walthamstow
+                          status: statusActive
+                          measures:
+                            -
+                              parameter: level
+                              parameter_name: 'Water Level'
+                              unit: mASD
+                              period_seconds: 900
+                    meta:
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+                      cached: false
+                      source: environment_agency_flood_monitoring
+                      retrieved_at: '2026-09-25T10:20:00+00:00'
+                      source_updated_at: null
+                      coverage: England
+                      safety_notice: 'This data is not an emergency alert service. Follow official Environment Agency advice and warnings.'
+        401:
+          description: 'Missing, invalid or revoked API key'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        examples:
+                          - invalid_api_key
+                      message:
+                        type: string
+                        examples:
+                          - 'The API key is invalid.'
+                      status:
+                        type: integer
+                        examples:
+                          - 401
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                examples:
+                  -
+                    error:
+                      code: invalid_api_key
+                      message: 'The API key is invalid.'
+                      status: 401
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+        503:
+          description: 'Environment Agency data is temporarily unavailable'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        examples:
+                          - upstream_unavailable
+                      message:
+                        type: string
+                        examples:
+                          - 'The upstream data provider is temporarily unavailable. Please retry shortly.'
+                      status:
+                        type: integer
+                        examples:
+                          - 503
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                examples:
+                  -
+                    error:
+                      code: upstream_unavailable
+                      message: 'The upstream data provider is temporarily unavailable. Please retry shortly.'
+                      status: 503
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+      tags:
+        - 'Flood monitoring'
+  '/v1/flood/stations/{station}/readings':
+    get:
+      summary: 'List flood station readings.'
+      operationId: listFloodStationReadings
+      description: 'Lists a bounded set of recent readings for an Environment Agency station.'
+      parameters: []
+      responses:
+        200:
+          description: 'Recent station readings'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      station_id:
+                        type: string
+                        examples:
+                          - 5380TH
+                      readings:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            measure_id:
+                              type: string
+                              examples:
+                                - 5380TH-level-stage-i-15_min-mASD
+                            recorded_at:
+                              type: string
+                              examples:
+                                - '2026-08-27T00:00:00+00:00'
+                            value:
+                              type: number
+                              examples:
+                                - 0.027
+                        examples:
+                          -
+                            -
+                              measure_id: 5380TH-level-stage-i-15_min-mASD
+                              recorded_at: '2026-08-27T00:00:00+00:00'
+                              value: 0.027
+                  meta:
+                    type: object
+                    properties:
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                      cached:
+                        type: boolean
+                        examples:
+                          - false
+                      source:
+                        type: string
+                        examples:
+                          - environment_agency_flood_monitoring
+                      retrieved_at:
+                        type: string
+                        examples:
+                          - '2026-09-25T10:20:00+00:00'
+                      source_updated_at:
+                        type: string
+                        examples:
+                          - '2026-08-27T00:00:00+00:00'
+                      coverage:
+                        type: string
+                        examples:
+                          - England
+                      safety_notice:
+                        type: string
+                        examples:
+                          - 'This data is not an emergency alert service. Follow official Environment Agency advice and warnings.'
+                examples:
+                  -
+                    data:
+                      station_id: 5380TH
+                      readings:
+                        -
+                          measure_id: 5380TH-level-stage-i-15_min-mASD
+                          recorded_at: '2026-08-27T00:00:00+00:00'
+                          value: 0.027
+                    meta:
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+                      cached: false
+                      source: environment_agency_flood_monitoring
+                      retrieved_at: '2026-09-25T10:20:00+00:00'
+                      source_updated_at: '2026-08-27T00:00:00+00:00'
+                      coverage: England
+                      safety_notice: 'This data is not an emergency alert service. Follow official Environment Agency advice and warnings.'
+        401:
+          description: 'Missing, invalid or revoked API key'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        examples:
+                          - invalid_api_key
+                      message:
+                        type: string
+                        examples:
+                          - 'The API key is invalid.'
+                      status:
+                        type: integer
+                        examples:
+                          - 401
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                examples:
+                  -
+                    error:
+                      code: invalid_api_key
+                      message: 'The API key is invalid.'
+                      status: 401
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+        503:
+          description: 'Environment Agency data is temporarily unavailable'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        examples:
+                          - upstream_unavailable
+                      message:
+                        type: string
+                        examples:
+                          - 'The upstream data provider is temporarily unavailable. Please retry shortly.'
+                      status:
+                        type: integer
+                        examples:
+                          - 503
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                examples:
+                  -
+                    error:
+                      code: upstream_unavailable
+                      message: 'The upstream data provider is temporarily unavailable. Please retry shortly.'
+                      status: 503
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+      tags:
+        - 'Flood monitoring'
+    parameters:
+      -
+        in: path
+        name: station
+        description: 'Environment Agency station identifier. Letters, numbers, hyphens and underscores are accepted.'
+        required: true
+        schema:
+          type: string
+          examples:
+            - 5380TH
+  /v1/vat/calculate:
+    get:
+      summary: 'Calculate VAT.'
+      operationId: calculateVAT
+      description: 'Calculates the VAT to add to a net GBP amount.'
+      parameters:
+        -
+          in: query
+          name: amount
+          description: 'Amount in GBP, with up to two decimal places. Use the net amount for calculate and the gross amount for remove. Must match the regex /^(?:0|[1-9]\d{0,11})(?:\.\d{1,2})?$/.'
+          required: true
+          schema:
+            type: string
+            description: 'Amount in GBP, with up to two decimal places. Use the net amount for calculate and the gross amount for remove. Must match the regex /^(?:0|[1-9]\d{0,11})(?:\.\d{1,2})?$/.'
+            examples:
+              - '100.00'
+        -
+          in: query
+          name: rate
+          description: 'VAT rate as a percentage, from 0 to 100, with up to two decimal places. Must match the regex /^(?:0|[1-9]\d{0,2})(?:\.\d{1,2})?$/. Must be between 0 and 100.'
+          required: true
+          schema:
+            type: number
+            description: 'VAT rate as a percentage, from 0 to 100, with up to two decimal places. Must match the regex /^(?:0|[1-9]\d{0,2})(?:\.\d{1,2})?$/. Must be between 0 and 100.'
+            examples:
+              - 20.0
+      responses:
+        200:
+          description: 'VAT calculation'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      amount:
+                        type: string
+                        examples:
+                          - '100.00'
+                      rate_percent:
+                        type: string
+                        examples:
+                          - '20.00'
+                      vat_amount:
+                        type: string
+                        examples:
+                          - '20.00'
+                      total_amount:
+                        type: string
+                        examples:
+                          - '120.00'
+                      currency:
+                        type: string
+                        examples:
+                          - GBP
+                  meta:
+                    type: object
+                    properties:
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                      cached:
+                        type: boolean
+                        examples:
+                          - false
+                      source:
+                        type: string
+                        examples:
+                          - ukapi
+                      coverage:
+                        type: string
+                        examples:
+                          - UK
+                examples:
+                  -
+                    data:
+                      amount: '100.00'
+                      rate_percent: '20.00'
+                      vat_amount: '20.00'
+                      total_amount: '120.00'
+                      currency: GBP
+                    meta:
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+                      cached: false
+                      source: ukapi
+                      coverage: UK
+        401:
+          description: 'Missing, invalid or revoked API key'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        examples:
+                          - invalid_api_key
+                      message:
+                        type: string
+                        examples:
+                          - 'The API key is invalid.'
+                      status:
+                        type: integer
+                        examples:
+                          - 401
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                examples:
+                  -
+                    error:
+                      code: invalid_api_key
+                      message: 'The API key is invalid.'
+                      status: 401
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+        422:
+          description: 'Invalid amount or rate'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        examples:
+                          - invalid_parameter
+                      message:
+                        type: string
+                        examples:
+                          - 'One or more request parameters are invalid.'
+                      status:
+                        type: integer
+                        examples:
+                          - 422
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                      details:
+                        type: object
+                        properties:
+                          fields:
+                            type: object
+                            properties:
+                              amount:
+                                type: array
+                                items:
+                                  type: string
+                                examples:
+                                  -
+                                    - 'The amount format is invalid.'
+                examples:
+                  -
+                    error:
+                      code: invalid_parameter
+                      message: 'One or more request parameters are invalid.'
+                      status: 422
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+                      details:
+                        fields:
+                          amount:
+                            - 'The amount format is invalid.'
+      tags:
+        - VAT
+  /v1/vat/remove:
+    get:
+      summary: 'Remove VAT.'
+      operationId: removeVAT
+      description: 'Removes VAT from a gross GBP amount.'
+      parameters:
+        -
+          in: query
+          name: amount
+          description: 'Amount in GBP, with up to two decimal places. Use the net amount for calculate and the gross amount for remove. Must match the regex /^(?:0|[1-9]\d{0,11})(?:\.\d{1,2})?$/.'
+          required: true
+          schema:
+            type: string
+            description: 'Amount in GBP, with up to two decimal places. Use the net amount for calculate and the gross amount for remove. Must match the regex /^(?:0|[1-9]\d{0,11})(?:\.\d{1,2})?$/.'
+            examples:
+              - '100.00'
+        -
+          in: query
+          name: rate
+          description: 'VAT rate as a percentage, from 0 to 100, with up to two decimal places. Must match the regex /^(?:0|[1-9]\d{0,2})(?:\.\d{1,2})?$/. Must be between 0 and 100.'
+          required: true
+          schema:
+            type: number
+            description: 'VAT rate as a percentage, from 0 to 100, with up to two decimal places. Must match the regex /^(?:0|[1-9]\d{0,2})(?:\.\d{1,2})?$/. Must be between 0 and 100.'
+            examples:
+              - 20.0
+      responses:
+        200:
+          description: 'VAT removal calculation'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      gross_amount:
+                        type: string
+                        examples:
+                          - '120.00'
+                      rate_percent:
+                        type: string
+                        examples:
+                          - '20.00'
+                      vat_amount:
+                        type: string
+                        examples:
+                          - '20.00'
+                      net_amount:
+                        type: string
+                        examples:
+                          - '100.00'
+                      currency:
+                        type: string
+                        examples:
+                          - GBP
+                  meta:
+                    type: object
+                    properties:
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                      cached:
+                        type: boolean
+                        examples:
+                          - false
+                      source:
+                        type: string
+                        examples:
+                          - ukapi
+                      coverage:
+                        type: string
+                        examples:
+                          - UK
+                examples:
+                  -
+                    data:
+                      gross_amount: '120.00'
+                      rate_percent: '20.00'
+                      vat_amount: '20.00'
+                      net_amount: '100.00'
+                      currency: GBP
+                    meta:
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+                      cached: false
+                      source: ukapi
+                      coverage: UK
+        401:
+          description: 'Missing, invalid or revoked API key'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        examples:
+                          - invalid_api_key
+                      message:
+                        type: string
+                        examples:
+                          - 'The API key is invalid.'
+                      status:
+                        type: integer
+                        examples:
+                          - 401
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                examples:
+                  -
+                    error:
+                      code: invalid_api_key
+                      message: 'The API key is invalid.'
+                      status: 401
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+        422:
+          description: 'Invalid amount or rate'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        examples:
+                          - invalid_parameter
+                      message:
+                        type: string
+                        examples:
+                          - 'One or more request parameters are invalid.'
+                      status:
+                        type: integer
+                        examples:
+                          - 422
+                      request_id:
+                        type: string
+                        examples:
+                          - req_01j8d5s1wdm85crh9b739hw4gd
+                      details:
+                        type: object
+                        properties:
+                          fields:
+                            type: object
+                            properties:
+                              amount:
+                                type: array
+                                items:
+                                  type: string
+                                examples:
+                                  -
+                                    - 'The amount format is invalid.'
+                examples:
+                  -
+                    error:
+                      code: invalid_parameter
+                      message: 'One or more request parameters are invalid.'
+                      status: 422
+                      request_id: req_01j8d5s1wdm85crh9b739hw4gd
+                      details:
+                        fields:
+                          amount:
+                            - 'The amount format is invalid.'
+      tags:
+        - VAT

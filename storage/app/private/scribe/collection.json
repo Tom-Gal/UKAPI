@@ -1,0 +1,1122 @@
+{
+    "variable": [
+        {
+            "id": "baseUrl",
+            "key": "baseUrl",
+            "type": "string",
+            "name": "string",
+            "value": "http:\/\/localhost:8000"
+        }
+    ],
+    "info": {
+        "name": "UKAPI.io API reference",
+        "_postman_id": "069d1854-8f7b-45b7-bb36-3fb35a64babd",
+        "description": "A focused, interactive reference for every live UKAPI.io v1 endpoint.",
+        "schema": "https:\/\/schema.getpostman.com\/json\/collection\/v2.1.0\/collection.json"
+    },
+    "item": [
+        {
+            "name": "Postcodes & location",
+            "description": "\nCanonical UK postcode, nearby-postcode and coordinate lookup data from Postcodes.io.",
+            "item": [
+                {
+                    "name": "Look up a postcode.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "v1\/postcodes\/:postcode",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/v1\/postcodes\/:postcode",
+                            "variable": [
+                                {
+                                    "id": "postcode",
+                                    "key": "postcode",
+                                    "value": "BL2 6XX",
+                                    "description": "UK postcode to look up. Spacing and case are normalised."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Returns a normalised UK postcode and selected geographic references."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\":{\"postcode\":\"BL2 6XX\",\"country\":\"England\",\"region\":\"North West\",\"latitude\":53.5922,\"longitude\":-2.4117,\"local_authority\":{\"name\":\"Bolton\",\"code\":\"E08000001\"}},\"meta\":{\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\",\"cached\":false,\"source\":\"postcodes_io\",\"coverage\":\"UK\"}}",
+                            "name": "Postcode found"
+                        },
+                        {
+                            "header": [],
+                            "code": 401,
+                            "body": "{\"error\":{\"code\":\"invalid_api_key\",\"message\":\"The API key is invalid.\",\"status\":401,\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\"}}",
+                            "name": "Missing, invalid or revoked API key"
+                        },
+                        {
+                            "header": [],
+                            "code": 429,
+                            "body": "{\"error\":{\"code\":\"rate_limit_exceeded\",\"message\":\"Too many requests. Please retry shortly.\",\"status\":429,\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\"}}",
+                            "name": "Burst limit or monthly quota reached"
+                        }
+                    ]
+                },
+                {
+                    "name": "Validate a postcode.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "v1\/postcodes\/:postcode\/validate",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/v1\/postcodes\/:postcode\/validate",
+                            "variable": [
+                                {
+                                    "id": "postcode",
+                                    "key": "postcode",
+                                    "value": "BL2 6XX",
+                                    "description": "UK postcode to validate. Spacing and case are normalised."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Checks whether a normalised UK postcode has a provider record."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\":{\"postcode\":\"BL2 6XX\",\"valid\":true},\"meta\":{\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\",\"cached\":true,\"source\":\"postcodes_io\",\"coverage\":\"UK\"}}",
+                            "name": "Postcode validation result"
+                        },
+                        {
+                            "header": [],
+                            "code": 401,
+                            "body": "{\"error\":{\"code\":\"invalid_api_key\",\"message\":\"The API key is invalid.\",\"status\":401,\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\"}}",
+                            "name": "Missing, invalid or revoked API key"
+                        },
+                        {
+                            "header": [],
+                            "code": 429,
+                            "body": "{\"error\":{\"code\":\"rate_limit_exceeded\",\"message\":\"Too many requests. Please retry shortly.\",\"status\":429,\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\"}}",
+                            "name": "Burst limit or monthly quota reached"
+                        }
+                    ]
+                },
+                {
+                    "name": "Find nearby postcodes.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "v1\/postcodes\/:postcode\/nearby",
+                            "query": [
+                                {
+                                    "key": "limit",
+                                    "value": "5",
+                                    "description": "Number of results to return, from 1 to 100. Defaults to 10. Must be between 1 and 100.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "radius",
+                                    "value": "500",
+                                    "description": "Search radius in metres, from 1 to 2,000. Defaults to 100. Must be between 1 and 2000.",
+                                    "disabled": false
+                                }
+                            ],
+                            "raw": "{{baseUrl}}\/v1\/postcodes\/:postcode\/nearby?limit=5&radius=500",
+                            "variable": [
+                                {
+                                    "id": "postcode",
+                                    "key": "postcode",
+                                    "value": "BL2 6XX",
+                                    "description": "UK postcode used as the search origin."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Results are ordered by distance in metres."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\":{\"postcode\":\"BL2 6XX\",\"results\":[{\"postcode\":\"BL2 6XY\",\"distance_metres\":152.4,\"latitude\":53.5931,\"longitude\":-2.4108}]},\"meta\":{\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\",\"cached\":false,\"source\":\"postcodes_io\",\"coverage\":\"UK\"}}",
+                            "name": "Nearby postcodes"
+                        },
+                        {
+                            "header": [],
+                            "code": 401,
+                            "body": "{\"error\":{\"code\":\"invalid_api_key\",\"message\":\"The API key is invalid.\",\"status\":401,\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\"}}",
+                            "name": "Missing, invalid or revoked API key"
+                        },
+                        {
+                            "header": [],
+                            "code": 429,
+                            "body": "{\"error\":{\"code\":\"rate_limit_exceeded\",\"message\":\"Too many requests. Please retry shortly.\",\"status\":429,\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\"}}",
+                            "name": "Burst limit or monthly quota reached"
+                        }
+                    ]
+                },
+                {
+                    "name": "Reverse geocode coordinates.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "v1\/coordinates\/:latitude\/:longitude\/postcode",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/v1\/coordinates\/:latitude\/:longitude\/postcode",
+                            "variable": [
+                                {
+                                    "id": "latitude",
+                                    "key": "latitude",
+                                    "value": 53.5922,
+                                    "description": "WGS84 latitude from -90 to 90."
+                                },
+                                {
+                                    "id": "longitude",
+                                    "key": "longitude",
+                                    "value": -2.4117,
+                                    "description": "WGS84 longitude from -180 to 180."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Returns the nearest UK postcode for WGS84 coordinates."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\":{\"postcode\":\"BL2 6XX\",\"country\":\"England\",\"latitude\":53.5922,\"longitude\":-2.4117},\"meta\":{\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\",\"cached\":false,\"source\":\"postcodes_io\",\"coverage\":\"UK\"}}",
+                            "name": "Nearest postcode"
+                        },
+                        {
+                            "header": [],
+                            "code": 401,
+                            "body": "{\"error\":{\"code\":\"invalid_api_key\",\"message\":\"The API key is invalid.\",\"status\":401,\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\"}}",
+                            "name": "Missing, invalid or revoked API key"
+                        },
+                        {
+                            "header": [],
+                            "code": 429,
+                            "body": "{\"error\":{\"code\":\"rate_limit_exceeded\",\"message\":\"Too many requests. Please retry shortly.\",\"status\":429,\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\"}}",
+                            "name": "Burst limit or monthly quota reached"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Companies & SIC",
+            "description": "\nSimplified Companies House profiles, officers and filing metadata with predictable pagination.",
+            "item": [
+                {
+                    "name": "Search companies.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "v1\/companies\/search",
+                            "query": [
+                                {
+                                    "key": "q",
+                                    "value": "example technology",
+                                    "description": "Company name search text, between 2 and 200 characters. Must be at least 2 characters. Must not be greater than 200 characters.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "description": "One-based result page. Defaults to 1. Must be at least 1.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "per_page",
+                                    "value": "25",
+                                    "description": "Results to return per page, from 1 to 100. Defaults to 25. Must be between 1 and 100.",
+                                    "disabled": false
+                                }
+                            ],
+                            "raw": "{{baseUrl}}\/v1\/companies\/search?q=example%20technology&page=1&per_page=25"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Searches Companies House company records by name."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\":[{\"company_number\":\"SC012345\",\"name\":\"Example Technology Ltd\",\"status\":\"active\",\"type\":\"ltd\"}],\"meta\":{\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\",\"cached\":false,\"stale\":false,\"source\":\"companies_house\",\"coverage\":\"UK\",\"pagination\":{\"page\":1,\"per_page\":25,\"total\":42}}}",
+                            "name": "Paginated company search results"
+                        },
+                        {
+                            "header": [],
+                            "code": 401,
+                            "body": "{\"error\":{\"code\":\"invalid_api_key\",\"message\":\"The API key is invalid.\",\"status\":401,\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\"}}",
+                            "name": "Missing, invalid or revoked API key"
+                        },
+                        {
+                            "header": [],
+                            "code": 503,
+                            "body": "{\"error\":{\"code\":\"upstream_unavailable\",\"message\":\"The upstream data provider is temporarily unavailable. Please retry shortly.\",\"status\":503,\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\"}}",
+                            "name": "Companies House is temporarily unavailable"
+                        }
+                    ]
+                },
+                {
+                    "name": "Look up a company.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "v1\/companies\/:companyNumber",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/v1\/companies\/:companyNumber",
+                            "variable": [
+                                {
+                                    "id": "companyNumber",
+                                    "key": "companyNumber",
+                                    "value": "SC012345",
+                                    "description": "Companies House company number. Whitespace is removed and letters are uppercased."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Returns a simplified Companies House company profile."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\":{\"company_number\":\"SC012345\",\"name\":\"Example Technology Ltd\",\"status\":\"active\",\"type\":\"ltd\",\"jurisdiction\":\"scotland\",\"incorporated_on\":\"2019-04-12\",\"sic_codes\":[\"62012\",\"63110\"]},\"meta\":{\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\",\"cached\":false,\"stale\":false,\"source\":\"companies_house\",\"coverage\":\"UK\"}}",
+                            "name": "Company profile"
+                        },
+                        {
+                            "header": [],
+                            "code": 401,
+                            "body": "{\"error\":{\"code\":\"invalid_api_key\",\"message\":\"The API key is invalid.\",\"status\":401,\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\"}}",
+                            "name": "Missing, invalid or revoked API key"
+                        },
+                        {
+                            "header": [],
+                            "code": 503,
+                            "body": "{\"error\":{\"code\":\"upstream_unavailable\",\"message\":\"The upstream data provider is temporarily unavailable. Please retry shortly.\",\"status\":503,\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\"}}",
+                            "name": "Companies House is temporarily unavailable"
+                        }
+                    ]
+                },
+                {
+                    "name": "List company officers.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "v1\/companies\/:companyNumber\/officers",
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "description": "One-based result page. Defaults to 1. Must be at least 1.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "per_page",
+                                    "value": "25",
+                                    "description": "Results to return per page, from 1 to 100. Defaults to 25. Must be between 1 and 100.",
+                                    "disabled": false
+                                }
+                            ],
+                            "raw": "{{baseUrl}}\/v1\/companies\/:companyNumber\/officers?page=1&per_page=25",
+                            "variable": [
+                                {
+                                    "id": "companyNumber",
+                                    "key": "companyNumber",
+                                    "value": "SC012345",
+                                    "description": "Companies House company number whose officers are requested."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Returns a company's officers without date-of-birth data."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\":[{\"name\":\"Alex Example\",\"role\":\"director\",\"appointed_on\":\"2020-01-15\",\"nationality\":\"British\"}],\"meta\":{\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\",\"cached\":false,\"stale\":false,\"source\":\"companies_house\",\"coverage\":\"UK\",\"pagination\":{\"page\":1,\"per_page\":25,\"total\":2}}}",
+                            "name": "Paginated company officers"
+                        },
+                        {
+                            "header": [],
+                            "code": 401,
+                            "body": "{\"error\":{\"code\":\"invalid_api_key\",\"message\":\"The API key is invalid.\",\"status\":401,\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\"}}",
+                            "name": "Missing, invalid or revoked API key"
+                        },
+                        {
+                            "header": [],
+                            "code": 503,
+                            "body": "{\"error\":{\"code\":\"upstream_unavailable\",\"message\":\"The upstream data provider is temporarily unavailable. Please retry shortly.\",\"status\":503,\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\"}}",
+                            "name": "Companies House is temporarily unavailable"
+                        }
+                    ]
+                },
+                {
+                    "name": "List company filings.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "v1\/companies\/:companyNumber\/filings",
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "description": "One-based result page. Defaults to 1. Must be at least 1.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "per_page",
+                                    "value": "25",
+                                    "description": "Results to return per page, from 1 to 100. Defaults to 25. Must be between 1 and 100.",
+                                    "disabled": false
+                                }
+                            ],
+                            "raw": "{{baseUrl}}\/v1\/companies\/:companyNumber\/filings?page=1&per_page=25",
+                            "variable": [
+                                {
+                                    "id": "companyNumber",
+                                    "key": "companyNumber",
+                                    "value": "SC012345",
+                                    "description": "Companies House company number whose filing history is requested."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Returns filing metadata; documents, links and contents are intentionally not proxied."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\":[{\"transaction_id\":\"MzAwMDAwMDAwMGFkaXF6a2N4\",\"category\":\"accounts\",\"type\":\"AA\",\"filed_on\":\"2025-03-31\",\"description\":\"accounts-with-accounts-type-full\",\"pages\":12}],\"meta\":{\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\",\"cached\":false,\"stale\":false,\"source\":\"companies_house\",\"coverage\":\"UK\",\"pagination\":{\"page\":1,\"per_page\":25,\"total\":42}}}",
+                            "name": "Paginated company filing metadata"
+                        },
+                        {
+                            "header": [],
+                            "code": 401,
+                            "body": "{\"error\":{\"code\":\"invalid_api_key\",\"message\":\"The API key is invalid.\",\"status\":401,\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\"}}",
+                            "name": "Missing, invalid or revoked API key"
+                        },
+                        {
+                            "header": [],
+                            "code": 503,
+                            "body": "{\"error\":{\"code\":\"upstream_unavailable\",\"message\":\"The upstream data provider is temporarily unavailable. Please retry shortly.\",\"status\":503,\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\"}}",
+                            "name": "Companies House is temporarily unavailable"
+                        }
+                    ]
+                },
+                {
+                    "name": "Search SIC codes.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "v1\/sic\/search",
+                            "query": [
+                                {
+                                    "key": "q",
+                                    "value": "software",
+                                    "description": "SIC code or description search text, between 2 and 200 characters. Must be at least 2 characters. Must not be greater than 200 characters.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "description": "One-based result page. Defaults to 1. Must be at least 1.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "per_page",
+                                    "value": "25",
+                                    "description": "Results to return per page, from 1 to 100. Defaults to 25. Must be between 1 and 100.",
+                                    "disabled": false
+                                }
+                            ],
+                            "raw": "{{baseUrl}}\/v1\/sic\/search?q=software&page=1&per_page=25"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Searches the SIC reference by code or description."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\":[{\"code\":\"62012\",\"description\":\"Business and domestic software development\"}],\"meta\":{\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\",\"cached\":false,\"source\":\"companies_house_sic_2007\",\"source_updated_at\":\"2026-09-24T12:00:00+00:00\",\"coverage\":\"UK\",\"reference_version\":\"companies_house_condensed_sic_2007\",\"pagination\":{\"page\":1,\"per_page\":25,\"total\":18}}}",
+                            "name": "Paginated SIC results"
+                        },
+                        {
+                            "header": [],
+                            "code": 401,
+                            "body": "{\"error\":{\"code\":\"invalid_api_key\",\"message\":\"The API key is invalid.\",\"status\":401,\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\"}}",
+                            "name": "Missing, invalid or revoked API key"
+                        },
+                        {
+                            "header": [],
+                            "code": 503,
+                            "body": "{\"error\":{\"code\":\"sic_reference_unavailable\",\"message\":\"The SIC reference snapshot is temporarily unavailable. Please retry shortly.\",\"status\":503,\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\"}}",
+                            "name": "The SIC snapshot is temporarily unavailable"
+                        }
+                    ]
+                },
+                {
+                    "name": "Look up a SIC code.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "v1\/sic\/:code",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/v1\/sic\/:code",
+                            "variable": [
+                                {
+                                    "id": "code",
+                                    "key": "code",
+                                    "value": "62012",
+                                    "description": "Five-digit Companies House condensed SIC 2007 code. Whitespace is removed."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Retrieves a five-digit Companies House condensed SIC 2007 code."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\":{\"code\":\"62012\",\"description\":\"Business and domestic software development\"},\"meta\":{\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\",\"cached\":false,\"source\":\"companies_house_sic_2007\",\"source_updated_at\":\"2026-09-24T12:00:00+00:00\",\"coverage\":\"UK\",\"reference_version\":\"companies_house_condensed_sic_2007\"}}",
+                            "name": "SIC record"
+                        },
+                        {
+                            "header": [],
+                            "code": 401,
+                            "body": "{\"error\":{\"code\":\"invalid_api_key\",\"message\":\"The API key is invalid.\",\"status\":401,\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\"}}",
+                            "name": "Missing, invalid or revoked API key"
+                        },
+                        {
+                            "header": [],
+                            "code": 503,
+                            "body": "{\"error\":{\"code\":\"sic_reference_unavailable\",\"message\":\"The SIC reference snapshot is temporarily unavailable. Please retry shortly.\",\"status\":503,\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\"}}",
+                            "name": "The SIC snapshot is temporarily unavailable"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Crime data",
+            "description": "\nApproximate, anonymised street-level crime data from Police.uk. Coverage is England, Wales and Northern Ireland; Scotland includes British Transport Police data only.",
+            "item": [
+                {
+                    "name": "Find crime near a postcode.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "v1\/crime\/nearby",
+                            "query": [
+                                {
+                                    "key": "postcode",
+                                    "value": "BL2 6XX",
+                                    "description": "A UK postcode. It is normalised and resolved to coordinates before the Police.uk request. Must not be greater than 16 characters.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "month",
+                                    "value": "2026-07",
+                                    "description": "A non-future month in YYYY-MM format. Omit it to use the latest provider data. Must be a valid date in the format Y-m.",
+                                    "disabled": false
+                                }
+                            ],
+                            "raw": "{{baseUrl}}\/v1\/crime\/nearby?postcode=BL2%206XX&month=2026-07"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Returns approximate street-level crime records near a postcode."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\":{\"postcode\":\"BL2 6XX\",\"crimes\":[{\"category\":\"anti-social-behaviour\",\"persistent_id\":null,\"month\":\"2026-07\",\"location\":{\"latitude\":53.592132,\"longitude\":-2.411624,\"street\":{\"id\":123456,\"name\":\"On or near Example Street\"},\"approximate\":true},\"outcome\":{\"category\":null,\"month\":null}}]},\"meta\":{\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\",\"cached\":false,\"source\":\"police_uk\",\"coverage\":\"England, Wales and Northern Ireland; Scotland has British Transport Police data only.\",\"requested_month\":\"2026-07\",\"data_is_approximate\":true}}",
+                            "name": "Approximate crime records"
+                        },
+                        {
+                            "header": [],
+                            "code": 401,
+                            "body": "{\"error\":{\"code\":\"invalid_api_key\",\"message\":\"The API key is invalid.\",\"status\":401,\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\"}}",
+                            "name": "Missing, invalid or revoked API key"
+                        },
+                        {
+                            "header": [],
+                            "code": 503,
+                            "body": "{\"error\":{\"code\":\"upstream_unavailable\",\"message\":\"The upstream data provider is temporarily unavailable. Please retry shortly.\",\"status\":503,\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\"}}",
+                            "name": "Police.uk is temporarily unavailable"
+                        }
+                    ]
+                },
+                {
+                    "name": "Summarise crime near a postcode.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "v1\/crime\/summary",
+                            "query": [
+                                {
+                                    "key": "postcode",
+                                    "value": "BL2 6XX",
+                                    "description": "A UK postcode. It is normalised and resolved to coordinates before the Police.uk request. Must not be greater than 16 characters.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "month",
+                                    "value": "2026-07",
+                                    "description": "A non-future month in YYYY-MM format. Omit it to use the latest provider data. Must be a valid date in the format Y-m.",
+                                    "disabled": false
+                                }
+                            ],
+                            "raw": "{{baseUrl}}\/v1\/crime\/summary?postcode=BL2%206XX&month=2026-07"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Aggregates approximate street-level crime records by category."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\":{\"postcode\":\"BL2 6XX\",\"month\":\"2026-07\",\"total\":2,\"by_category\":[{\"category\":\"anti-social-behaviour\",\"count\":1},{\"category\":\"violent-crime\",\"count\":1}]},\"meta\":{\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\",\"cached\":false,\"source\":\"police_uk\",\"coverage\":\"England, Wales and Northern Ireland; Scotland has British Transport Police data only.\",\"requested_month\":\"2026-07\",\"data_is_approximate\":true}}",
+                            "name": "Crime category summary"
+                        },
+                        {
+                            "header": [],
+                            "code": 401,
+                            "body": "{\"error\":{\"code\":\"invalid_api_key\",\"message\":\"The API key is invalid.\",\"status\":401,\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\"}}",
+                            "name": "Missing, invalid or revoked API key"
+                        },
+                        {
+                            "header": [],
+                            "code": 503,
+                            "body": "{\"error\":{\"code\":\"upstream_unavailable\",\"message\":\"The upstream data provider is temporarily unavailable. Please retry shortly.\",\"status\":503,\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\"}}",
+                            "name": "Police.uk is temporarily unavailable"
+                        }
+                    ]
+                },
+                {
+                    "name": "List crime categories.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "v1\/crime\/categories",
+                            "query": [
+                                {
+                                    "key": "month",
+                                    "value": "2026-07",
+                                    "description": "A non-future month in YYYY-MM format. Omit it to use the latest provider categories. Must be a valid date in the format Y-m.",
+                                    "disabled": false
+                                }
+                            ],
+                            "raw": "{{baseUrl}}\/v1\/crime\/categories?month=2026-07"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Lists Police.uk crime categories for an optional month."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\":{\"categories\":[{\"code\":\"all-crime\",\"name\":\"All crime and anti-social behaviour\"}]},\"meta\":{\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\",\"cached\":false,\"source\":\"police_uk\",\"coverage\":\"England, Wales and Northern Ireland; Scotland has British Transport Police data only.\",\"requested_month\":\"2026-07\",\"data_is_approximate\":true}}",
+                            "name": "Crime categories"
+                        },
+                        {
+                            "header": [],
+                            "code": 401,
+                            "body": "{\"error\":{\"code\":\"invalid_api_key\",\"message\":\"The API key is invalid.\",\"status\":401,\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\"}}",
+                            "name": "Missing, invalid or revoked API key"
+                        },
+                        {
+                            "header": [],
+                            "code": 503,
+                            "body": "{\"error\":{\"code\":\"upstream_unavailable\",\"message\":\"The upstream data provider is temporarily unavailable. Please retry shortly.\",\"status\":503,\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\"}}",
+                            "name": "Police.uk is temporarily unavailable"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Flood monitoring",
+            "description": "\nNear-real-time England flood warnings, stations and readings from the Environment Agency. This data is not an emergency alert service.",
+            "item": [
+                {
+                    "name": "List current flood warnings.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "v1\/flood\/warnings",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/v1\/flood\/warnings"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Lists current England flood warnings and alerts. This endpoint is not an emergency alert service."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\":{\"warnings\":[{\"id\":\"061WAFSF3A\",\"severity\":2,\"severity_level\":\"Flood Warning\",\"type\":\"Flood Warning\",\"message\":\"Flooding is possible in low lying areas.\",\"raised_at\":\"2026-09-25T09:00:00+00:00\",\"area\":{\"code\":\"061WAFSF3A\",\"county\":\"Somerset\",\"river_or_sea\":\"River Tone\"}}]},\"meta\":{\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\",\"cached\":false,\"source\":\"environment_agency_flood_monitoring\",\"retrieved_at\":\"2026-09-25T10:20:00+00:00\",\"source_updated_at\":\"2026-09-25T10:15:00+00:00\",\"coverage\":\"England\",\"safety_notice\":\"This data is not an emergency alert service. Follow official Environment Agency advice and warnings.\"}}",
+                            "name": "Current flood warnings"
+                        },
+                        {
+                            "header": [],
+                            "code": 401,
+                            "body": "{\"error\":{\"code\":\"invalid_api_key\",\"message\":\"The API key is invalid.\",\"status\":401,\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\"}}",
+                            "name": "Missing, invalid or revoked API key"
+                        },
+                        {
+                            "header": [],
+                            "code": 503,
+                            "body": "{\"error\":{\"code\":\"upstream_unavailable\",\"message\":\"The upstream data provider is temporarily unavailable. Please retry shortly.\",\"status\":503,\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\"}}",
+                            "name": "Environment Agency data is temporarily unavailable"
+                        }
+                    ]
+                },
+                {
+                    "name": "Find flood warnings near a postcode.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "v1\/flood\/nearby",
+                            "query": [
+                                {
+                                    "key": "postcode",
+                                    "value": "BL2 6XX",
+                                    "description": "A UK postcode. It is normalised and resolved to coordinates before querying the Environment Agency. Must not be greater than 16 characters.",
+                                    "disabled": false
+                                }
+                            ],
+                            "raw": "{{baseUrl}}\/v1\/flood\/nearby?postcode=BL2%206XX"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Finds current England flood warnings and alerts near a postcode."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\":{\"postcode\":\"BL2 6XX\",\"nearby_distance_kilometres\":10,\"warnings\":[]},\"meta\":{\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\",\"cached\":false,\"source\":\"environment_agency_flood_monitoring\",\"retrieved_at\":\"2026-09-25T10:20:00+00:00\",\"source_updated_at\":\"2026-09-25T10:15:00+00:00\",\"coverage\":\"England\",\"safety_notice\":\"This data is not an emergency alert service. Follow official Environment Agency advice and warnings.\"}}",
+                            "name": "Nearby flood warnings"
+                        },
+                        {
+                            "header": [],
+                            "code": 401,
+                            "body": "{\"error\":{\"code\":\"invalid_api_key\",\"message\":\"The API key is invalid.\",\"status\":401,\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\"}}",
+                            "name": "Missing, invalid or revoked API key"
+                        },
+                        {
+                            "header": [],
+                            "code": 503,
+                            "body": "{\"error\":{\"code\":\"upstream_unavailable\",\"message\":\"The upstream data provider is temporarily unavailable. Please retry shortly.\",\"status\":503,\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\"}}",
+                            "name": "Environment Agency data is temporarily unavailable"
+                        }
+                    ]
+                },
+                {
+                    "name": "Find flood stations near a postcode.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "v1\/flood\/stations\/nearby",
+                            "query": [
+                                {
+                                    "key": "postcode",
+                                    "value": "BL2 6XX",
+                                    "description": "A UK postcode. It is normalised and resolved to coordinates before querying the Environment Agency. Must not be greater than 16 characters.",
+                                    "disabled": false
+                                }
+                            ],
+                            "raw": "{{baseUrl}}\/v1\/flood\/stations\/nearby?postcode=BL2%206XX"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Finds Environment Agency monitoring stations near a postcode."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\":{\"postcode\":\"BL2 6XX\",\"nearby_distance_kilometres\":10,\"stations\":[{\"id\":\"5380TH\",\"name\":\"Walthamstow, Low Hall\",\"latitude\":51.574894,\"longitude\":-0.043637,\"river_name\":\"River Lee\",\"town\":\"Walthamstow\",\"status\":\"statusActive\",\"measures\":[{\"parameter\":\"level\",\"parameter_name\":\"Water Level\",\"unit\":\"mASD\",\"period_seconds\":900}]}]},\"meta\":{\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\",\"cached\":false,\"source\":\"environment_agency_flood_monitoring\",\"retrieved_at\":\"2026-09-25T10:20:00+00:00\",\"source_updated_at\":null,\"coverage\":\"England\",\"safety_notice\":\"This data is not an emergency alert service. Follow official Environment Agency advice and warnings.\"}}",
+                            "name": "Nearby flood-monitoring stations"
+                        },
+                        {
+                            "header": [],
+                            "code": 401,
+                            "body": "{\"error\":{\"code\":\"invalid_api_key\",\"message\":\"The API key is invalid.\",\"status\":401,\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\"}}",
+                            "name": "Missing, invalid or revoked API key"
+                        },
+                        {
+                            "header": [],
+                            "code": 503,
+                            "body": "{\"error\":{\"code\":\"upstream_unavailable\",\"message\":\"The upstream data provider is temporarily unavailable. Please retry shortly.\",\"status\":503,\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\"}}",
+                            "name": "Environment Agency data is temporarily unavailable"
+                        }
+                    ]
+                },
+                {
+                    "name": "List flood station readings.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "v1\/flood\/stations\/:station\/readings",
+                            "query": [],
+                            "raw": "{{baseUrl}}\/v1\/flood\/stations\/:station\/readings",
+                            "variable": [
+                                {
+                                    "id": "station",
+                                    "key": "station",
+                                    "value": "5380TH",
+                                    "description": "Environment Agency station identifier. Letters, numbers, hyphens and underscores are accepted."
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Lists a bounded set of recent readings for an Environment Agency station."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\":{\"station_id\":\"5380TH\",\"readings\":[{\"measure_id\":\"5380TH-level-stage-i-15_min-mASD\",\"recorded_at\":\"2026-08-27T00:00:00+00:00\",\"value\":0.027}]},\"meta\":{\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\",\"cached\":false,\"source\":\"environment_agency_flood_monitoring\",\"retrieved_at\":\"2026-09-25T10:20:00+00:00\",\"source_updated_at\":\"2026-08-27T00:00:00+00:00\",\"coverage\":\"England\",\"safety_notice\":\"This data is not an emergency alert service. Follow official Environment Agency advice and warnings.\"}}",
+                            "name": "Recent station readings"
+                        },
+                        {
+                            "header": [],
+                            "code": 401,
+                            "body": "{\"error\":{\"code\":\"invalid_api_key\",\"message\":\"The API key is invalid.\",\"status\":401,\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\"}}",
+                            "name": "Missing, invalid or revoked API key"
+                        },
+                        {
+                            "header": [],
+                            "code": 503,
+                            "body": "{\"error\":{\"code\":\"upstream_unavailable\",\"message\":\"The upstream data provider is temporarily unavailable. Please retry shortly.\",\"status\":503,\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\"}}",
+                            "name": "Environment Agency data is temporarily unavailable"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "VAT",
+            "description": "\nDeterministic VAT calculations for GBP amounts. Calculations are provided for convenience and are not tax advice.",
+            "item": [
+                {
+                    "name": "Calculate VAT.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "v1\/vat\/calculate",
+                            "query": [
+                                {
+                                    "key": "amount",
+                                    "value": "100.00",
+                                    "description": "Amount in GBP, with up to two decimal places. Use the net amount for calculate and the gross amount for remove. Must match the regex \/^(?:0|[1-9]\\d{0,11})(?:\\.\\d{1,2})?$\/.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "rate",
+                                    "value": "20",
+                                    "description": "VAT rate as a percentage, from 0 to 100, with up to two decimal places. Must match the regex \/^(?:0|[1-9]\\d{0,2})(?:\\.\\d{1,2})?$\/. Must be between 0 and 100.",
+                                    "disabled": false
+                                }
+                            ],
+                            "raw": "{{baseUrl}}\/v1\/vat\/calculate?amount=100.00&rate=20"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Calculates the VAT to add to a net GBP amount."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\":{\"amount\":\"100.00\",\"rate_percent\":\"20.00\",\"vat_amount\":\"20.00\",\"total_amount\":\"120.00\",\"currency\":\"GBP\"},\"meta\":{\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\",\"cached\":false,\"source\":\"ukapi\",\"coverage\":\"UK\"}}",
+                            "name": "VAT calculation"
+                        },
+                        {
+                            "header": [],
+                            "code": 401,
+                            "body": "{\"error\":{\"code\":\"invalid_api_key\",\"message\":\"The API key is invalid.\",\"status\":401,\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\"}}",
+                            "name": "Missing, invalid or revoked API key"
+                        },
+                        {
+                            "header": [],
+                            "code": 422,
+                            "body": "{\"error\":{\"code\":\"invalid_parameter\",\"message\":\"One or more request parameters are invalid.\",\"status\":422,\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\",\"details\":{\"fields\":{\"amount\":[\"The amount format is invalid.\"]}}}}",
+                            "name": "Invalid amount or rate"
+                        }
+                    ]
+                },
+                {
+                    "name": "Remove VAT.",
+                    "request": {
+                        "url": {
+                            "host": "{{baseUrl}}",
+                            "path": "v1\/vat\/remove",
+                            "query": [
+                                {
+                                    "key": "amount",
+                                    "value": "100.00",
+                                    "description": "Amount in GBP, with up to two decimal places. Use the net amount for calculate and the gross amount for remove. Must match the regex \/^(?:0|[1-9]\\d{0,11})(?:\\.\\d{1,2})?$\/.",
+                                    "disabled": false
+                                },
+                                {
+                                    "key": "rate",
+                                    "value": "20",
+                                    "description": "VAT rate as a percentage, from 0 to 100, with up to two decimal places. Must match the regex \/^(?:0|[1-9]\\d{0,2})(?:\\.\\d{1,2})?$\/. Must be between 0 and 100.",
+                                    "disabled": false
+                                }
+                            ],
+                            "raw": "{{baseUrl}}\/v1\/vat\/remove?amount=100.00&rate=20"
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application\/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "body": null,
+                        "description": "Removes VAT from a gross GBP amount."
+                    },
+                    "response": [
+                        {
+                            "header": [],
+                            "code": 200,
+                            "body": "{\"data\":{\"gross_amount\":\"120.00\",\"rate_percent\":\"20.00\",\"vat_amount\":\"20.00\",\"net_amount\":\"100.00\",\"currency\":\"GBP\"},\"meta\":{\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\",\"cached\":false,\"source\":\"ukapi\",\"coverage\":\"UK\"}}",
+                            "name": "VAT removal calculation"
+                        },
+                        {
+                            "header": [],
+                            "code": 401,
+                            "body": "{\"error\":{\"code\":\"invalid_api_key\",\"message\":\"The API key is invalid.\",\"status\":401,\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\"}}",
+                            "name": "Missing, invalid or revoked API key"
+                        },
+                        {
+                            "header": [],
+                            "code": 422,
+                            "body": "{\"error\":{\"code\":\"invalid_parameter\",\"message\":\"One or more request parameters are invalid.\",\"status\":422,\"request_id\":\"req_01j8d5s1wdm85crh9b739hw4gd\",\"details\":{\"fields\":{\"amount\":[\"The amount format is invalid.\"]}}}}",
+                            "name": "Invalid amount or rate"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "key": "Authorization",
+                "type": "string"
+            }
+        ]
+    }
+}

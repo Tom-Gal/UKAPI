@@ -6,7 +6,6 @@ import { UkapiMark } from '@/components/ukapi-mark';
 const navigation = [
     ['API catalogue', '/api-catalogue'],
     ['Documentation', '/docs'],
-    ['Try it out', '/try-it'],
     ['Pricing', '/pricing'],
     ['Status', '/status'],
 ];

@@ -13,7 +13,6 @@ Route::inertia('/', 'welcome')->name('home');
 Route::get('/ready', HealthController::class)->name('ready');
 Route::inertia('/api-catalogue', 'public/api-catalogue')->name('api-catalogue');
 Route::inertia('/pricing', 'public/pricing')->name('pricing');
-Route::inertia('/try-it', 'public/try-it')->name('try-it');
 Route::get('/status', PublicStatusController::class)->name('status');
 Route::inertia('/terms', 'public/legal')->defaults('document', 'terms')->name('terms');
 Route::inertia('/privacy', 'public/legal')->defaults('document', 'privacy')->name('privacy');
