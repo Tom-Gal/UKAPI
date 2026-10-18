@@ -1,4 +1,4 @@
-import { Link, usePage } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import { ArrowUpRight, Menu, X } from 'lucide-react';
 import { useState, type PropsWithChildren } from 'react';
 import { UkapiMark } from '@/components/ukapi-mark';
@@ -10,10 +10,15 @@ const navigation = [
     ['Status', '/status'],
 ];
 
+const siteUrl = 'https://ukapi.co.uk';
+const defaultDescription =
+    'A dependable UK data API for postcodes, companies, crime and flood information.';
+
 export default function PublicLayout({ children }: PropsWithChildren) {
     const page = usePage();
     const { auth } = page.props;
     const currentPath = page.url.split('?')[0];
+    const canonicalUrl = `${siteUrl}${currentPath === '/' ? '' : currentPath}`;
     const [menuOpen, setMenuOpen] = useState(false);
     const isActive = (href: string) =>
         currentPath === href ||
@@ -21,6 +26,16 @@ export default function PublicLayout({ children }: PropsWithChildren) {
 
     return (
         <div className="min-h-svh overflow-x-clip bg-[#f5f7f4] text-slate-950">
+            <Head>
+                <link rel="canonical" href={canonicalUrl} />
+                <meta property="og:site_name" content="UKApi.co.uk" />
+                <meta property="og:type" content="website" />
+                <meta property="og:url" content={canonicalUrl} />
+                <meta property="og:locale" content="en_GB" />
+                <meta property="og:description" content={defaultDescription} />
+                <meta name="twitter:card" content="summary" />
+                <meta name="twitter:description" content={defaultDescription} />
+            </Head>
             <a
                 href="#main-content"
                 className="fixed top-3 left-3 z-[60] -translate-y-20 border border-slate-950 bg-slate-950 px-4 py-2 text-sm font-bold text-white focus:translate-y-0"
@@ -147,6 +162,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                         title="Policies"
                         links={[
                             ['Terms', '/terms'],
+                            ['Paid Plan Terms', '/paid-plan-terms'],
                             ['Privacy', '/privacy'],
                             ['Acceptable use', '/acceptable-use'],
                         ]}
@@ -154,7 +170,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                 </div>
                 <div className="border-t border-[#415047]">
                     <div className="atlas-shell flex flex-col gap-2 py-5 font-mono text-[10px] leading-5 tracking-[0.08em] text-[#aeb8af] uppercase sm:flex-row sm:justify-between">
-                        <span>© {new Date().getFullYear()} UKApi.co.uk</span>
+                        <span>© {new Date().getFullYear()} UKApi.co.uk · Independent service</span>
                         <span>
                             Not affiliated with or endorsed by the UK Government
                         </span>

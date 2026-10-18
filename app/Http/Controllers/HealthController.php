@@ -18,7 +18,8 @@ final class HealthController extends Controller
 
             return response()
                 ->json(['status' => 'unavailable'], 503)
-                ->header('Cache-Control', 'no-store');
+                ->header('Cache-Control', 'no-store')
+                ->header('X-Robots-Tag', 'noindex');
         }
 
         return response()
@@ -26,6 +27,7 @@ final class HealthController extends Controller
                 'status' => 'ready',
                 'version' => (string) config('app.version'),
             ])
-            ->header('Cache-Control', 'no-store');
+            ->header('Cache-Control', 'no-store')
+            ->header('X-Robots-Tag', 'noindex');
     }
 }

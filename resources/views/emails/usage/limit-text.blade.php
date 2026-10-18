@@ -5,3 +5,4 @@ You have used {{ number_format($used) }} of {{ number_format($limit) }} requests
 {{ $atLimit ? 'Requests will be available again' : 'Your monthly allowance resets' }} on {{ $resetsAt }}.
 
 View your dashboard: {{ $dashboardUrl }}
+@include('emails.layouts.transactional-text-footer')

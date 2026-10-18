@@ -8,3 +8,4 @@ Environment: {{ $environment }}
 For your security, key secrets are never sent by email.
 
 Manage your API keys: {{ $apiKeysUrl }}
+@include('emails.layouts.transactional-text-footer')

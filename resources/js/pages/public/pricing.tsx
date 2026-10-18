@@ -8,7 +8,7 @@ export default function Pricing() {
 
     return (
         <>
-            <Head title="Pricing">
+            <Head title="API pricing and plans">
                 <meta
                     name="description"
                     content="Simple UKApi.co.uk plans and predictable monthly request quotas."

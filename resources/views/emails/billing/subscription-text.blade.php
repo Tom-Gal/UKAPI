@@ -5,3 +5,4 @@ Hi {{ $name }},
 {{ $body }}
 
 Manage billing: {{ $billingUrl }}
+@include('emails.layouts.transactional-text-footer')

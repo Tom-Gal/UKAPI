@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+        <loc>https://ukapi.co.uk/</loc>
+    </url>
+    <url>
+        <loc>https://ukapi.co.uk/api-catalogue</loc>
+    </url>
+    <url>
+        <loc>https://ukapi.co.uk/docs</loc>
+    </url>
+    <url>
+        <loc>https://ukapi.co.uk/pricing</loc>
+    </url>
+    <url>
+        <loc>https://ukapi.co.uk/status</loc>
+    </url>
+    <url>
+        <loc>https://ukapi.co.uk/data-sources</loc>
+    </url>
+    <url>
+        <loc>https://ukapi.co.uk/terms</loc>
+    </url>
+    <url>
+        <loc>https://ukapi.co.uk/paid-plan-terms</loc>
+    </url>
+    <url>
+        <loc>https://ukapi.co.uk/privacy</loc>
+    </url>
+    <url>
+        <loc>https://ukapi.co.uk/acceptable-use</loc>
+    </url>
+</urlset>

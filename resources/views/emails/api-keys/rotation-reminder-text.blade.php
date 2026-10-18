@@ -9,3 +9,4 @@ Rotate long-lived keys regularly to limit the impact of an accidental exposure.
 Create a replacement key, update your integration, confirm it works, then revoke the old key. We will never email API-key secrets.
 
 Manage API keys: {{ $apiKeysUrl }}
+@include('emails.layouts.transactional-text-footer')

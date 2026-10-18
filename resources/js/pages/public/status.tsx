@@ -11,7 +11,7 @@ type Service = {
 export default function Status({ services }: { services: Service[] }) {
     return (
         <>
-            <Head title="Service status">
+            <Head title="UK API service status">
                 <meta
                     name="description"
                     content="UKApi.co.uk service and provider status."

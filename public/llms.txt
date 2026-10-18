@@ -1,0 +1,19 @@
+# UKApi.co.uk
+
+> A UK data API for developers. UKApi.co.uk normalises postcode, company, crime and flood data into a consistent versioned API.
+
+## Public resources
+
+- [API catalogue](https://ukapi.co.uk/api-catalogue): Available endpoint families and coverage.
+- [Documentation](https://ukapi.co.uk/docs): Authentication, request format, response format and endpoint reference.
+- [Pricing](https://ukapi.co.uk/pricing): Plans and monthly request quotas.
+- [Data sources](https://ukapi.co.uk/data-sources): Upstream sources, attribution, coverage and limitations.
+- [Service status](https://ukapi.co.uk/status): Current configured service availability.
+- [Terms of Use](https://ukapi.co.uk/terms): Terms for accounts and API access.
+- [Paid Plan Terms](https://ukapi.co.uk/paid-plan-terms): Paid subscriptions, billing, cancellation and refunds.
+- [Privacy Notice](https://ukapi.co.uk/privacy): How UKApi handles personal information.
+- [Acceptable Use Policy](https://ukapi.co.uk/acceptable-use): Security, fair-use and conduct rules.
+
+## Notes
+
+UKApi.co.uk is an independent developer service and is not affiliated with or endorsed by the UK Government. Consult the data-sources page for source-specific coverage, freshness and terms.

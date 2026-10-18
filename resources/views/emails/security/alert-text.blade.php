@@ -10,3 +10,4 @@ Hi {{ $name }},
 @endif
 
 Review your security settings: {{ $securityUrl }}
+@include('emails.layouts.transactional-text-footer')

@@ -19,6 +19,7 @@ Route::get('/docs/{section?}', function (?string $section = null) {
 Route::inertia('/pricing', 'public/pricing')->name('pricing');
 Route::get('/status', PublicStatusController::class)->name('status');
 Route::inertia('/terms', 'public/legal')->defaults('document', 'terms')->name('terms');
+Route::inertia('/paid-plan-terms', 'public/legal')->defaults('document', 'paid-plan-terms')->name('paid-plan-terms');
 Route::inertia('/privacy', 'public/legal')->defaults('document', 'privacy')->name('privacy');
 Route::inertia('/acceptable-use', 'public/legal')->defaults('document', 'acceptable-use')->name('acceptable-use');
 Route::inertia('/data-sources', 'public/data-sources')->name('data-sources');

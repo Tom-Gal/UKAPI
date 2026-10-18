@@ -1,2 +1,10 @@
 User-agent: *
-Disallow:
+Disallow: /ready
+Disallow: /up
+Disallow: /dashboard
+Disallow: /api-keys
+Disallow: /usage
+Disallow: /billing
+Disallow: /admin
+
+Sitemap: https://ukapi.co.uk/sitemap.xml
