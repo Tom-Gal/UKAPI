@@ -75,6 +75,39 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Dashboard usage labels
+    |--------------------------------------------------------------------------
+    |
+    | These identifiers are the route defaults used by the API. Keeping the
+    | labels here means the dashboard never records request parameters or data
+    | returned by customers' API calls.
+    |
+    */
+
+    'usage_endpoint_labels' => [
+        'vat.calculate' => 'VAT calculations',
+        'vat.remove' => 'VAT removal',
+        'companies.search' => 'Company searches',
+        'companies.show' => 'Company profiles',
+        'companies.officers' => 'Company officers',
+        'companies.filings' => 'Company filings',
+        'sic.search' => 'SIC searches',
+        'sic.show' => 'SIC lookups',
+        'crime.nearby' => 'Crime nearby',
+        'crime.summary' => 'Crime summaries',
+        'crime.categories' => 'Crime categories',
+        'flood.warnings' => 'Flood warnings',
+        'flood.nearby' => 'Flood nearby',
+        'flood.stations.nearby' => 'Flood stations',
+        'flood.stations.readings' => 'Flood readings',
+        'postcodes.validate' => 'Postcode validation',
+        'postcodes.nearby' => 'Nearby postcodes',
+        'postcodes.show' => 'Postcode lookups',
+        'coordinates.postcode' => 'Coordinate lookups',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Usage notification thresholds
     |--------------------------------------------------------------------------
     |
@@ -127,7 +160,7 @@ return [
     'companies_house' => [
         'base_url' => env('COMPANIES_HOUSE_BASE_URL', 'https://api.company-information.service.gov.uk'),
         'api_key' => env('COMPANIES_HOUSE_API_KEY'),
-        'user_agent' => env('COMPANIES_HOUSE_USER_AGENT', 'UKAPI.io/1.0'),
+        'user_agent' => env('COMPANIES_HOUSE_USER_AGENT', 'UKApi.co.uk/1.0'),
         'connect_timeout_seconds' => (int) env('COMPANIES_HOUSE_CONNECT_TIMEOUT', 2),
         'timeout_seconds' => (int) env('COMPANIES_HOUSE_TIMEOUT', 5),
         'profile_cache_ttl_minutes' => (int) env('COMPANIES_HOUSE_PROFILE_CACHE_TTL_MINUTES', 15),
@@ -154,7 +187,7 @@ return [
 
     'police_uk' => [
         'base_url' => env('POLICE_UK_BASE_URL', 'https://data.police.uk/api'),
-        'user_agent' => env('POLICE_UK_USER_AGENT', 'UKAPI.io/1.0'),
+        'user_agent' => env('POLICE_UK_USER_AGENT', 'UKApi.co.uk/1.0'),
         'connect_timeout_seconds' => (int) env('POLICE_UK_CONNECT_TIMEOUT', 2),
         'timeout_seconds' => (int) env('POLICE_UK_TIMEOUT', 5),
         'crime_cache_ttl_hours' => (int) env('POLICE_UK_CRIME_CACHE_TTL_HOURS', 24),
@@ -176,7 +209,7 @@ return [
 
     'environment_agency' => [
         'base_url' => env('ENVIRONMENT_AGENCY_BASE_URL', 'https://environment.data.gov.uk/flood-monitoring'),
-        'user_agent' => env('ENVIRONMENT_AGENCY_USER_AGENT', 'UKAPI.io/1.0'),
+        'user_agent' => env('ENVIRONMENT_AGENCY_USER_AGENT', 'UKApi.co.uk/1.0'),
         'connect_timeout_seconds' => (int) env('ENVIRONMENT_AGENCY_CONNECT_TIMEOUT', 2),
         'timeout_seconds' => (int) env('ENVIRONMENT_AGENCY_TIMEOUT', 5),
         'cache_ttl_minutes' => (int) env('ENVIRONMENT_AGENCY_CACHE_TTL_MINUTES', 5),

@@ -4,4 +4,9 @@ Hi {{ $name }},
 
 {{ $alertMessage }}
 
+@if ($activityDetails)
+{{ $activityDetails }}
+
+@endif
+
 Review your security settings: {{ $securityUrl }}

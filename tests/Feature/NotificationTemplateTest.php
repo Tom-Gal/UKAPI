@@ -4,8 +4,10 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use App\Notifications\ApiKeyActivityNotification;
+use App\Notifications\ApiKeyRotationReminderNotification;
 use App\Notifications\ResetPasswordNotification;
 use App\Notifications\SecurityAlertNotification;
+use App\Notifications\SubscriptionNotification;
 use App\Notifications\UsageLimitNotification;
 use App\Notifications\VerifyEmailNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -28,15 +30,18 @@ class NotificationTemplateTest extends TestCase
             new VerifyEmailNotification,
             new ResetPasswordNotification('test-reset-token'),
             SecurityAlertNotification::twoFactorEnabled(),
+            SecurityAlertNotification::signedIn('203.0.113.42', 'Example Browser'),
             new UsageLimitNotification(used: 4_000, limit: 5_000, percentage: 80, resetsAt: now()->addMonth()->timestamp),
             ApiKeyActivityNotification::created($key),
             ApiKeyActivityNotification::revoked($key),
+            new ApiKeyRotationReminderNotification([['name' => $key->name, 'environment' => 'Test', 'ageDays' => 90]]),
+            SubscriptionNotification::confirmed('Pro'),
         ];
 
         foreach ($notifications as $notification) {
             $html = $notification->toMail($user)->render();
 
-            $this->assertStringContainsString('UKAPI.io', $html);
+            $this->assertStringContainsString('UKApi.co.uk', $html);
             $this->assertStringContainsString('border-top:4px solid #2563c7', $html);
             $this->assertStringContainsString('Alex Smith', $html);
             $this->assertStringNotContainsString('color-scheme" content="dark', $html);

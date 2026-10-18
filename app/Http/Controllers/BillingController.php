@@ -30,7 +30,7 @@ class BillingController extends Controller
         return $user->newSubscription('default', $plan['stripe_price'])
             ->allowPromotionCodes()
             ->checkout([
-                'success_url' => route('billing', ['checkout' => 'success']),
+                'success_url' => route('billing', ['checkout' => 'success']).'&session_id={CHECKOUT_SESSION_ID}',
                 'cancel_url' => route('billing', ['checkout' => 'cancelled']),
                 'tax_id_collection' => ['enabled' => true],
                 'customer_update' => ['address' => 'auto'],

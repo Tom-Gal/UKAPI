@@ -11,7 +11,7 @@ export default function Pricing() {
             <Head title="Pricing">
                 <meta
                     name="description"
-                    content="Simple UKAPI.io plans and predictable monthly request quotas."
+                    content="Simple UKApi.co.uk plans and predictable monthly request quotas."
                 />
             </Head>
             <PageHero

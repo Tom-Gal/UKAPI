@@ -9,12 +9,18 @@ export default function Billing({
     hasStripeCustomer,
     hasActiveSubscription,
     checkoutStatus,
+    checkoutSynchronized,
+    invoices,
+    invoicesAvailable,
 }: {
     plan: Plan;
     paidPlans: Plan[];
     hasStripeCustomer: boolean;
     hasActiveSubscription: boolean;
     checkoutStatus?: 'success' | 'cancelled';
+    checkoutSynchronized: boolean;
+    invoices: Invoice[];
+    invoicesAvailable: boolean;
 }) {
     return (
         <>
@@ -27,8 +33,9 @@ export default function Billing({
             <main className="space-y-6 p-5 lg:p-8">
                 {checkoutStatus === 'success' && (
                     <Notice>
-                        Thanks — Stripe is confirming your subscription. Your
-                        plan will update here as soon as the webhook arrives.
+                        {checkoutSynchronized
+                            ? 'Your subscription is active and your plan has been updated.'
+                            : 'Thanks — Stripe is confirming your subscription. Your plan will update here as soon as the webhook arrives.'}
                     </Notice>
                 )}
                 {checkoutStatus === 'cancelled' && (
@@ -100,6 +107,62 @@ export default function Billing({
                         portal, where you can change plans or cancel.
                     </section>
                 )}
+                <section className="rounded-xl border border-slate-200 bg-white p-6">
+                    <div className="flex items-baseline justify-between gap-4">
+                        <h2 className="text-lg font-semibold">Invoices</h2>
+                        {hasStripeCustomer && (
+                            <span className="text-sm text-slate-500">
+                                Provided by Stripe
+                            </span>
+                        )}
+                    </div>
+                    {!invoicesAvailable && (
+                        <p className="mt-3 text-sm text-slate-600">
+                            Invoices are temporarily unavailable. Please try
+                            again shortly or use the Stripe billing portal.
+                        </p>
+                    )}
+                    {invoicesAvailable && invoices.length === 0 && (
+                        <p className="mt-3 text-sm text-slate-600">
+                            No invoices yet.
+                        </p>
+                    )}
+                    {invoices.length > 0 && (
+                        <div className="mt-4 divide-y divide-slate-100">
+                            {invoices.map((invoice) => (
+                                <div
+                                    key={invoice.id}
+                                    className="flex flex-wrap items-center justify-between gap-3 py-3 text-sm"
+                                >
+                                    <div>
+                                        <p className="font-medium text-slate-800">
+                                            {invoice.number}
+                                        </p>
+                                        <p className="text-slate-500">
+                                            {invoice.date} · {invoice.status}
+                                        </p>
+                                    </div>
+                                    <div className="flex items-center gap-4">
+                                        <span className="font-mono text-slate-700">
+                                            {invoice.total}
+                                        </span>
+                                        {invoice.url && (
+                                            <a
+                                                href={invoice.url}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="font-semibold text-[#2563c7] hover:underline"
+                                            >
+                                                View{' '}
+                                                <ExternalLink className="mb-0.5 inline size-3.5" />
+                                            </a>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </section>
                 <Link
                     href="/pricing"
                     className="inline-flex rounded-lg border border-slate-300 px-3.5 py-2 text-sm font-semibold text-slate-800 hover:border-slate-400"
@@ -123,6 +186,15 @@ type Plan = {
     stripe_price: string | null;
     monthly_request_quota: number;
     burst_requests_per_second: number;
+};
+
+type Invoice = {
+    id: string;
+    number: string;
+    date: string;
+    total: string;
+    status: string;
+    url: string | null;
 };
 
 function Notice({ children }: { children: ReactNode }) {

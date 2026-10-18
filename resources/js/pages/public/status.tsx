@@ -14,12 +14,12 @@ export default function Status({ services }: { services: Service[] }) {
             <Head title="Service status">
                 <meta
                     name="description"
-                    content="UKAPI.io service and provider status."
+                    content="UKApi.co.uk service and provider status."
                 />
             </Head>
             <PageHero
                 eyebrow="Service status"
-                title="Current availability across UKAPI.io."
+                title="Current availability across UKApi.co.uk."
                 description="This page shows the application capabilities configured on this deployment."
             />
             <div className="atlas-shell max-w-5xl pb-24">

@@ -34,7 +34,7 @@ export default function Profile({
                 <Heading
                     variant="small"
                     title="Profile"
-                    description="Update your name and email address"
+                    description="Update your personal and business details"
                 />
 
                 <Form
@@ -82,6 +82,29 @@ export default function Profile({
                                 <InputError
                                     className="mt-2"
                                     message={errors.email}
+                                />
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label htmlFor="business_name">
+                                    Business name{' '}
+                                    <span className="text-muted-foreground">
+                                        (optional)
+                                    </span>
+                                </Label>
+
+                                <Input
+                                    id="business_name"
+                                    className="mt-1 block w-full"
+                                    defaultValue={auth.user.business_name ?? ''}
+                                    name="business_name"
+                                    autoComplete="organization"
+                                    placeholder="Your company or business"
+                                />
+
+                                <InputError
+                                    className="mt-2"
+                                    message={errors.business_name}
                                 />
                             </div>
 

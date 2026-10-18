@@ -1,4 +1,4 @@
-# UKAPI.io — MVP Product Report
+# UKApi.co.uk — MVP Product Report
 
 **Version:** 1.0  
 **Date:** 23 September 2026  
@@ -7,7 +7,7 @@
 
 ## Executive summary
 
-UKAPI.io is a developer-first service that exposes many small, useful UK-focused data APIs behind one account, one API key, one documentation site, one billing relationship and one predictable response format. The product does not attempt to become the authoritative owner of every underlying dataset. Instead, it acts as a reliable aggregation and normalisation layer over public/open data sources and selected first-party APIs.
+UKApi.co.uk is a developer-first service that exposes many small, useful UK-focused data APIs behind one account, one API key, one documentation site, one billing relationship and one predictable response format. The product does not attempt to become the authoritative owner of every underlying dataset. Instead, it acts as a reliable aggregation and normalisation layer over public/open data sources and selected first-party APIs.
 
 The MVP should be deliberately narrow operationally while appearing broad to the customer. A single Laravel application can provide the website, authentication, API-key management, metering, billing, documentation metadata and the API gateway. Each upstream dataset is isolated behind a provider adapter so public endpoint contracts remain stable even if an upstream service changes.
 
@@ -19,7 +19,7 @@ A sensible commercial position is “simple UK data for developers” rather tha
 
 ### 1.1 Product statement
 
-**UKAPI.io gives developers one simple API for useful UK data.**
+**UKApi.co.uk gives developers one simple API for useful UK data.**
 
 Instead of separately learning Companies House, Police.uk, GOV.UK, local authority datasets, planning datasets and postcode services, a developer can authenticate once and use a consistent URL structure and JSON envelope.
 
@@ -37,7 +37,7 @@ UK public data is plentiful but fragmented. Common integration friction includes
 - varying stability, beta status and licensing requirements;
 - duplicated caching and resilience work in every consuming application.
 
-UKAPI.io removes that integration tax.
+UKApi.co.uk removes that integration tax.
 
 ### 1.3 Target users
 
@@ -78,7 +78,7 @@ The MVP will not:
 
 ### 3.1 Name
 
-**UKAPI.io**
+**UKApi.co.uk**
 
 ### 3.2 Suggested positioning
 
@@ -90,7 +90,7 @@ Alternative homepage line: **Postcodes, companies, councils, crime, holidays, pl
 
 The visual identity should feel like infrastructure rather than government. Use a clean developer-tool aesthetic, restrained colour palette, clear monospace examples and minimal marketing language. Avoid visual imitation of GOV.UK, which could imply official status.
 
-Every relevant page should include a clear statement such as: **UKAPI.io is an independent developer service and is not affiliated with or endorsed by the UK Government.**
+Every relevant page should include a clear statement such as: **UKApi.co.uk is an independent developer service and is not affiliated with or endorsed by the UK Government.**
 
 ## 4. MVP endpoint catalogue
 
@@ -110,7 +110,7 @@ GET /v1/outcodes/{outcode}
 
 Core response fields should include canonical postcode, country, region where applicable, coordinates, local authority name/code, parliamentary constituency where available and selected statistical geography codes.
 
-The adapter can initially use Postcodes.io, which provides postcode lookup and reverse geocoding without authentication. The public UKAPI.io contract should remain source-agnostic so a future ONS-backed/self-hosted implementation can replace it.
+The adapter can initially use Postcodes.io, which provides postcode lookup and reverse geocoding without authentication. The public UKApi.co.uk contract should remain source-agnostic so a future ONS-backed/self-hosted implementation can replace it.
 
 ### 4.2 Councils
 
@@ -138,7 +138,7 @@ GET /v1/sic/{code}
 GET /v1/sic/search?q={query}
 ```
 
-Companies House provides live public company information through its REST API and requires API credentials. UKAPI.io can hide that integration detail while returning a simplified stable schema.
+Companies House provides live public company information through its REST API and requires API credentials. UKApi.co.uk can hide that integration detail while returning a simplified stable schema.
 
 The MVP should avoid promising that every filing document itself can be redistributed. Start with metadata exposed by the public data API and review terms/licensing before adding document proxying.
 
@@ -156,7 +156,7 @@ GET /v1/vat/calculate?amount=100&rate=20
 GET /v1/vat/remove?amount=120&rate=20
 ```
 
-These are exceptionally cheap endpoints and make useful “glue” utilities. Bank holidays should come from the official GOV.UK JSON source. Working-day and VAT endpoints are derived utilities implemented directly by UKAPI.io.
+These are exceptionally cheap endpoints and make useful “glue” utilities. Bank holidays should come from the official GOV.UK JSON source. Working-day and VAT endpoints are derived utilities implemented directly by UKApi.co.uk.
 
 Do not market tax endpoints as tax advice. For MVP, tax-year utilities should deal with calendar boundaries and identifiers, not attempt to calculate individual tax liabilities.
 
@@ -170,7 +170,7 @@ GET /v1/food-establishments/search?name=&postcode=&rating=
 GET /v1/food-establishments/nearby?postcode={postcode}&radius=2
 ```
 
-The Food Standards Agency offers free programmatic access to FHRS/FHIS data across the UK with no registration requirement at the time of writing. UKAPI.io should normalise the differences between rating schemes instead of pretending every nation uses the same score system.
+The Food Standards Agency offers free programmatic access to FHRS/FHIS data across the UK with no registration requirement at the time of writing. UKApi.co.uk should normalise the differences between rating schemes instead of pretending every nation uses the same score system.
 
 ### 4.6 Crime
 
@@ -182,7 +182,7 @@ GET /v1/crime/summary?postcode={postcode}&month=YYYY-MM
 GET /v1/crime/categories
 ```
 
-The Police.uk street-level endpoint works from coordinates and returns approximate/anonymised crime locations. UKAPI.io can make postcode searches convenient by resolving the postcode to coordinates first.
+The Police.uk street-level endpoint works from coordinates and returns approximate/anonymised crime locations. UKApi.co.uk can make postcode searches convenient by resolving the postcode to coordinates first.
 
 Coverage caveats must be exposed in metadata, particularly for Scotland where Police.uk does not provide a complete national picture.
 
@@ -208,7 +208,7 @@ GET /v1/planning/constraints?postcode={postcode}
 GET /v1/planning/constraints?lat={lat}&lng={lng}
 ```
 
-Start with a small curated group of high-value datasets such as conservation areas, listed buildings, green belt, Article 4 directions and flood-risk zones. The official Planning Data API exposes more than 100 planning/housing datasets for England, but its documentation currently describes the platform/API as beta. UKAPI.io should therefore cache and isolate it carefully and return source status in metadata.
+Start with a small curated group of high-value datasets such as conservation areas, listed buildings, green belt, Article 4 directions and flood-risk zones. The official Planning Data API exposes more than 100 planning/housing datasets for England, but its documentation currently describes the platform/API as beta. UKApi.co.uk should therefore cache and isolate it carefully and return source status in metadata.
 
 Planning coverage should be labelled **England only** until equivalent, dependable sources are intentionally integrated for the other nations.
 
@@ -217,7 +217,7 @@ Planning coverage should be labelled **England only** until equivalent, dependab
 ### 5.1 Base URL
 
 ```text
-https://api.ukapi.io/v1
+https://api.ukapi.co.uk/v1
 ```
 
 ### 5.2 Authentication
@@ -459,7 +459,7 @@ Do not build a massive admin CMS. Operational visibility is the priority.
 
 ## 15. Reliability model
 
-UKAPI.io depends on upstream providers, so graceful degradation is essential.
+UKApi.co.uk depends on upstream providers, so graceful degradation is essential.
 
 For each provider define:
 
@@ -603,7 +603,7 @@ Do not over-instrument the first release. Track:
 - quota-triggered upgrade conversions;
 - churn/cancellations.
 
-The strongest early product metric is likely **developers making a second API request on a later day**, because it indicates UKAPI.io has become part of an actual project rather than a one-off experiment.
+The strongest early product metric is likely **developers making a second API request on a later day**, because it indicates UKApi.co.uk has become part of an actual project rather than a one-off experiment.
 
 ## 21. Post-MVP opportunities
 
@@ -627,7 +627,7 @@ Potential additions after product-market validation:
 
 ## 22. Recommendation
 
-Build UKAPI.io as a **small Laravel monolith with strongly separated provider adapters**, not a microservice platform. Launch with breadth at the endpoint level but restraint at the infrastructure level. The differentiator should be developer experience: predictable contracts, excellent examples, sensible caching, low prices and a growing catalogue of useful UK-specific endpoints.
+Build UKApi.co.uk as a **small Laravel monolith with strongly separated provider adapters**, not a microservice platform. Launch with breadth at the endpoint level but restraint at the infrastructure level. The differentiator should be developer experience: predictable contracts, excellent examples, sensible caching, low prices and a growing catalogue of useful UK-specific endpoints.
 
 The product becomes defensible gradually as it accumulates normalized schemas, source knowledge, edge-case handling, usage data, SDKs and trust. None of those require a large team to begin.
 

@@ -8,11 +8,11 @@ const documents: Record<
     terms: {
         title: 'Terms of service',
         summary:
-            'Draft document — pending review and replacement by UKAPI.io’s legal team.',
+            'Draft document — pending review and replacement by UKApi.co.uk’s legal team.',
         sections: [
             [
                 'Service scope',
-                'UKAPI.io is an independent developer service that normalises selected UK data sources. Availability, freshness, and geographic scope are documented per endpoint and are not warranties.',
+                'UKApi.co.uk is an independent developer service that normalises selected UK data sources. Availability, freshness, and geographic scope are documented per endpoint and are not warranties.',
             ],
             [
                 'Acceptable use',
@@ -27,11 +27,11 @@ const documents: Record<
     privacy: {
         title: 'Privacy notice',
         summary:
-            'Draft document — pending review and replacement by UKAPI.io’s legal team.',
+            'Draft document — pending review and replacement by UKApi.co.uk’s legal team.',
         sections: [
             [
                 'Account information',
-                'UKAPI.io needs account information to provide dashboard access, API keys, support and operational communications.',
+                'UKApi.co.uk needs account information to provide dashboard access, API keys, support and operational communications.',
             ],
             [
                 'Operational data',
@@ -46,7 +46,7 @@ const documents: Record<
     'acceptable-use': {
         title: 'Acceptable use policy',
         summary:
-            'Draft document — pending review and replacement by UKAPI.io’s legal team.',
+            'Draft document — pending review and replacement by UKApi.co.uk’s legal team.',
         sections: [
             [
                 'Respect sources',

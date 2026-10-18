@@ -6,6 +6,7 @@ use App\Domain\Billing\PlanCatalog;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
 
 final class ProductionReadinessCheck extends Command
 {
@@ -27,6 +28,7 @@ final class ProductionReadinessCheck extends Command
             ['Stripe secret key', filled(config('cashier.secret')), 'Set STRIPE_SECRET in the secret manager.'],
             ['Stripe publishable key', filled(config('cashier.key')), 'Set STRIPE_KEY in the secret manager.'],
             ['Stripe webhook secret', filled(config('cashier.webhook.secret')), 'Create the Stripe webhook and set STRIPE_WEBHOOK_SECRET.'],
+            ['Stripe webhook route', Route::has('cashier.webhook'), 'Ensure Laravel Cashier is installed and clear/rebuild the route cache.'],
             ['Stripe plan prices', $plans->hasConfiguredPrices(), 'Set STRIPE_PRICE_HOBBY, STRIPE_PRICE_PRO, and STRIPE_PRICE_SCALE.'],
         ];
 

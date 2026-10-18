@@ -1,4 +1,4 @@
-@extends('emails.layouts.transactional', ['title' => 'API key created', 'preheader' => 'A new API key was created for your UKAPI.io account.'])
+@extends('emails.layouts.transactional', ['title' => 'API key created', 'preheader' => 'A new API key was created for your UKApi.co.uk account.'])
 
 @section('content')
     <p style="margin:0 0 10px;color:#2563c7;font-size:11px;font-weight:700;letter-spacing:.14em;line-height:16px;text-transform:uppercase;">API key activity</p>

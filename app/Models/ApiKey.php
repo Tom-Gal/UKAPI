@@ -17,6 +17,7 @@ use Illuminate\Support\Carbon;
  * @property string $status
  * @property Carbon|null $last_used_at
  * @property Carbon|null $revoked_at
+ * @property Carbon|null $last_rotation_reminded_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
@@ -30,6 +31,7 @@ class ApiKey extends Model
         'status',
         'last_used_at',
         'revoked_at',
+        'last_rotation_reminded_at',
     ];
 
     protected function casts(): array
@@ -37,6 +39,7 @@ class ApiKey extends Model
         return [
             'last_used_at' => 'datetime',
             'revoked_at' => 'datetime',
+            'last_rotation_reminded_at' => 'datetime',
         ];
     }
 

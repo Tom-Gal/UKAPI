@@ -29,7 +29,7 @@ final class UsageLimitNotification extends Notification
         $atLimit = $this->used >= $this->limit;
 
         return (new MailMessage)
-            ->subject($atLimit ? 'Your monthly UKAPI.io limit has been reached' : 'You are nearing your UKAPI.io monthly limit')
+            ->subject($atLimit ? 'Your monthly UKApi.co.uk limit has been reached' : 'You are nearing your UKApi.co.uk monthly limit')
             ->view([
                 'html' => 'emails.usage.limit',
                 'text' => 'emails.usage.limit-text',

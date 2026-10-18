@@ -1,14 +1,14 @@
 openapi: 3.1.0
 info:
-    title: UKAPI.io API
+    title: UKApi.co.uk API
     version: 1.0.0
     description: |
-        The UKAPI.io v1 contract. API keys are issued through the customer dashboard
+        The UKApi.co.uk v1 contract. API keys are issued through the customer dashboard
         and must be supplied with the Bearer authentication scheme.
         All operations are read-only GET requests and are safe to retry. X-Request-Id
         is a correlation identifier; it does not deduplicate requests or usage accounting.
 servers:
-    - url: https://api.ukapi.io
+    - url: https://api.ukapi.co.uk
       description: Production
 security:
     - bearerApiKey: []
@@ -401,7 +401,7 @@ paths:
         get:
             operationId: findNearbyFloodWarnings
             summary: Find current flood warnings and alerts near a postcode
-            description: Resolves the postcode to coordinates and searches the England-only Environment Agency source within UKAPI.io's documented nearby distance.
+            description: Resolves the postcode to coordinates and searches the England-only Environment Agency source within UKApi.co.uk's documented nearby distance.
             parameters:
                 - $ref: '#/components/parameters/FloodPostcode'
             responses:

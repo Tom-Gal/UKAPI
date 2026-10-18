@@ -37,7 +37,7 @@ final class ApiKeyActivityNotification extends Notification
     {
         $created = $this->activity === 'created';
         $message = (new MailMessage)
-            ->subject($created ? 'New API key created · UKAPI.io' : 'API key revoked · UKAPI.io');
+            ->subject($created ? 'New API key created · UKApi.co.uk' : 'API key revoked · UKApi.co.uk');
         $data = [
             'name' => $notifiable->name,
             'keyName' => $this->apiKey->name,

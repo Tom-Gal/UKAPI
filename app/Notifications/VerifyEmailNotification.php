@@ -10,7 +10,7 @@ final class VerifyEmailNotification extends VerifyEmail
     public function toMail($notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Verify your UKAPI.io email address')
+            ->subject('Verify your UKApi.co.uk email address')
             ->view([
                 'html' => 'emails.auth.verify-email',
                 'text' => 'emails.auth.verify-email-text',

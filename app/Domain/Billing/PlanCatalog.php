@@ -49,6 +49,20 @@ final class PlanCatalog
         return null;
     }
 
+    /**
+     * @return array{key: string, label: string, stripe_price: string|null, monthly_request_quota: int, burst_requests_per_second: int}|null
+     */
+    public function forStripePrice(string $price): ?array
+    {
+        foreach ($this->paid() as $plan) {
+            if ($plan['stripe_price'] === $price) {
+                return $plan;
+            }
+        }
+
+        return null;
+    }
+
     public function hasConfiguredPrices(): bool
     {
         foreach ($this->paid() as $plan) {

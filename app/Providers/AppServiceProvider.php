@@ -10,13 +10,17 @@ use App\Integrations\Contracts\PostcodeProvider;
 use App\Integrations\EnvironmentAgency\EnvironmentAgencyFloodProvider;
 use App\Integrations\PoliceUk\PoliceUkCrimeProvider;
 use App\Integrations\PostcodesIo\PostcodesIoPostcodeProvider;
+use App\Listeners\SendSubscriptionLifecycleNotification;
+use App\Models\User;
 use App\Notifications\SecurityAlertNotification;
 use Carbon\CarbonImmutable;
+use Illuminate\Auth\Events\Login;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Laravel\Cashier\Events\WebhookHandled;
 use Laravel\Fortify\Events\TwoFactorAuthenticationConfirmed;
 use Laravel\Fortify\Events\TwoFactorAuthenticationDisabled;
 
@@ -76,5 +80,16 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(TwoFactorAuthenticationDisabled::class, function (TwoFactorAuthenticationDisabled $event): void {
             $event->user->notify(SecurityAlertNotification::twoFactorDisabled());
         });
+        Event::listen(Login::class, function (Login $event): void {
+            if ($event->guard !== 'web' || ! $event->user instanceof User) {
+                return;
+            }
+
+            $event->user->notify(SecurityAlertNotification::signedIn(
+                request()->ip(),
+                request()->userAgent(),
+            ));
+        });
+        Event::listen(WebhookHandled::class, SendSubscriptionLifecycleNotification::class);
     }
 }

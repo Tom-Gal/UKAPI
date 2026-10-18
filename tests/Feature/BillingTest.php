@@ -4,8 +4,11 @@ namespace Tests\Feature;
 
 use App\Domain\Usage\Entitlements;
 use App\Models\User;
+use App\Notifications\SubscriptionNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Inertia\Testing\AssertableInertia as Assert;
+use Laravel\Cashier\Events\WebhookHandled;
 use Tests\TestCase;
 
 class BillingTest extends TestCase
@@ -61,5 +64,64 @@ class BillingTest extends TestCase
         $this->actingAs($user)
             ->post(route('billing.checkout'), ['plan' => 'enterprise'])
             ->assertSessionHasErrors('plan');
+    }
+
+    public function test_stripe_subscription_webhook_updates_the_local_entitlement_record(): void
+    {
+        Notification::fake();
+        config()->set('cashier.webhook.secret', null);
+        config()->set('ukapi.paid_plans.pro.stripe_price', 'price_pro_test');
+
+        $user = User::factory()->create(['stripe_id' => 'cus_webhook_test']);
+
+        $this->postJson(route('cashier.webhook'), [
+            'type' => 'customer.subscription.created',
+            'data' => [
+                'object' => [
+                    'id' => 'sub_webhook_test',
+                    'customer' => 'cus_webhook_test',
+                    'status' => 'active',
+                    'metadata' => ['type' => 'default'],
+                    'items' => [
+                        'data' => [[
+                            'id' => 'si_webhook_test',
+                            'quantity' => 1,
+                            'price' => [
+                                'id' => 'price_pro_test',
+                                'product' => 'prod_webhook_test',
+                            ],
+                        ]],
+                    ],
+                ],
+            ],
+        ])->assertOk();
+
+        $this->assertTrue($user->fresh()->subscribed('default', 'price_pro_test'));
+        $this->assertSame('Pro', app(Entitlements::class)->forUser($user->fresh())['label']);
+        Notification::assertSentTo($user, SubscriptionNotification::class);
+    }
+
+    public function test_a_scheduled_subscription_cancellation_sends_an_email(): void
+    {
+        Notification::fake();
+        config()->set('ukapi.paid_plans.pro.stripe_price', 'price_pro_test');
+        $user = User::factory()->create(['stripe_id' => 'cus_cancel_test']);
+
+        event(new WebhookHandled([
+            'type' => 'customer.subscription.updated',
+            'data' => [
+                'previous_attributes' => ['cancel_at_period_end' => false],
+                'object' => [
+                    'customer' => 'cus_cancel_test',
+                    'cancel_at_period_end' => true,
+                    'items' => ['data' => [[
+                        'current_period_end' => now()->addMonth()->timestamp,
+                        'price' => ['id' => 'price_pro_test'],
+                    ]]],
+                ],
+            ],
+        ]));
+
+        Notification::assertSentTo($user, SubscriptionNotification::class);
     }
 }

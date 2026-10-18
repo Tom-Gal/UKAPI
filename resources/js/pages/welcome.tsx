@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { endpointFamilies, plans } from '@/lib/ukapi-content';
 
-const example = `curl https://api.ukapi.io/v1/postcodes/BL2 \\\n+  -H "Authorization: Bearer uk_live_…"
+const example = `curl https://api.ukapi.co.uk/v1/postcodes/BL2 \\\n+  -H "Authorization: Bearer uk_live_…"
 
 {
   "data": { "postcode": "BL2 6XX", "country": "England" },

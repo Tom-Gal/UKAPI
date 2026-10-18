@@ -29,6 +29,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => EnsureUserIsAdmin::class,
         ]);
         $middleware->encryptCookies(except: ['sidebar_state']);
+        // Cashier's production-default webhook route is /stripe/webhook. This
+        // runs before configuration is loaded, so do not call config() here.
         $middleware->validateCsrfTokens(except: ['stripe/*']);
 
         $middleware->web(append: [
@@ -98,7 +100,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 status: $exception->getStatusCode(),
             );
         });
-        $exceptions->render(function (\Throwable $exception, Request $request) {
+        $exceptions->render(function (Throwable $exception, Request $request) {
             if (! $request->is('v1/*')) {
                 return null;
             }

@@ -5,12 +5,20 @@ import {
     EmptyState,
 } from '@/components/dashboard-page-header';
 
+type UsageBreakdown = {
+    endpoint: string;
+    label: string;
+    requests: number;
+};
+
 export default function Usage({
     monthlyUsage,
     monthlyQuota,
+    breakdown,
 }: {
     monthlyUsage: number;
     monthlyQuota: number;
+    breakdown: UsageBreakdown[];
 }) {
     const percentage = Math.min(
         100,
@@ -28,7 +36,7 @@ export default function Usage({
             <main className="p-5 lg:p-8">
                 <div className="mb-6 rounded-xl border border-slate-200 bg-white p-6">
                     <p className="text-xs font-bold tracking-[.14em] text-slate-500 uppercase">
-                        Free plan quota
+                        Monthly quota
                     </p>
                     <p className="mt-3 text-3xl font-semibold">
                         {monthlyUsage.toLocaleString()}{' '}
@@ -43,6 +51,37 @@ export default function Usage({
                         />
                     </div>
                 </div>
+                {breakdown.length > 0 && (
+                    <section className="mb-6 rounded-xl border border-slate-200 bg-white p-6">
+                        <div className="flex items-baseline justify-between gap-4">
+                            <h2 className="text-lg font-semibold">
+                                Where requests are going
+                            </h2>
+                            <span className="text-sm text-slate-500">
+                                This month
+                            </span>
+                        </div>
+                        <div className="mt-4 divide-y divide-slate-100">
+                            {breakdown.map((item) => (
+                                <div
+                                    key={item.endpoint}
+                                    className="flex items-center justify-between gap-4 py-3 text-sm"
+                                >
+                                    <span className="font-medium text-slate-800">
+                                        {item.label}
+                                    </span>
+                                    <span className="font-mono text-slate-600">
+                                        {item.requests.toLocaleString()}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                        <p className="mt-4 text-xs text-slate-500">
+                            A high-level breakdown by API endpoint. Request
+                            contents and API-key secrets are never shown here.
+                        </p>
+                    </section>
+                )}
                 <EmptyState
                     title={
                         monthlyUsage === 0

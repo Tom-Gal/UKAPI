@@ -256,7 +256,7 @@ const allEndpointFamilies: EndpointFamily[] = [
                     },
                 ],
                 description:
-                    'List officers with UKAPI.io pagination. The response intentionally excludes date-of-birth data.',
+                    'List officers with UKApi.co.uk pagination. The response intentionally excludes date-of-birth data.',
                 coverage: 'UK',
                 source: 'Companies House',
                 freshness: '1 hour',
@@ -311,7 +311,7 @@ const allEndpointFamilies: EndpointFamily[] = [
                     },
                 ],
                 description:
-                    'List filing metadata with UKAPI.io pagination. Filing-document links, barcodes and document contents are not relayed.',
+                    'List filing metadata with UKApi.co.uk pagination. Filing-document links, barcodes and document contents are not relayed.',
                 coverage: 'UK',
                 source: 'Companies House',
                 freshness: '15 minutes',
@@ -445,7 +445,7 @@ const allEndpointFamilies: EndpointFamily[] = [
                 path: '/v1/working-days?from=&to=&division=',
                 description: 'Calculate working days.',
                 coverage: 'UK divisions',
-                source: 'UKAPI.io',
+                source: 'UKApi.co.uk',
                 freshness: 'Calculated',
             },
             {
@@ -453,7 +453,7 @@ const allEndpointFamilies: EndpointFamily[] = [
                 path: '/v1/tax-years/current',
                 description: 'Get the current tax-year identifier.',
                 coverage: 'UK',
-                source: 'UKAPI.io',
+                source: 'UKApi.co.uk',
                 freshness: 'Calculated',
             },
             {
@@ -461,7 +461,7 @@ const allEndpointFamilies: EndpointFamily[] = [
                 path: '/v1/tax-years/{year}',
                 description: 'Get tax-year boundaries.',
                 coverage: 'UK',
-                source: 'UKAPI.io',
+                source: 'UKApi.co.uk',
                 freshness: 'Calculated',
             },
             {
@@ -486,7 +486,7 @@ const allEndpointFamilies: EndpointFamily[] = [
                 live: true,
                 description: 'Calculate VAT.',
                 coverage: 'UK',
-                source: 'UKAPI.io',
+                source: 'UKApi.co.uk',
                 freshness: 'Calculated',
             },
             {
@@ -511,7 +511,7 @@ const allEndpointFamilies: EndpointFamily[] = [
                 live: true,
                 description: 'Remove VAT.',
                 coverage: 'UK',
-                source: 'UKAPI.io',
+                source: 'UKApi.co.uk',
                 freshness: 'Calculated',
             },
         ],
@@ -699,7 +699,7 @@ const allEndpointFamilies: EndpointFamily[] = [
                     },
                 ],
                 description:
-                    'Find current England flood warnings and alerts within UKAPI.io’s configured nearby radius (returned in the response).',
+                    'Find current England flood warnings and alerts within UKApi.co.uk’s configured nearby radius (returned in the response).',
                 coverage: 'England',
                 source: 'Environment Agency',
                 freshness: '5 minutes',

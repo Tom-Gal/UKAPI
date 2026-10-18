@@ -8,7 +8,7 @@ export default function ApiCatalogue() {
             <Head title="API catalogue">
                 <meta
                     name="description"
-                    content="Explore the UKAPI.io endpoint catalogue and its geographic coverage."
+                    content="Explore the UKApi.co.uk endpoint catalogue and its geographic coverage."
                 />
             </Head>
             <PageHero

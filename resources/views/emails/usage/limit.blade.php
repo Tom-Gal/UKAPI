@@ -1,4 +1,4 @@
-@extends('emails.layouts.transactional', ['title' => $atLimit ? 'Monthly API limit reached' : 'Monthly API limit reminder', 'preheader' => $atLimit ? 'Your plan’s monthly request allowance has been used.' : 'Your monthly UKAPI.io request allowance is nearly used.'])
+@extends('emails.layouts.transactional', ['title' => $atLimit ? 'Monthly API limit reached' : 'Monthly API limit reminder', 'preheader' => $atLimit ? 'Your plan’s monthly request allowance has been used.' : 'Your monthly UKApi.co.uk request allowance is nearly used.'])
 
 @section('content')
     <p style="margin:0 0 10px;color:{{ $atLimit ? '#b45309' : '#2563c7' }};font-size:11px;font-weight:700;letter-spacing:.14em;line-height:16px;text-transform:uppercase;">Usage update</p>

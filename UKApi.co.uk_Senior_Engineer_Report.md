@@ -1,19 +1,19 @@
-# UKAPI.io — Senior Engineer Architecture & Implementation Report
+# UKApi.co.uk — Senior Engineer Architecture & Implementation Report
 
 **Version:** 1.0  
 **Date:** 23 September 2026  
-**Audience:** Senior/lead engineer implementing UKAPI.io  
+**Audience:** Senior/lead engineer implementing UKApi.co.uk
 **Primary stack:** Laravel 13, PHP 8.3+, MySQL, Redis
 
 ## 1. Purpose
 
-This document turns the UKAPI.io MVP concept into an implementation blueprint. It assumes a small engineering team or a single experienced developer and intentionally favours a modular Laravel monolith over distributed services.
+This document turns the UKApi.co.uk MVP concept into an implementation blueprint. It assumes a small engineering team or a single experienced developer and intentionally favours a modular Laravel monolith over distributed services.
 
-The architectural objective is not merely to proxy upstream APIs. UKAPI.io needs to own a stable external contract while upstream providers remain replaceable implementation details. The critical boundaries are therefore domain contracts, provider adapters, caching, metering, authentication and failure isolation.
+The architectural objective is not merely to proxy upstream APIs. UKApi.co.uk needs to own a stable external contract while upstream providers remain replaceable implementation details. The critical boundaries are therefore domain contracts, provider adapters, caching, metering, authentication and failure isolation.
 
 ## 2. Engineering principles
 
-1. **Public contracts are ours; provider contracts are not.** Controllers return UKAPI.io resources/DTOs, never provider payloads.
+1. **Public contracts are ours; provider contracts are not.** Controllers return UKApi.co.uk resources/DTOs, never provider payloads.
 2. **Monolith first.** One Laravel deployment, one relational database and one Redis cluster are enough for MVP.
 3. **Provider isolation.** Every external source lives behind an interface plus adapter.
 4. **Cache by semantics.** Cache keys represent normalized requests, not raw URLs.
@@ -51,7 +51,7 @@ Use first-party capabilities where practical:
 - Policies/gates
 - encrypted casts / framework encryption where appropriate
 
-Sanctum is suitable for authenticated dashboard/API interactions belonging to logged-in users, but customer API keys should use a dedicated `ApiKey` model because UKAPI.io needs explicit prefixes, scopes, quotas, revocation metadata and high-speed hash lookup.
+Sanctum is suitable for authenticated dashboard/API interactions belonging to logged-in users, but customer API keys should use a dedicated `ApiKey` model because UKApi.co.uk needs explicit prefixes, scopes, quotas, revocation metadata and high-speed hash lookup.
 
 ### 3.3 Testing
 
@@ -108,7 +108,7 @@ openapi/
   openapi.yaml
 ```
 
-Domain folders own UKAPI.io concepts; `Integrations` owns source-specific code.
+Domain folders own UKApi.co.uk concepts; `Integrations` owns source-specific code.
 
 ## 5. Request lifecycle
 
@@ -326,7 +326,7 @@ RateLimit-Reset
 Retry-After
 ```
 
-A `429` response should use the normal UKAPI.io error envelope.
+A `429` response should use the normal UKApi.co.uk error envelope.
 
 Plan checks should be keyed by API key, not user, so multiple applications remain independently observable. The monthly quota can either be per account or key depending on product semantics; per-account is simpler commercially, while per-key is simpler operationally. Recommendation: **account-level quota, key-level rate limits**.
 
@@ -408,7 +408,7 @@ DTOs should be immutable value objects where practical. Laravel API Resources tr
 
 Create a shared integration HTTP factory/wrapper that standardizes:
 
-- user agent identifying UKAPI.io;
+- user agent identifying UKApi.co.uk;
 - connect timeout;
 - total timeout;
 - JSON headers;
@@ -449,7 +449,7 @@ Cache normalized postcode records for a long TTL. Canonicalize user input before
 
 Store the canonical display form in the response.
 
-Do not expose every raw ONS field initially. Define a versioned `PostcodeData` DTO containing fields UKAPI.io commits to supporting.
+Do not expose every raw ONS field initially. Define a versioned `PostcodeData` DTO containing fields UKApi.co.uk commits to supporting.
 
 ### 13.2 Companies House
 
@@ -507,7 +507,7 @@ Crime history is effectively immutable after publication except for revisions, s
 
 This source is England-specific. Near-real-time data needs short TTLs and timestamps.
 
-Use stale cache conservatively: a stale river-level reading may be acceptable if visibly timestamped; a stale active warning may be safety-relevant. Do not present UKAPI.io as an emergency alert service and include official-source attribution.
+Use stale cache conservatively: a stale river-level reading may be acceptable if visibly timestamped; a stale active warning may be safety-relevant. Do not present UKApi.co.uk as an emergency alert service and include official-source attribution.
 
 ### 13.7 Planning Data
 
@@ -843,7 +843,7 @@ Expose two concepts:
 /health   -> internal/secured deeper dependency status
 ```
 
-Public load balancers should not depend on every external provider being healthy, otherwise one government API outage could remove all UKAPI.io instances from rotation.
+Public load balancers should not depend on every external provider being healthy, otherwise one government API outage could remove all UKApi.co.uk instances from rotation.
 
 ## 24. Security design
 
@@ -884,7 +884,7 @@ Because this product calls many external APIs, integration code is a sensitive S
 
 ## 25. Privacy and data retention
 
-UKAPI.io primarily handles public-source data, but customer usage data is still personal/business data.
+UKApi.co.uk primarily handles public-source data, but customer usage data is still personal/business data.
 
 Recommended retention defaults:
 
@@ -1058,7 +1058,7 @@ Initial internal targets, not contractual SLAs:
 - cache hit ratio: >80% overall after traffic warms, with much higher ratios for immutable/reference endpoints;
 - platform-generated 5xx rate: <0.5% under normal upstream conditions.
 
-Provider latency and outages should be measured separately from UKAPI.io platform faults.
+Provider latency and outages should be measured separately from UKApi.co.uk platform faults.
 
 ## 33. Scalability path
 
@@ -1078,7 +1078,7 @@ Possible future service extraction candidates are usage analytics and bulk datas
 
 Do not introduce Elasticsearch/OpenSearch for MVP unless an endpoint truly needs it. Companies House/FSA searches can initially rely on upstream search. Local SIC/council metadata can use MySQL indexes/full-text or small in-memory/cached datasets.
 
-If UKAPI.io later ingests national datasets and provides fuzzy cross-source search, then a dedicated search engine can be justified.
+If UKApi.co.uk later ingests national datasets and provides fuzzy cross-source search, then a dedicated search engine can be justified.
 
 ## 35. Deployment topology
 
@@ -1129,7 +1129,7 @@ Maintain a simple runbook containing provider disable commands/flags, queue rest
 
 ## 38. Source freshness policy
 
-Each response family should have a documented freshness contract expressed as **how UKAPI.io behaves**, not a guarantee about upstream publication.
+Each response family should have a documented freshness contract expressed as **how UKApi.co.uk behaves**, not a guarantee about upstream publication.
 
 Example:
 
@@ -1187,7 +1187,7 @@ Example C#:
 ```csharp
 using var client = new HttpClient
 {
-    BaseAddress = new Uri("https://api.ukapi.io/v1/")
+    BaseAddress = new Uri("https://api.ukapi.co.uk/v1/")
 };
 
 client.DefaultRequestHeaders.Authorization =
@@ -1288,7 +1288,7 @@ Do not tell customers “Companies House returned 502” as the primary API cont
 
 ## 46. Concurrency controls
 
-A sudden popular client could cause UKAPI.io to exceed an upstream provider rate limit even if each UKAPI.io plan limit appears reasonable.
+A sudden popular client could cause UKApi.co.uk to exceed an upstream provider rate limit even if each UKApi.co.uk plan limit appears reasonable.
 
 Use a provider-wide limiter in addition to customer limits:
 
@@ -1328,7 +1328,7 @@ When v2 is eventually needed, operate v1 and v2 in parallel for a communicated m
 
 ## 49. Pagination policy
 
-Use one UKAPI.io pagination model regardless of provider. Prefer cursor pagination for large mutable collections, but simple page/per-page is acceptable for MVP search endpoints if upstream APIs naturally support it.
+Use one UKApi.co.uk pagination model regardless of provider. Prefer cursor pagination for large mutable collections, but simple page/per-page is acceptable for MVP search endpoints if upstream APIs naturally support it.
 
 Cap `per_page` (for example at 100) to prevent amplification abuse.
 
@@ -1581,11 +1581,11 @@ PLANNING
 GET /v1/planning/constraints
 ```
 
-That is already enough for UKAPI.io to feel like a genuine toolbox rather than a single API with branding around it.
+That is already enough for UKApi.co.uk to feel like a genuine toolbox rather than a single API with branding around it.
 
 ## 60. Final engineering recommendation
 
-Implement UKAPI.io as a **modular Laravel 13 monolith** with a hard boundary between the public API contract and every upstream data source. Spend engineering effort on normalization, caching, metering, documentation and failure behaviour before spending it on infrastructure sophistication.
+Implement UKApi.co.uk as a **modular Laravel 13 monolith** with a hard boundary between the public API contract and every upstream data source. Spend engineering effort on normalization, caching, metering, documentation and failure behaviour before spending it on infrastructure sophistication.
 
 The platform's long-term technical asset is the normalized contract layer: provider quirks, licensing knowledge, geographic caveats, edge-case handling, source health behaviour and developer-friendly schemas. Protect that layer with interfaces, tests and observability from day one.
 

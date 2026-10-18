@@ -34,7 +34,7 @@ export default function AuthSimpleLayout({
                     </div>
                     {children}
                     <p className="text-center text-xs leading-5 text-slate-500">
-                        UKAPI.io is an independent developer service and is not
+                        UKApi.co.uk is an independent developer service and is not
                         affiliated with or endorsed by the UK Government.
                     </p>
                 </div>

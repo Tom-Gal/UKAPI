@@ -14,13 +14,14 @@ final class SecurityAlertNotification extends Notification
     public function __construct(
         public readonly string $heading,
         public readonly string $alertMessage,
+        public readonly ?string $activityDetails = null,
     ) {}
 
     public static function passwordChanged(): self
     {
         return new self(
             'Your password was changed',
-            'The password for your UKAPI.io account has just been changed. If this was not you, reset your password immediately and contact support.',
+            'The password for your UKApi.co.uk account has just been changed. If this was not you, reset your password immediately and contact support.',
         );
     }
 
@@ -28,7 +29,7 @@ final class SecurityAlertNotification extends Notification
     {
         return new self(
             'Two-factor authentication is active',
-            'A new authenticator app has been confirmed for your UKAPI.io account. Your recovery codes remain available in Security settings.',
+            'A new authenticator app has been confirmed for your UKApi.co.uk account. Your recovery codes remain available in Security settings.',
         );
     }
 
@@ -36,7 +37,21 @@ final class SecurityAlertNotification extends Notification
     {
         return new self(
             'Two-factor authentication was turned off',
-            'Two-factor authentication has been disabled on your UKAPI.io account. If this was not you, reset your password immediately and contact support.',
+            'Two-factor authentication has been disabled on your UKApi.co.uk account. If this was not you, reset your password immediately and contact support.',
+        );
+    }
+
+    public static function signedIn(?string $ipAddress, ?string $userAgent): self
+    {
+        $details = array_filter([
+            $ipAddress ? "IP address: {$ipAddress}" : null,
+            $userAgent ? 'Device: '.str($userAgent)->limit(180) : null,
+        ]);
+
+        return new self(
+            'New sign-in to your account',
+            'Your UKApi.co.uk account was just signed in to. If this was not you, reset your password immediately and review your API keys.',
+            $details ? implode("\n", $details) : null,
         );
     }
 
@@ -49,7 +64,7 @@ final class SecurityAlertNotification extends Notification
     public function toMail(User $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject($this->heading.' · UKAPI.io security')
+            ->subject($this->heading.' · UKApi.co.uk security')
             ->view([
                 'html' => 'emails.security.alert',
                 'text' => 'emails.security.alert-text',
@@ -57,6 +72,7 @@ final class SecurityAlertNotification extends Notification
                 'name' => $notifiable->name,
                 'heading' => $this->heading,
                 'alertMessage' => $this->alertMessage,
+                'activityDetails' => $this->activityDetails,
                 'securityUrl' => url('/settings/security'),
             ]);
     }

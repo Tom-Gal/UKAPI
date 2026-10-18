@@ -3,7 +3,9 @@
 namespace Tests\Feature\Auth;
 
 use App\Models\User;
+use App\Notifications\SecurityAlertNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\RateLimiter;
 use Laravel\Fortify\Features;
 use Tests\TestCase;
@@ -21,6 +23,7 @@ class AuthenticationTest extends TestCase
 
     public function test_users_can_authenticate_using_the_login_screen()
     {
+        Notification::fake();
         $user = User::factory()->create();
 
         $response = $this->post(route('login.store'), [
@@ -30,6 +33,9 @@ class AuthenticationTest extends TestCase
 
         $this->assertAuthenticated();
         $response->assertRedirect(route('dashboard', absolute: false));
+        Notification::assertSentTo($user, SecurityAlertNotification::class, function (SecurityAlertNotification $notification): bool {
+            return $notification->heading === 'New sign-in to your account';
+        });
     }
 
     public function test_users_with_two_factor_enabled_are_redirected_to_two_factor_challenge()

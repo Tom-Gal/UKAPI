@@ -10,7 +10,7 @@ final class GrantAdmin extends Command
 {
     protected $signature = 'ukapi:grant-admin {email : Email address of the existing user to promote}';
 
-    protected $description = 'Grant the UKAPI.io administrator role to an existing user.';
+    protected $description = 'Grant the UKApi.co.uk administrator role to an existing user.';
 
     public function handle(): int
     {

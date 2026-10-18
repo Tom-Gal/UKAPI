@@ -1,6 +1,6 @@
 Hi {{ $name }},
 
-A new API key was created for your UKAPI.io account.
+A new API key was created for your UKApi.co.uk account.
 
 Name: {{ $keyName }}
 Environment: {{ $environment }}

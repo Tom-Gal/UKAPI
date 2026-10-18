@@ -19,7 +19,7 @@ never in Git:
 - `TRUSTED_PROXIES` only when the host terminates TLS through a proxy you trust. Use the host's documented proxy addresses, or `*` only when the application is reachable exclusively through that trusted ingress.
 - `COMPANIES_HOUSE_API_KEY` from the secret manager. The previously exposed credential must not be reused.
 - Stripe secret-manager values: `STRIPE_KEY`, `STRIPE_SECRET`, `STRIPE_PRICE_HOBBY`, `STRIPE_PRICE_PRO`, and `STRIPE_PRICE_SCALE`. Run `php artisan stripe:provision-plans` against the applicable Stripe mode to create the documented GBP monthly prices when needed.
-- Create a Stripe webhook for `https://<your-domain>/stripe/webhook`, subscribe it to Cashier's customer/subscription and invoice events, and store its signing secret as `STRIPE_WEBHOOK_SECRET`. The release readiness command rejects a production configuration without it.
+- Create a Stripe webhook for `https://<your-domain>/stripe/webhook`. Subscribe it to Cashier's customer/subscription and invoice events, or run `php artisan cashier:webhook --url=https://<your-domain>/stripe/webhook` to create the complete Cashier event set. Store its signing secret as `STRIPE_WEBHOOK_SECRET`. The release readiness command rejects a production configuration without it.
 
 Keep `SIC_REFERENCE_SNAPSHOT_PATH` on writable persistent storage if the refresh
 command will run at runtime. A versioned SIC reference is bundled so first boot
@@ -41,6 +41,10 @@ php artisan ukapi:production:check --probe
 Restart any PHP workers after deploy. Create a Laravel Cloud queue worker when
 moving queued work off the request path, then include `php artisan queue:restart`
 as part of the release.
+
+Enable Laravel Cloud's Scheduler for the production environment. It runs the
+daily API-key rotation reminder, which sends customers a grouped reminder when
+an active key reaches 90 days and again no sooner than every 90 days.
 
 ## Operational checks
 

@@ -42,7 +42,7 @@ export function UkapiMark({
             {!compact && (
                 <span className="flex flex-col leading-none">
                     <span className="text-[15px] tracking-[-0.055em]">
-                        UKAPI.io
+                        UKApi.co.uk
                     </span>
                     <span className="mt-1 font-mono text-[8px] font-medium tracking-[0.18em] text-slate-500 uppercase">
                         Data field service

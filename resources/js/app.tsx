@@ -6,7 +6,7 @@ import AuthLayout from '@/layouts/auth-layout';
 import PublicLayout from '@/layouts/public-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 
-const appName = import.meta.env.VITE_APP_NAME || 'UKAPI.io';
+const appName = import.meta.env.VITE_APP_NAME || 'UKApi.co.uk';
 
 void createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),

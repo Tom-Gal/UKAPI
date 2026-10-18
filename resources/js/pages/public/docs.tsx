@@ -49,13 +49,13 @@ export default function Docs({ section }: DocsProps) {
             <Head title="Documentation">
                 <meta
                     name="description"
-                    content="A complete, practical guide to making reliable UKAPI.io requests."
+                    content="A complete, practical guide to making reliable UKApi.co.uk requests."
                 />
             </Head>
             <div className="border-b border-slate-300 bg-white">
                 <div className="atlas-shell flex items-center gap-2 py-4 text-xs font-medium text-slate-500">
                     <Link href="/" className="hover:text-[#2563c7]">
-                        UKAPI.io
+                        UKApi.co.uk
                     </Link>
                     <span aria-hidden="true">/</span>
                     <span className="text-slate-800">Documentation</span>
@@ -69,7 +69,7 @@ export default function Docs({ section }: DocsProps) {
                         <article className="max-w-4xl">
                             <header className="border-b border-slate-950 pb-12">
                                 <p className="atlas-kicker">
-                                    UKAPI.io API · v1
+                                    UKApi.co.uk API · v1
                                 </p>
                                 <h1 className="mt-4 text-5xl font-semibold tracking-[-0.045em] text-slate-950 sm:text-6xl">
                                     Documentation
@@ -108,12 +108,12 @@ export default function Docs({ section }: DocsProps) {
                                 </ol>
                                 <CodeBlock
                                     title="First request"
-                                    code={`curl "https://api.ukapi.io/v1/postcodes/BL2%206XX" \\\n+  -H "Authorization: Bearer uk_live_your_api_key" \\\n+  -H "Accept: application/json"`}
+                                    code={`curl "https://api.ukapi.co.uk/v1/postcodes/BL2%206XX" \\\n+  -H "Authorization: Bearer uk_live_your_api_key" \\\n+  -H "Accept: application/json"`}
                                 />
                                 <Callout title="Keep keys out of client code">
                                     Do not place an API key in browser
                                     JavaScript, a mobile app or public source
-                                    control. Call UKAPI.io through your own
+                                    control. Call UKApi.co.uk through your own
                                     backend.
                                 </Callout>
                             </DocSection>
@@ -347,7 +347,7 @@ Retry-After: 12`}
                                 id="sources-and-coverage"
                                 label="07"
                                 title="Sources & coverage"
-                                intro="UKAPI.io normalises public data without hiding where it came from or where it applies."
+                                intro="UKApi.co.uk normalises public data without hiding where it came from or where it applies."
                             >
                                 <div className="overflow-x-auto border border-slate-300 bg-white">
                                     <table className="w-full min-w-[680px] text-left text-sm">

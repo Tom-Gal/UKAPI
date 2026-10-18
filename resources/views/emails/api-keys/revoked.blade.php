@@ -1,4 +1,4 @@
-@extends('emails.layouts.transactional', ['title' => 'API key revoked', 'preheader' => 'An API key has been revoked for your UKAPI.io account.'])
+@extends('emails.layouts.transactional', ['title' => 'API key revoked', 'preheader' => 'An API key has been revoked for your UKApi.co.uk account.'])
 
 @section('content')
     <p style="margin:0 0 10px;color:#b45309;font-size:12px;font-weight:700;letter-spacing:.14em;line-height:16px;text-transform:uppercase;">API key activity</p>

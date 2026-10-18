@@ -40,7 +40,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                 >
                     <Link
                         href="/"
-                        aria-label="UKAPI.io home"
+                        aria-label="UKApi.co.uk home"
                         className="shrink-0"
                     >
                         <UkapiMark />
@@ -154,7 +154,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                 </div>
                 <div className="border-t border-[#415047]">
                     <div className="atlas-shell flex flex-col gap-2 py-5 font-mono text-[10px] leading-5 tracking-[0.08em] text-[#aeb8af] uppercase sm:flex-row sm:justify-between">
-                        <span>© {new Date().getFullYear()} UKAPI.io</span>
+                        <span>© {new Date().getFullYear()} UKApi.co.uk</span>
                         <span>
                             Not affiliated with or endorsed by the UK Government
                         </span>

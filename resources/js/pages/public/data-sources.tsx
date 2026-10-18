@@ -35,13 +35,13 @@ export default function DataSources() {
             <Head title="Data sources & attribution">
                 <meta
                     name="description"
-                    content="UKAPI.io source, attribution and coverage register."
+                    content="UKApi.co.uk source, attribution and coverage register."
                 />
             </Head>
             <PageHero
                 eyebrow="Data sources & attribution"
                 title="Public data still has provenance, terms and limits."
-                description="UKAPI.io is a normalisation layer, not the authority for these datasets. Coverage and freshness are exposed alongside endpoint responses."
+                description="UKApi.co.uk is a normalisation layer, not the authority for these datasets. Coverage and freshness are exposed alongside endpoint responses."
             />
             <div className="atlas-shell pb-24">
                 <div className="overflow-x-auto border border-slate-950 bg-white shadow-[5px_5px_0_#d7d2c3]">

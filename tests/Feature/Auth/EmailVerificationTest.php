@@ -51,7 +51,7 @@ class EmailVerificationTest extends TestCase
         Notification::assertSentTo($user, VerifyEmailNotification::class, function (VerifyEmailNotification $notification) use ($user): bool {
             $message = $notification->toMail($user);
 
-            return $message->subject === 'Verify your UKAPI.io email address'
+            return $message->subject === 'Verify your UKApi.co.uk email address'
                 && $message->view['html'] === 'emails.auth.verify-email'
                 && $message->view['text'] === 'emails.auth.verify-email-text';
         });
