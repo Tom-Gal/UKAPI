@@ -73,9 +73,9 @@ final class FloodController extends Controller
      *
      * Lists a bounded set of recent readings for an Environment Agency station.
      */
-    public function readings(Request $request, string $station, FloodService $flood): JsonResponse
+    public function readings(Request $request, string $id, FloodService $flood): JsonResponse
     {
-        $reference = FloodStationReference::from($station);
+        $reference = FloodStationReference::from($id);
         $result = $flood->readings($reference);
 
         return ApiResponse::success($request, [

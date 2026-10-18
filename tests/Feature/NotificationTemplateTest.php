@@ -36,8 +36,8 @@ class NotificationTemplateTest extends TestCase
         foreach ($notifications as $notification) {
             $html = $notification->toMail($user)->render();
 
-            $this->assertStringContainsString('UKAPI<span style="color:#1248e8;">.io</span>', $html);
-            $this->assertStringContainsString('background:#10182d', $html);
+            $this->assertStringContainsString('UKAPI.io', $html);
+            $this->assertStringContainsString('border-top:4px solid #2563c7', $html);
             $this->assertStringContainsString('Alex Smith', $html);
             $this->assertStringNotContainsString('color-scheme" content="dark', $html);
         }

@@ -5,6 +5,8 @@ info:
     description: |
         The UKAPI.io v1 contract. API keys are issued through the customer dashboard
         and must be supplied with the Bearer authentication scheme.
+        All operations are read-only GET requests and are safe to retry. X-Request-Id
+        is a correlation identifier; it does not deduplicate requests or usage accounting.
 servers:
     - url: https://api.ukapi.io
       description: Production
@@ -621,6 +623,7 @@ components:
             schema:
                 type: integer
                 minimum: 1
+                maximum: 10000
             example: 1
         PerPage:
             name: per_page
@@ -655,6 +658,18 @@ components:
                     schema:
                         type: integer
                 RateLimit-Reset:
+                    schema:
+                        type: integer
+                Retry-After:
+                    schema:
+                        type: integer
+                X-Quota-Limit:
+                    schema:
+                        type: integer
+                X-Quota-Remaining:
+                    schema:
+                        type: integer
+                X-Quota-Reset:
                     schema:
                         type: integer
             content:
@@ -698,6 +713,9 @@ components:
                     properties:
                         request_id:
                             type: string
+                        details:
+                            type: object
+                            additionalProperties: true
                             example: req_01j8d5s1wdm85crh9b739hw4gd
                         cached:
                             type: boolean
@@ -1218,7 +1236,7 @@ components:
                           properties:
                               pagination:
                                   type: object
-                                  required: [page, per_page, total]
+                                  required: [page, per_page, total, total_pages, next_page, previous_page]
                                   properties:
                                       page:
                                           type: integer
@@ -1226,6 +1244,12 @@ components:
                                           type: integer
                                       total:
                                           type: integer
+                                      total_pages:
+                                          type: integer
+                                      next_page:
+                                          type: [integer, 'null']
+                                      previous_page:
+                                          type: [integer, 'null']
         CompanyMeta:
             type: object
             required: [request_id, cached, stale, source, coverage]
@@ -1253,7 +1277,7 @@ components:
                   properties:
                       pagination:
                           type: object
-                          required: [page, per_page, total]
+                          required: [page, per_page, total, total_pages, next_page, previous_page]
                           properties:
                               page:
                                   type: integer
@@ -1261,6 +1285,12 @@ components:
                                   type: integer
                               total:
                                   type: integer
+                              total_pages:
+                                  type: integer
+                              next_page:
+                                  type: [integer, 'null']
+                              previous_page:
+                                  type: [integer, 'null']
         Company:
             type: object
             required:

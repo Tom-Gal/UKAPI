@@ -2,195 +2,258 @@ import { Head, Link } from '@inertiajs/react';
 import {
     ArrowRight,
     BookOpen,
-    Braces,
     Check,
     Database,
-    MapPinned,
+    Map,
     ShieldCheck,
 } from 'lucide-react';
 import { endpointFamilies, plans } from '@/lib/ukapi-content';
 
-const example = `curl https://api.ukapi.io/v1/postcodes/BL2\n  -H "Authorization: Bearer uk_live_…"\n\n{\n  "data": { "postcode": "BL2 6XX", "country": "England" },\n  "meta": { "request_id": "req_01…", "cached": true }\n}`;
+const example = `curl https://api.ukapi.io/v1/postcodes/BL2 \\\n+  -H "Authorization: Bearer uk_live_…"
+
+{
+  "data": { "postcode": "BL2 6XX", "country": "England" },
+  "meta": { "request_id": "req_01…", "cached": true }
+}`;
 
 export default function Welcome() {
+    const liveEndpoints = endpointFamilies.reduce(
+        (sum, family) => sum + family.endpoints.length,
+        0,
+    );
+
     return (
         <>
-            <Head title="Simple UK data. One API.">
+            <Head title="One clean route into useful UK data">
                 <meta
                     name="description"
-                    content="Postcodes, companies, councils, crime, holidays, planning and more through one clean API."
+                    content="Postcodes, companies, crime, flood information and more through one carefully normalised API."
                 />
             </Head>
-            <section className="relative overflow-hidden border-b border-slate-200 bg-[radial-gradient(circle_at_75%_25%,#dce8ff,transparent_26rem)]">
+
+            <section className="relative overflow-hidden border-b border-slate-950">
                 <div
                     aria-hidden="true"
-                    className="ukapi-glow pointer-events-none absolute -top-28 -right-24 size-96 rounded-full bg-blue-300/25 blur-3xl"
+                    className="absolute inset-0 [background-image:linear-gradient(to_right,#8fb49f45_1px,transparent_1px),linear-gradient(to_bottom,#8fb49f45_1px,transparent_1px)] [background-size:64px_64px] opacity-45"
                 />
-                <div className="relative mx-auto grid max-w-6xl gap-12 px-5 py-20 lg:grid-cols-[1.05fr_.95fr] lg:px-8 lg:py-28">
-                    <div className="max-w-xl">
-                        <p className="ukapi-enter mb-5 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-bold tracking-wide text-blue-800">
-                            <span className="size-1.5 rounded-full bg-[#1248e8]" />
-                            UK data, normalised for developers
-                        </p>
-                        <h1 className="ukapi-enter ukapi-enter-delay-1 text-5xl font-semibold tracking-[-0.055em] text-slate-950 sm:text-6xl">
-                            Simple UK data.
-                            <br />
-                            <span className="text-[#1248e8]">One API.</span>
+                <div className="atlas-shell relative grid min-h-[690px] min-w-0 lg:grid-cols-[1.12fr_.88fr]">
+                    <div className="flex flex-col justify-center border-slate-950 py-16 lg:border-r lg:py-24 lg:pr-14">
+                        <div className="ukapi-enter flex items-center gap-3">
+                            <span className="h-px w-10 bg-[#2563c7]" />
+                            <p className="atlas-kicker">
+                                The UK data field service
+                            </p>
+                        </div>
+                        <h1 className="ukapi-enter ukapi-enter-delay-1 mt-7 max-w-3xl text-[clamp(3rem,7vw,6.5rem)] leading-[0.92] font-semibold tracking-[-0.06em]">
+                            UK data, one clean API.
                         </h1>
-                        <p className="ukapi-enter ukapi-enter-delay-2 mt-6 max-w-lg text-lg leading-8 text-slate-600">
-                            Postcodes, companies, councils, crime, holidays,
-                            planning and more through one clean API.
+                        <p className="ukapi-enter ukapi-enter-delay-2 mt-9 max-w-xl text-lg leading-8 text-slate-600 sm:text-xl">
+                            Postcodes, companies, crime, flood information and
+                            more—normalised into a single, dependable API for UK
+                            products.
                         </p>
-                        <div className="ukapi-enter ukapi-enter-delay-3 mt-8 flex flex-wrap gap-3">
+                        <div className="ukapi-enter ukapi-enter-delay-3 mt-9 flex flex-col gap-4 sm:flex-row sm:flex-wrap">
                             <Link
                                 href="/register"
-                                className="inline-flex items-center gap-2 rounded-lg bg-[#1248e8] px-4 py-3 text-sm font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-[#0f3dc4] hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1248e8]"
+                                className="atlas-button w-full sm:w-auto"
                             >
-                                Start with the free plan{' '}
+                                Start on the free plan{' '}
                                 <ArrowRight className="size-4" />
                             </Link>
                             <Link
                                 href="/docs"
-                                className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-800 transition duration-200 hover:-translate-y-0.5 hover:border-slate-400 hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1248e8]"
+                                className="atlas-button-secondary w-full sm:w-auto"
                             >
-                                Read the docs <BookOpen className="size-4" />
+                                Open the field guide{' '}
+                                <BookOpen className="size-4" />
                             </Link>
                         </div>
-                        <p className="ukapi-enter ukapi-enter-delay-4 mt-5 text-sm text-slate-500">
-                            5,000 requests each month. No credit card required.
+                        <p className="ukapi-enter ukapi-enter-delay-4 mt-6 font-mono text-[11px] tracking-[0.08em] text-slate-500 uppercase">
+                            5,000 requests / month · no card required
                         </p>
                     </div>
-                    <div className="ukapi-enter ukapi-enter-delay-2 ukapi-float self-center overflow-hidden rounded-xl border border-slate-700 bg-[#10182d] shadow-2xl shadow-blue-950/15">
-                        <div className="flex items-center gap-2 border-b border-slate-700 px-4 py-3">
-                            <span className="size-2 rounded-full bg-rose-400" />
-                            <span className="size-2 rounded-full bg-amber-300" />
-                            <span className="size-2 rounded-full bg-emerald-400" />
-                            <span className="ml-2 font-mono text-xs text-slate-400">
-                                postcode.ts
-                            </span>
+
+                    <div className="relative flex min-w-0 items-center py-12 lg:pl-14">
+                        <div className="w-full min-w-0">
+                            <div className="atlas-coordinate mb-4 flex justify-between">
+                                <span>Sample response</span>
+                                <span className="hidden sm:inline">
+                                    53.592° N · 2.412° W
+                                </span>
+                                <span className="sm:hidden">OS grid</span>
+                            </div>
+                            <div className="ukapi-enter ukapi-enter-delay-2 max-w-full min-w-0 border border-slate-950 bg-[#122019] text-[#eef1e9] shadow-[6px_6px_0_#9dbbec] sm:shadow-[8px_8px_0_#9dbbec]">
+                                <div className="flex items-center justify-between border-b border-[#526158] px-5 py-3 font-mono text-[10px] tracking-[0.12em] text-[#afbcaf] uppercase">
+                                    <span>Request / response</span>
+                                    <span className="text-[#e89276]">
+                                        200 OK
+                                    </span>
+                                </div>
+                                <pre className="p-5 font-mono text-[12px] leading-6 break-words whitespace-pre-wrap sm:p-7 sm:text-[13px]">
+                                    <code>{example}</code>
+                                </pre>
+                            </div>
+                            <div className="mt-7 grid grid-cols-3 border border-slate-950 bg-white">
+                                <Stat
+                                    value={`${liveEndpoints}`}
+                                    label="live endpoints"
+                                />
+                                <Stat
+                                    value={`${endpointFamilies.length}`}
+                                    label="data families"
+                                />
+                                <Stat value="v1" label="stable contract" />
+                            </div>
                         </div>
-                        <pre className="overflow-x-auto p-5 font-mono text-[13px] leading-6 text-blue-100">
-                            <code>{example}</code>
-                        </pre>
                     </div>
                 </div>
             </section>
-            <section className="mx-auto max-w-6xl px-5 py-20 lg:px-8">
-                <div className="max-w-2xl">
-                    <p className="text-sm font-bold tracking-[.16em] text-[#1248e8] uppercase">
-                        One surface area
-                    </p>
-                    <h2 className="mt-3 text-3xl font-semibold tracking-[-.035em]">
-                        The useful parts of UK data, without the integration
-                        tax.
-                    </h2>
-                    <p className="mt-4 leading-7 text-slate-600">
-                        One account, one API key, one response format.
-                        Source-specific quirks stay behind the API boundary.
-                    </p>
-                </div>
-                <div className="mt-10 grid gap-px overflow-hidden rounded-xl border border-slate-200 bg-slate-200 sm:grid-cols-2 lg:grid-cols-4">
-                    {endpointFamilies.map((family, index) => (
+
+            <section className="atlas-shell py-20 lg:py-28">
+                <div className="grid gap-12 lg:grid-cols-[.7fr_1.3fr]">
+                    <div>
+                        <p className="atlas-kicker">Coverage index</p>
+                        <h2 className="mt-5 text-4xl leading-[1.02] font-semibold tracking-[-0.04em] sm:text-5xl">
+                            The useful parts, catalogued clearly.
+                        </h2>
+                        <p className="mt-6 max-w-md leading-7 text-slate-600">
+                            One account and one response shape. Source,
+                            freshness and geographic limits remain attached to
+                            every route.
+                        </p>
                         <Link
-                            key={family.slug}
-                            href="/docs"
-                            className="group bg-white p-5 transition duration-300 hover:-translate-y-1 hover:bg-blue-50 hover:shadow-lg hover:shadow-blue-950/5 focus-visible:relative focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#1248e8]"
+                            href="/api-catalogue"
+                            className="mt-7 inline-flex items-center gap-2 border-b border-slate-950 pb-1 text-sm font-bold hover:text-[#2563c7]"
                         >
-                            <div className="flex items-center justify-between">
-                                <span className="font-mono text-xs text-slate-400">
-                                    0{index + 1}
-                                </span>
-                                <ArrowRight className="size-4 text-slate-300 transition group-hover:translate-x-0.5 group-hover:text-[#1248e8]" />
-                            </div>
-                            <h3 className="mt-8 font-semibold tracking-tight">
-                                {family.name}
-                            </h3>
-                            <p className="mt-2 text-sm leading-6 text-slate-600">
-                                {family.summary}
-                            </p>
+                            Explore the full catalogue{' '}
+                            <ArrowRight className="size-4" />
                         </Link>
-                    ))}
+                    </div>
+                    <div className="border-t border-l border-slate-950">
+                        {endpointFamilies.map((family, index) => (
+                            <Link
+                                key={family.slug}
+                                href={`/docs/api-reference#${family.slug}`}
+                                className="group grid gap-3 border-r border-b border-slate-950 bg-white p-5 transition hover:bg-[#e4ece7] sm:grid-cols-[3rem_11rem_1fr_auto] sm:items-center"
+                            >
+                                <span className="font-mono text-xs text-[#2563c7]">
+                                    {String(index + 1).padStart(2, '0')}
+                                </span>
+                                <h3 className="font-sans text-base font-bold tracking-tight">
+                                    {family.name}
+                                </h3>
+                                <p className="text-sm leading-6 text-slate-600">
+                                    {family.summary}
+                                </p>
+                                <ArrowRight className="size-4 transition group-hover:translate-x-1" />
+                            </Link>
+                        ))}
+                    </div>
                 </div>
             </section>
-            <section className="border-y border-slate-200 bg-white">
-                <div className="mx-auto grid max-w-6xl gap-10 px-5 py-20 md:grid-cols-3 lg:px-8">
-                    <Value
-                        icon={Braces}
-                        title="Predictable contracts"
-                        text="A consistent JSON envelope, stable error codes and clear versioning under /v1."
-                    />
+
+            <section className="border-y border-slate-950 bg-[#dbe4cd]">
+                <div className="atlas-shell grid lg:grid-cols-3">
                     <Value
                         icon={Database}
-                        title="Useful freshness"
-                        text="Caching policies are documented by endpoint, with source timestamps where they matter."
+                        title="Predictable contracts"
+                        text="A consistent JSON envelope, stable error codes and clear versioning across every source."
                     />
                     <Value
-                        icon={MapPinned}
-                        title="Honest coverage"
-                        text="England-only, partial and UK-wide coverage are explicit—not hidden in fine print."
+                        icon={Map}
+                        title="Coverage in view"
+                        text="UK-wide, England-only and partial coverage are treated as product information, not fine print."
+                    />
+                    <Value
+                        icon={ShieldCheck}
+                        title="Provenance included"
+                        text="Freshness, upstream source and request IDs travel with the data that needs them."
                     />
                 </div>
             </section>
-            <section className="mx-auto max-w-6xl px-5 py-20 lg:px-8">
-                <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
+
+            <section className="atlas-shell py-20 lg:py-28">
+                <div className="grid gap-10 lg:grid-cols-[.8fr_1.2fr]">
                     <div>
-                        <p className="text-sm font-bold tracking-[.16em] text-[#1248e8] uppercase">
-                            Straightforward pricing
-                        </p>
-                        <h2 className="mt-3 text-3xl font-semibold tracking-[-.035em]">
-                            A useful free tier. Clear limits.
+                        <p className="atlas-kicker">Usage bands</p>
+                        <h2 className="mt-5 text-4xl leading-none font-semibold tracking-[-0.04em]">
+                            Start useful. Scale plainly.
                         </h2>
+                        <p className="mt-5 max-w-md leading-7 text-slate-600">
+                            Every live endpoint counts as one request. Pick a
+                            monthly allowance; the API stays the same.
+                        </p>
                     </div>
-                    <Link
-                        href="/pricing"
-                        className="inline-flex items-center gap-1 text-sm font-semibold text-[#1248e8] hover:text-[#0f3dc4]"
-                    >
-                        Compare plans <ArrowRight className="size-4" />
+                    <div className="grid border-t border-l border-slate-950 sm:grid-cols-2">
+                        {plans.map((plan) => (
+                            <div
+                                key={plan.name}
+                                className={`relative border-r border-b border-slate-950 p-6 ${plan.emphasis ? 'bg-[#122019] text-white' : 'bg-white'}`}
+                            >
+                                {plan.emphasis && (
+                                    <span className="absolute top-0 right-0 bg-[#2563c7] px-2 py-1 font-mono text-[9px] tracking-widest uppercase">
+                                        Most useful
+                                    </span>
+                                )}
+                                <p className="font-mono text-[11px] font-bold tracking-widest uppercase">
+                                    {plan.name}
+                                </p>
+                                <p className="mt-7 text-4xl font-semibold tracking-tight">
+                                    {plan.price}
+                                    <span className="font-sans text-sm font-normal opacity-60">
+                                        {' '}
+                                        / mo
+                                    </span>
+                                </p>
+                                <p
+                                    className={`mt-3 font-mono text-xs ${plan.emphasis ? 'text-[#b9cba6]' : 'text-[#2563c7]'}`}
+                                >
+                                    {plan.quota} requests
+                                </p>
+                                <p className="mt-4 text-sm leading-6 opacity-70">
+                                    {plan.description}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+                <div className="mt-8 flex justify-end">
+                    <Link href="/pricing" className="atlas-button-secondary">
+                        Compare every plan <ArrowRight className="size-4" />
                     </Link>
                 </div>
-                <div className="mt-8 grid gap-4 md:grid-cols-4">
-                    {plans.map((plan) => (
-                        <div
-                            key={plan.name}
-                            className={`rounded-xl border p-5 transition duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-950/5 ${plan.emphasis ? 'border-[#1248e8] bg-blue-50' : 'border-slate-200 bg-white'}`}
-                        >
-                            <p className="font-semibold">{plan.name}</p>
-                            <p className="mt-4 text-3xl font-semibold tracking-tight">
-                                {plan.price}
-                                <span className="text-sm font-medium text-slate-500">
-                                    /mo
-                                </span>
-                            </p>
-                            <p className="mt-3 font-mono text-sm text-[#1248e8]">
-                                {plan.quota} requests
-                            </p>
-                            <p className="mt-3 text-sm leading-5 text-slate-600">
-                                {plan.description}
-                            </p>
-                        </div>
-                    ))}
-                </div>
             </section>
-            <section className="border-t border-slate-200 bg-[#10182d]">
-                <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-7 px-5 py-16 lg:flex-row lg:items-center lg:px-8">
+
+            <section className="border-t border-slate-950 bg-[#2563c7] text-white">
+                <div className="atlas-shell flex flex-col items-start justify-between gap-8 py-14 md:flex-row md:items-end">
                     <div>
-                        <div className="flex items-center gap-2 text-blue-200">
-                            <ShieldCheck className="size-5" />
-                            Built for real integrations.
-                        </div>
-                        <h2 className="mt-3 text-3xl font-semibold tracking-[-.035em] text-white">
-                            Make the first successful request in minutes.
+                        <p className="font-mono text-[11px] font-bold tracking-[0.16em] uppercase">
+                            Ready for first contact?
+                        </p>
+                        <h2 className="mt-4 max-w-2xl text-4xl leading-none font-semibold tracking-[-0.04em] sm:text-5xl">
+                            Make a successful request in minutes.
                         </h2>
                     </div>
                     <Link
                         href="/register"
-                        className="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-3 text-sm font-semibold text-slate-950 transition duration-200 hover:-translate-y-0.5 hover:bg-blue-50 hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                        className="inline-flex min-h-12 items-center gap-2 border border-white bg-white px-5 py-3 text-sm font-bold text-[#122019] transition hover:bg-[#edf4ff]"
                     >
-                        Create your account <Check className="size-4" />
+                        Create an account <Check className="size-4" />
                     </Link>
                 </div>
             </section>
         </>
+    );
+}
+
+function Stat({ value, label }: { value: string; label: string }) {
+    return (
+        <div className="border-r border-slate-950 p-4 last:border-r-0">
+            <p className="text-2xl font-semibold tracking-tight">{value}</p>
+            <p className="mt-1 font-mono text-[9px] tracking-wider text-slate-500 uppercase">
+                {label}
+            </p>
+        </div>
     );
 }
 
@@ -199,15 +262,15 @@ function Value({
     title,
     text,
 }: {
-    icon: typeof Braces;
+    icon: typeof Database;
     title: string;
     text: string;
 }) {
     return (
-        <div>
-            <Icon className="size-5 text-[#1248e8]" />
-            <h3 className="mt-4 font-semibold">{title}</h3>
-            <p className="mt-2 text-sm leading-6 text-slate-600">{text}</p>
+        <div className="border-b border-slate-950 p-8 last:border-b-0 lg:border-r lg:border-b-0 lg:last:border-r-0">
+            <Icon className="size-6 text-[#2563c7]" strokeWidth={1.7} />
+            <h3 className="mt-8 font-sans text-lg font-bold">{title}</h3>
+            <p className="mt-3 text-sm leading-6 text-slate-700">{text}</p>
         </div>
     );
 }

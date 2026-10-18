@@ -2,10 +2,13 @@
 
 namespace App\Http\Requests\Api\V1;
 
+use App\Http\Requests\Api\V1\Concerns\InteractsWithPagination;
 use Illuminate\Foundation\Http\FormRequest;
 
 class CompanySearchRequest extends FormRequest
 {
+    use InteractsWithPagination;
+
     public function authorize(): bool
     {
         return true;
@@ -16,8 +19,7 @@ class CompanySearchRequest extends FormRequest
     {
         return [
             'q' => ['bail', 'required', 'string', 'min:2', 'max:200', 'not_regex:/^\\s*$/'],
-            'page' => ['sometimes', 'integer', 'min:1'],
-            'per_page' => ['sometimes', 'integer', 'between:1,100'],
+            ...$this->paginationRules(),
         ];
     }
 
@@ -26,13 +28,4 @@ class CompanySearchRequest extends FormRequest
         return (string) preg_replace('/\\s+/', ' ', trim((string) $this->validated('q')));
     }
 
-    public function pageNumber(): int
-    {
-        return (int) ($this->validated('page') ?? 1);
-    }
-
-    public function perPage(): int
-    {
-        return (int) ($this->validated('per_page') ?? 25);
-    }
 }

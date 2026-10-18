@@ -76,15 +76,38 @@ return Application::configure(basePath: dirname(__DIR__))
             );
         });
         $exceptions->render(function (HttpExceptionInterface $exception, Request $request) {
-            if (! $request->is('v1/*') || $exception->getStatusCode() !== 404) {
+            if (! $request->is('v1/*')) {
+                return null;
+            }
+
+            [$code, $message] = match ($exception->getStatusCode()) {
+                400 => ['bad_request', 'The request could not be understood.'],
+                401 => ['unauthorized', 'Authentication is required to access this API endpoint.'],
+                403 => ['forbidden', 'You are not permitted to access this API endpoint.'],
+                404 => ['not_found', 'The requested API endpoint was not found.'],
+                405 => ['method_not_allowed', 'This HTTP method is not supported by the requested API endpoint.'],
+                406 => ['not_acceptable', 'The requested response representation is not available.'],
+                415 => ['unsupported_media_type', 'The request content type is not supported.'],
+                default => ['http_error', 'The API request could not be completed.'],
+            };
+
+            return ApiResponse::error(
+                $request,
+                code: $code,
+                message: $message,
+                status: $exception->getStatusCode(),
+            );
+        });
+        $exceptions->render(function (\Throwable $exception, Request $request) {
+            if (! $request->is('v1/*')) {
                 return null;
             }
 
             return ApiResponse::error(
                 $request,
-                code: 'not_found',
-                message: 'The requested API endpoint was not found.',
-                status: 404,
+                code: 'internal_error',
+                message: 'The API encountered an unexpected error. Please retry shortly.',
+                status: 500,
             );
         });
     })->create();

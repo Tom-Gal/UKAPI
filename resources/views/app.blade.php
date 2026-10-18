@@ -5,10 +5,10 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        {{-- Keep the first paint aligned with the permanent light interface. --}}
+        {{-- Keep the first paint aligned with the field-atlas interface. --}}
         <style>
             html {
-                background-color: oklch(1 0 0);
+                background-color: #f5f7f4;
             }
         </style>
 

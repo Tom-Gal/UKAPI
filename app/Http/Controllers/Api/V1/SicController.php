@@ -9,6 +9,7 @@ use App\Domain\Companies\SicSnapshot;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\SicSearchRequest;
 use App\Support\Api\ApiResponse;
+use App\Support\Api\Pagination;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -51,11 +52,7 @@ final class SicController extends Controller
             array_map(static fn (SicData $record): array => $record->toArray(), $result['records']),
             [
                 ...$this->meta($result['snapshot'], $result['cached']),
-                'pagination' => [
-                    'page' => $page,
-                    'per_page' => $perPage,
-                    'total' => $result['total'],
-                ],
+                'pagination' => Pagination::from($page, $perPage, $result['total'])->toArray(),
             ],
         );
     }

@@ -38,13 +38,19 @@ export default function Usage({
                     </p>
                     <div className="mt-5 h-2 overflow-hidden rounded-full bg-slate-100">
                         <div
-                            className="h-full rounded-full bg-[#1248e8] transition-[width] duration-500"
+                            className="h-full bg-[#2563c7] transition-[width] duration-500"
                             style={{ width: `${percentage}%` }}
                         />
                     </div>
                 </div>
-                <EmptyState title={monthlyUsage === 0 ? 'No usage recorded yet' : 'Keep building'}>
-                    <BarChart3 className="mx-auto size-5 text-[#1248e8]" />
+                <EmptyState
+                    title={
+                        monthlyUsage === 0
+                            ? 'No usage recorded yet'
+                            : 'Keep building'
+                    }
+                >
+                    <BarChart3 className="mx-auto size-5 text-[#2563c7]" />
                     <p className="mt-2">
                         {monthlyUsage === 0
                             ? 'Make your first API request to start using your monthly allowance.'
@@ -52,7 +58,7 @@ export default function Usage({
                     </p>
                     <Link
                         href="/docs"
-                        className="mt-4 inline-flex items-center gap-1 font-semibold text-[#1248e8]"
+                        className="mt-4 inline-flex items-center gap-1 border-b border-[#2563c7] font-semibold text-slate-950 hover:text-[#2563c7]"
                     >
                         Read the API documentation
                         <ArrowRight className="size-4" />

@@ -28,7 +28,7 @@ export default function Dashboard({ summary }: Props) {
                 action={
                     <Link
                         href="/api-keys"
-                        className="inline-flex items-center gap-2 rounded-lg bg-[#1248e8] px-3.5 py-2.5 text-sm font-semibold text-white hover:bg-[#0f3dc4]"
+                        className="inline-flex items-center gap-2 border border-slate-950 bg-[#13231a] px-3.5 py-2.5 text-sm font-semibold text-white shadow-[3px_3px_0_#9dbbec] hover:bg-[#2563c7]"
                     >
                         <KeyRound className="size-4" />
                         Manage API keys
@@ -64,20 +64,20 @@ export default function Dashboard({ summary }: Props) {
                                 accepted.
                             </p>
                         </div>
-                        <span className="font-mono text-sm text-[#1248e8]">
+                        <span className="font-mono text-sm text-[#2563c7]">
                             {summary.monthly_requests.toLocaleString()} /{' '}
                             {summary.monthly_quota.toLocaleString()}
                         </span>
                     </div>
                     <div className="mt-5 h-2 overflow-hidden rounded-full bg-slate-100">
                         <div
-                            className="h-full rounded-full bg-[#1248e8]"
+                            className="h-full bg-[#2563c7]"
                             style={{ width: `${percentage}%` }}
                         />
                     </div>
                     <Link
                         href="/usage"
-                        className="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-[#1248e8]"
+                        className="mt-5 inline-flex items-center gap-1 border-b border-[#2563c7] text-sm font-semibold text-slate-950 hover:text-[#2563c7]"
                     >
                         View usage details <ArrowRight className="size-4" />
                     </Link>
@@ -90,7 +90,7 @@ export default function Dashboard({ summary }: Props) {
                         </p>
                         <Link
                             href="/api-keys"
-                            className="mt-4 inline-flex items-center gap-2 font-semibold text-[#1248e8]"
+                            className="mt-4 inline-flex items-center gap-2 font-semibold text-[#2563c7]"
                         >
                             Create a key <ArrowRight className="size-4" />
                         </Link>
@@ -103,7 +103,7 @@ export default function Dashboard({ summary }: Props) {
                         </p>
                         <Link
                             href="/docs"
-                            className="mt-4 inline-flex items-center gap-2 font-semibold text-[#1248e8]"
+                            className="mt-4 inline-flex items-center gap-2 font-semibold text-[#2563c7]"
                         >
                             Open documentation <Zap className="size-4" />
                         </Link>

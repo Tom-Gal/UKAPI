@@ -2,10 +2,13 @@
 
 namespace App\Http\Requests\Api\V1;
 
+use App\Http\Requests\Api\V1\Concerns\InteractsWithPagination;
 use Illuminate\Foundation\Http\FormRequest;
 
 class SicSearchRequest extends FormRequest
 {
+    use InteractsWithPagination;
+
     public function authorize(): bool
     {
         return true;
@@ -24,8 +27,7 @@ class SicSearchRequest extends FormRequest
     {
         return [
             'q' => ['required', 'string', 'min:2', 'max:200'],
-            'page' => ['sometimes', 'integer', 'min:1'],
-            'per_page' => ['sometimes', 'integer', 'between:1,100'],
+            ...$this->paginationRules(),
         ];
     }
 
@@ -34,13 +36,4 @@ class SicSearchRequest extends FormRequest
         return (string) $this->validated('q');
     }
 
-    public function pageNumber(): int
-    {
-        return (int) ($this->validated('page') ?? 1);
-    }
-
-    public function perPage(): int
-    {
-        return (int) ($this->validated('per_page') ?? 25);
-    }
 }

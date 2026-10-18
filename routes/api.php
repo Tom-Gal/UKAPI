@@ -67,7 +67,7 @@ Route::prefix('v1')
         Route::get('flood/stations/nearby', [FloodController::class, 'stationsNearby'])
             ->defaults('ukapi_endpoint', 'flood.stations.nearby')
             ->name('api.v1.flood.stations.nearby');
-        Route::get('flood/stations/{station}/readings', [FloodController::class, 'readings'])
+        Route::get('flood/stations/{id}/readings', [FloodController::class, 'readings'])
             ->defaults('ukapi_endpoint', 'flood.stations.readings')
             ->name('api.v1.flood.stations.readings');
 

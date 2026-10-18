@@ -19,43 +19,56 @@ export default function Pricing() {
                 title="Pay for more headroom, not a more complicated product."
                 description="Every MVP endpoint counts as one request. There are no launch overages; upgrade when your quota needs to grow."
             />
-            <div className="mx-auto max-w-6xl px-5 pb-20 lg:px-8">
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <div className="atlas-shell pb-24">
+                <div className="grid border-t border-l border-slate-950 md:grid-cols-2 lg:grid-cols-4">
                     {plans.map((plan) => (
                         <article
                             key={plan.name}
-                            className={`flex flex-col rounded-xl border p-6 ${plan.emphasis ? 'border-[#1248e8] bg-blue-50 shadow-sm' : 'border-slate-200 bg-white'}`}
+                            className={`relative flex flex-col border-r border-b border-slate-950 p-6 ${plan.emphasis ? 'bg-[#122019] text-white' : 'bg-white'}`}
                         >
-                            <h2 className="font-semibold">{plan.name}</h2>
+                            {plan.emphasis && (
+                                <span className="absolute top-0 right-0 bg-[#2563c7] px-2 py-1 font-mono text-[9px] tracking-widest uppercase">
+                                    Recommended
+                                </span>
+                            )}
+                            <h2 className="font-sans font-bold">{plan.name}</h2>
                             <p className="mt-5 text-4xl font-semibold tracking-tight">
                                 {plan.price}
-                                <span className="text-base font-medium text-slate-500">
+                                <span
+                                    className={`text-base font-medium ${plan.emphasis ? 'text-[#aeb8af]' : 'text-slate-500'}`}
+                                >
                                     /month
                                 </span>
                             </p>
-                            <p className="mt-3 font-mono text-sm text-[#1248e8]">
+                            <p
+                                className={`mt-3 font-mono text-sm ${plan.emphasis ? 'text-[#b9cba6]' : 'text-[#2563c7]'}`}
+                            >
                                 {plan.quota} requests/month
                             </p>
-                            <p className="mt-4 min-h-10 text-sm leading-5 text-slate-600">
+                            <p
+                                className={`mt-4 min-h-10 text-sm leading-5 ${plan.emphasis ? 'text-[#cbd2c7]' : 'text-slate-600'}`}
+                            >
                                 {plan.description}
                             </p>
-                            <ul className="mt-6 space-y-3 border-t border-slate-200/80 pt-5 text-sm text-slate-700">
+                            <ul
+                                className={`mt-6 space-y-3 border-t pt-5 text-sm ${plan.emphasis ? 'border-[#526158] text-[#e7ece6]' : 'border-slate-300 text-slate-700'}`}
+                            >
                                 <li className="flex gap-2">
-                                    <Check className="size-4 shrink-0 text-[#1248e8]" />
+                                    <Check className="size-4 shrink-0 text-[#2563c7]" />
                                     One API key account
                                 </li>
                                 <li className="flex gap-2">
-                                    <Check className="size-4 shrink-0 text-[#1248e8]" />
+                                    <Check className="size-4 shrink-0 text-[#2563c7]" />
                                     Predictable JSON contracts
                                 </li>
                                 <li className="flex gap-2">
-                                    <Check className="size-4 shrink-0 text-[#1248e8]" />
+                                    <Check className="size-4 shrink-0 text-[#2563c7]" />
                                     Documented coverage
                                 </li>
                             </ul>
                             <Link
                                 href={auth.user ? '/billing' : '/register'}
-                                className={`mt-8 rounded-lg px-4 py-2.5 text-center text-sm font-semibold transition ${plan.emphasis ? 'bg-[#1248e8] text-white hover:bg-[#0f3dc4]' : 'border border-slate-300 bg-white text-slate-900 hover:border-slate-400'}`}
+                                className={`mt-8 border px-4 py-3 text-center text-sm font-bold transition ${plan.emphasis ? 'border-white bg-white text-[#122019] hover:bg-[#dce9ff]' : 'border-slate-950 bg-transparent text-slate-900 hover:bg-[#e4ece7]'}`}
                             >
                                 {auth.user
                                     ? `Choose ${plan.name}`

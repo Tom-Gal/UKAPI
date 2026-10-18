@@ -43,10 +43,10 @@ export default function DataSources() {
                 title="Public data still has provenance, terms and limits."
                 description="UKAPI.io is a normalisation layer, not the authority for these datasets. Coverage and freshness are exposed alongside endpoint responses."
             />
-            <div className="mx-auto max-w-6xl px-5 pb-20 lg:px-8">
-                <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+            <div className="atlas-shell pb-24">
+                <div className="overflow-x-auto border border-slate-950 bg-white shadow-[5px_5px_0_#d7d2c3]">
                     <table className="w-full min-w-[760px] text-left text-sm">
-                        <thead className="bg-slate-50 text-xs tracking-wide text-slate-500 uppercase">
+                        <thead className="border-b border-slate-950 bg-[#122019] font-mono text-[10px] tracking-[0.14em] text-[#dbe4cd] uppercase">
                             <tr>
                                 <th className="px-5 py-3">Source</th>
                                 <th className="px-5 py-3">Coverage</th>
@@ -58,7 +58,7 @@ export default function DataSources() {
                             {sources.map(([name, url, coverage, use]) => (
                                 <tr
                                     key={name}
-                                    className="border-t border-slate-100"
+                                    className="border-t border-slate-300 first:border-t-0 hover:bg-[#e4ece7]"
                                 >
                                     <td className="px-5 py-4 font-medium">
                                         {name}
@@ -74,7 +74,7 @@ export default function DataSources() {
                                             href={url}
                                             target="_blank"
                                             rel="noreferrer"
-                                            className="inline-flex items-center gap-1 font-semibold text-[#1248e8]"
+                                            className="inline-flex items-center gap-1 border-b border-[#2563c7] font-semibold text-slate-950 hover:text-[#2563c7]"
                                         >
                                             Source docs{' '}
                                             <ExternalLink className="size-3.5" />
@@ -85,7 +85,7 @@ export default function DataSources() {
                         </tbody>
                     </table>
                 </div>
-                <p className="mt-6 text-sm leading-6 text-slate-500">
+                <p className="mt-7 max-w-2xl border-l-2 border-[#2563c7] pl-4 text-sm leading-6 text-slate-600">
                     Data is supplied by the sources shown above. Coverage and
                     freshness are included in API responses where available.
                 </p>

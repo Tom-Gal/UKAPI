@@ -15,6 +15,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\CompanyCollectionRequest;
 use App\Http\Requests\Api\V1\CompanySearchRequest;
 use App\Support\Api\ApiResponse;
+use App\Support\Api\Pagination;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -97,7 +98,7 @@ final class CompanyController extends Controller
         );
     }
 
-    /** @return array<string, bool|int|string|null|array<string, int>> */
+    /** @return array<string, bool|int|string|null|array<string, int|null>> */
     private function meta(
         CompanyProfile|CompanySearchResults|CompanyOfficers|CompanyFilings $result,
         ?int $page = null,
@@ -112,11 +113,7 @@ final class CompanyController extends Controller
         ];
 
         if ($page !== null && $perPage !== null && ($result instanceof CompanySearchResults || $result instanceof CompanyOfficers || $result instanceof CompanyFilings)) {
-            $meta['pagination'] = [
-                'page' => $page,
-                'per_page' => $perPage,
-                'total' => $result->total,
-            ];
+            $meta['pagination'] = Pagination::from($page, $perPage, $result->total)->toArray();
         }
 
         return $meta;

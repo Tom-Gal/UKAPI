@@ -2,7 +2,7 @@
 
 @section('content')
     <p style="margin:0 0 10px;color:#b45309;font-size:12px;font-weight:700;letter-spacing:.14em;line-height:16px;text-transform:uppercase;">Security notice</p>
-    <h1 style="margin:0 0 14px;color:#0f172a;font-size:28px;line-height:34px;letter-spacing:-1px;">{{ $heading }}</h1>
-    <p style="margin:0 0 24px;color:#475569;font-size:16px;line-height:25px;">Hi {{ $name }}, {{ $alertMessage }}</p>
-    <p style="margin:0;"><a href="{{ $securityUrl }}" style="display:inline-block;background:#10182d;border-radius:8px;color:#ffffff;font-size:15px;font-weight:700;line-height:20px;padding:12px 18px;text-decoration:none;">Review security settings&nbsp; →</a></p>
+    <h1 style="margin:0 0 14px;color:#13231a;font-size:28px;line-height:34px;letter-spacing:-.7px;">{{ $heading }}</h1>
+    <p style="margin:0 0 24px;color:#4d5b51;font-size:16px;line-height:25px;">Hi {{ $name }}, {{ $alertMessage }}</p>
+    <p style="margin:0;"><a href="{{ $securityUrl }}" style="display:inline-block;background:#13231a;border:1px solid #13231a;color:#ffffff;font-size:15px;font-weight:700;line-height:20px;padding:12px 18px;text-decoration:none;">Review security settings&nbsp; →</a></p>
 @endsection

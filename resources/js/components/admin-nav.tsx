@@ -16,7 +16,7 @@ export function AdminNav() {
                 <Link
                     key={href}
                     href={href}
-                    className="rounded-md px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-blue-50 hover:text-[#1248e8]"
+                    className="border-b border-transparent px-3 py-2 font-mono text-xs font-bold tracking-wide text-slate-600 uppercase hover:border-[#2563c7] hover:text-[#2563c7]"
                 >
                     {name}
                 </Link>

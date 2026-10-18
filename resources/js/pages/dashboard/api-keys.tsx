@@ -87,7 +87,7 @@ export default function ApiKeys({ apiKeys }: Props) {
                                 </fieldset>
                                 <Button
                                     disabled={processing}
-                                    className="w-full bg-[#1248e8] hover:bg-[#0f3dc4]"
+                                    className="w-full bg-[#13231a] hover:bg-[#2563c7]"
                                 >
                                     {processing
                                         ? 'Creating key…'

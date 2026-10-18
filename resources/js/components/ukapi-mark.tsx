@@ -24,24 +24,29 @@ export function UkapiMark({
                     className="size-full"
                     xmlns="http://www.w3.org/2000/svg"
                 >
-                    <path
-                        d="M6.5 6.5V19c0 4.45 3.4 7.5 8.5 7.5s8.5-3.05 8.5-7.5V6.5"
+                    <rect
+                        x="2.5"
+                        y="2.5"
+                        width="27"
+                        height="27"
                         stroke="currentColor"
-                        strokeWidth="3.25"
-                        strokeLinecap="round"
                     />
-                    <circle cx="25" cy="7" r="3.25" fill="#1248e8" />
                     <path
-                        d="M25 5.5v3M23.5 7h3"
-                        stroke="white"
-                        strokeWidth="1"
-                        strokeLinecap="round"
+                        d="M8 9v8.2c0 4.2 2.8 6.8 7 6.8s7-2.6 7-6.8V9"
+                        stroke="currentColor"
+                        strokeWidth="2.4"
                     />
+                    <circle cx="23.5" cy="8.5" r="3.5" fill="#2563c7" />
                 </svg>
             </span>
             {!compact && (
-                <span className="text-[15px] leading-none tracking-[-0.055em]">
-                    UKAPI<span className="text-[#1248e8]">.io</span>
+                <span className="flex flex-col leading-none">
+                    <span className="text-[15px] tracking-[-0.055em]">
+                        UKAPI.io
+                    </span>
+                    <span className="mt-1 font-mono text-[8px] font-medium tracking-[0.18em] text-slate-500 uppercase">
+                        Data field service
+                    </span>
                 </span>
             )}
         </span>

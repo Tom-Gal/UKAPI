@@ -72,7 +72,7 @@ export default function Billing({
                                     <h3 className="font-semibold">
                                         {paidPlan.label}
                                     </h3>
-                                    <p className="mt-2 font-mono text-sm text-[#1248e8]">
+                                    <p className="mt-2 font-mono text-sm text-[#2563c7]">
                                         {paidPlan.monthly_request_quota.toLocaleString()}{' '}
                                         requests/month
                                     </p>
@@ -83,7 +83,7 @@ export default function Billing({
                                     <StripeRedirectForm
                                         action="/billing/checkout"
                                         plan={paidPlan.key}
-                                        className="mt-5 inline-flex items-center justify-center gap-2 rounded-lg bg-[#1248e8] px-3.5 py-2 text-sm font-semibold text-white hover:bg-[#0f3dc4] disabled:cursor-not-allowed disabled:bg-slate-300"
+                                        className="mt-5 inline-flex items-center justify-center gap-2 border border-slate-950 bg-[#13231a] px-3.5 py-2 text-sm font-semibold text-white shadow-[3px_3px_0_#9dbbec] hover:bg-[#2563c7] disabled:cursor-not-allowed disabled:bg-slate-300"
                                     >
                                         <CreditCard className="size-4" />
                                         Choose {paidPlan.label}
@@ -95,7 +95,7 @@ export default function Billing({
                 )}
                 {hasActiveSubscription && (
                     <section className="rounded-xl border border-blue-200 bg-blue-50 p-5 text-sm text-slate-700">
-                        <Check className="mb-2 size-5 text-[#1248e8]" />
+                        <Check className="mb-2 size-5 text-[#2563c7]" />
                         Your active plan is managed in the Stripe billing
                         portal, where you can change plans or cancel.
                     </section>
@@ -150,7 +150,11 @@ function StripeRedirectForm({
         ?.getAttribute('content');
 
     return (
-        <form action={action} method="post" onSubmit={() => setSubmitting(true)}>
+        <form
+            action={action}
+            method="post"
+            onSubmit={() => setSubmitting(true)}
+        >
             <input name="_token" type="hidden" value={csrfToken ?? ''} />
             {plan && <input name="plan" type="hidden" value={plan} />}
             <button type="submit" disabled={submitting} className={className}>
