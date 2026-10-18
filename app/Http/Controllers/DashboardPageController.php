@@ -21,11 +21,17 @@ class DashboardPageController extends Controller
         UsageMeter $usageMeter,
     ): Response {
         $user = $request->user();
+        $subscription = $user->subscription('default');
+        $plan = $entitlements->forUser($user);
 
         return Inertia::render('dashboard/usage', [
             'monthlyUsage' => $usageMeter->currentMonthlyUsageForUser($user->id),
-            'monthlyQuota' => $entitlements->forUser($user)['monthly_request_quota'],
+            'monthlyQuota' => $plan['monthly_request_quota'],
             'breakdown' => $usageMeter->currentMonthlyBreakdownForUser($user->id),
+            'plan' => $plan,
+            'cancelledPlanEndsAt' => $subscription?->onGracePeriod()
+                ? $subscription->ends_at?->format('j M Y')
+                : null,
         ]);
     }
 

@@ -101,10 +101,6 @@ export function PageHero({
             <div className="grid gap-8 lg:grid-cols-[.42fr_1.58fr]">
                 <div className="pt-2">
                     <p className="atlas-kicker">{eyebrow}</p>
-                    <p className="atlas-coordinate mt-4">
-                        51.507° N<br />
-                        0.128° W
-                    </p>
                 </div>
                 <div>
                     <h1 className="atlas-title max-w-4xl">{title}</h1>

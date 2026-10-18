@@ -6,6 +6,7 @@ use App\Domain\Usage\Entitlements;
 use App\Models\User;
 use App\Notifications\SubscriptionNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Notification;
 use Inertia\Testing\AssertableInertia as Assert;
 use Laravel\Cashier\Events\WebhookHandled;
@@ -55,6 +56,33 @@ class BillingTest extends TestCase
                 ->where('plan.monthly_request_quota', 50_000)
                 ->where('hasActiveSubscription', true),
             );
+    }
+
+    public function test_a_cancelled_paid_plan_remains_the_entitlement_until_the_paid_period_ends(): void
+    {
+        Carbon::setTestNow('2026-10-18 12:00:00');
+        config()->set('ukapi.paid_plans.pro.stripe_price', 'price_pro_test');
+
+        $user = User::factory()->create();
+        $user->subscriptions()->create([
+            'type' => 'default',
+            'stripe_id' => 'sub_cancelled_pro',
+            'stripe_status' => 'active',
+            'stripe_price' => 'price_pro_test',
+            'ends_at' => now()->addMonth(),
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('usage'))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('dashboard/usage')
+                ->where('plan.label', 'Pro')
+                ->where('monthlyQuota', 250_000)
+                ->where('cancelledPlanEndsAt', '18 Nov 2026'),
+            );
+
+        Carbon::setTestNow();
     }
 
     public function test_checkout_rejects_an_unknown_plan_without_contacting_stripe(): void

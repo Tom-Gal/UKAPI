@@ -15,10 +15,16 @@ export default function Usage({
     monthlyUsage,
     monthlyQuota,
     breakdown,
+    plan,
+    cancelledPlanEndsAt,
 }: {
     monthlyUsage: number;
     monthlyQuota: number;
     breakdown: UsageBreakdown[];
+    plan: {
+        label: string;
+    };
+    cancelledPlanEndsAt: string | null;
 }) {
     const percentage = Math.min(
         100,
@@ -34,6 +40,18 @@ export default function Usage({
                 description="Track the requests included in your current monthly plan."
             />
             <main className="p-5 lg:p-8">
+                {cancelledPlanEndsAt && (
+                    <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-5 text-sm text-slate-700">
+                        <p className="font-semibold text-slate-950">
+                            You’re on the {plan.label} plan you cancelled.
+                        </p>
+                        <p className="mt-1">
+                            Your {plan.label} limits remain available until{' '}
+                            <strong>{cancelledPlanEndsAt}</strong>. After that,
+                            your account will move to the Free plan.
+                        </p>
+                    </div>
+                )}
                 <div className="mb-6 rounded-xl border border-slate-200 bg-white p-6">
                     <p className="text-xs font-bold tracking-[.14em] text-slate-500 uppercase">
                         Monthly quota
