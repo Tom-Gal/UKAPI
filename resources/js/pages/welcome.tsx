@@ -49,7 +49,7 @@ export default function Welcome() {
                         </h1>
                         <p className="ukapi-enter ukapi-enter-delay-2 mt-9 max-w-xl text-lg leading-8 text-slate-600 sm:text-xl">
                             Postcodes, companies, crime, flood information and
-                            more—normalised into a single, dependable API for UK
+                            more, normalised into a single, dependable API for UK
                             products.
                         </p>
                         <div className="ukapi-enter ukapi-enter-delay-3 mt-9 flex flex-col gap-4 sm:flex-row sm:flex-wrap">
