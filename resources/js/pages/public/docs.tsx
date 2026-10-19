@@ -320,15 +320,27 @@ Retry-After: 12`}
                                             id={family.slug}
                                             className="scroll-mt-28"
                                         >
-                                            <div className="border-b border-slate-950 pb-4">
-                                                <h3 className="text-2xl font-semibold tracking-tight">
-                                                    {family.name}
-                                                </h3>
-                                                <p className="mt-2 leading-7 text-slate-600">
+                                            <div className="border-y border-slate-950 bg-[#e7ece8] px-5 py-5 sm:px-6">
+                                                <div className="flex flex-wrap items-baseline justify-between gap-3">
+                                                    <h3 className="text-2xl font-semibold tracking-tight">
+                                                        {family.name}
+                                                    </h3>
+                                                    <span className="font-mono text-[10px] font-bold tracking-[0.14em] text-slate-500 uppercase">
+                                                        {
+                                                            family.endpoints
+                                                                .length
+                                                        }{' '}
+                                                        {family.endpoints
+                                                            .length === 1
+                                                            ? 'endpoint'
+                                                            : 'endpoints'}
+                                                    </span>
+                                                </div>
+                                                <p className="mt-2 max-w-2xl leading-7 text-slate-600">
                                                     {family.summary}
                                                 </p>
                                             </div>
-                                            <div className="divide-y divide-slate-300">
+                                            <div className="space-y-4 pt-4">
                                                 {family.endpoints.map(
                                                     (endpoint) => (
                                                         <EndpointReference
@@ -349,54 +361,54 @@ Retry-After: 12`}
                                 title="Sources & coverage"
                                 intro="UKApi.co.uk normalises public data without hiding where it came from or where it applies."
                             >
-                                <div className="overflow-x-auto border border-slate-300 bg-white">
-                                    <table className="w-full min-w-[680px] text-left text-sm">
-                                        <thead className="bg-slate-100 font-mono text-[10px] tracking-wider text-slate-600 uppercase">
-                                            <tr>
-                                                <th className="px-4 py-3">
-                                                    Family
-                                                </th>
-                                                <th className="px-4 py-3">
-                                                    Source
-                                                </th>
-                                                <th className="px-4 py-3">
-                                                    Coverage
-                                                </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-slate-200">
-                                            {endpointFamilies.map((family) => (
-                                                <tr
-                                                    key={family.slug}
-                                                    className="align-top"
-                                                >
-                                                    <th className="px-4 py-4 font-semibold text-slate-900">
+                                <div className="space-y-3">
+                                    {endpointFamilies.map((family) => {
+                                        const sources = [
+                                            ...new Set(
+                                                family.endpoints.map(
+                                                    (item) => item.source,
+                                                ),
+                                            ),
+                                        ];
+                                        const coverage = [
+                                            ...new Set(
+                                                family.endpoints.map(
+                                                    (item) => item.coverage,
+                                                ),
+                                            ),
+                                        ];
+
+                                        return (
+                                            <div
+                                                key={family.slug}
+                                                className="grid gap-4 border border-slate-300 bg-white p-5 sm:grid-cols-[minmax(10rem,.8fr)_1fr_1.2fr] sm:items-start sm:p-6"
+                                            >
+                                                <div>
+                                                    <p className="font-semibold text-slate-950">
                                                         {family.name}
-                                                    </th>
-                                                    <td className="px-4 py-4 leading-6 text-slate-600">
-                                                        {[
-                                                            ...new Set(
-                                                                family.endpoints.map(
-                                                                    (item) =>
-                                                                        item.source,
-                                                                ),
-                                                            ),
-                                                        ].join('; ')}
-                                                    </td>
-                                                    <td className="px-4 py-4 leading-6 text-slate-600">
-                                                        {[
-                                                            ...new Set(
-                                                                family.endpoints.map(
-                                                                    (item) =>
-                                                                        item.coverage,
-                                                                ),
-                                                            ),
-                                                        ].join('; ')}
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
+                                                    </p>
+                                                    <p className="mt-1 font-mono text-[10px] tracking-wide text-slate-500 uppercase">
+                                                        {
+                                                            family.endpoints
+                                                                .length
+                                                        }{' '}
+                                                        {family.endpoints
+                                                            .length === 1
+                                                            ? 'endpoint'
+                                                            : 'endpoints'}
+                                                    </p>
+                                                </div>
+                                                <SourceList
+                                                    label="Source"
+                                                    items={sources}
+                                                />
+                                                <SourceList
+                                                    label="Coverage"
+                                                    items={coverage}
+                                                />
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                                 <Callout title="Safety note">
                                     Flood information is informational only and
@@ -561,78 +573,122 @@ function ErrorRow({
 
 function EndpointReference({ endpoint }: { endpoint: Endpoint }) {
     return (
-        <article className="py-7">
-            <div className="flex flex-wrap items-start justify-between gap-4">
+        <article className="border border-slate-300 bg-white shadow-[3px_3px_0_#d7d2c3]">
+            <div className="border-b border-slate-200 px-5 py-5 sm:px-6">
                 <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-3">
-                        <span className="bg-emerald-100 px-2 py-1 font-mono text-[10px] font-bold text-emerald-800">
+                        <span className="bg-emerald-100 px-2 py-1 font-mono text-[10px] font-bold tracking-wide text-emerald-800">
                             {endpoint.method}
                         </span>
-                        <code className="font-mono text-sm font-semibold break-all text-slate-900">
+                        <code className="font-mono text-sm font-semibold break-all text-slate-950 sm:text-[15px]">
                             {endpoint.path}
                         </code>
                     </div>
-                    <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600">
+                    <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:text-[15px]">
                         {endpoint.description}
                     </p>
                 </div>
             </div>
-            <dl className="mt-5 grid gap-x-6 gap-y-3 border-l-2 border-slate-200 pl-4 text-sm sm:grid-cols-3">
+            <dl className="grid divide-y divide-slate-200 border-b border-slate-200 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
                 <InfoPair term="Coverage" value={endpoint.coverage} />
                 <InfoPair term="Source" value={endpoint.source} />
                 <InfoPair term="Freshness" value={endpoint.freshness} />
             </dl>
-            {endpoint.parameters && endpoint.parameters.length > 0 && (
-                <div className="mt-5 overflow-x-auto">
-                    <table className="w-full min-w-[560px] text-left text-sm">
-                        <thead className="font-mono text-[10px] tracking-wide text-slate-500 uppercase">
-                            <tr>
-                                <th className="pb-2">Parameter</th>
-                                <th className="pb-2">In</th>
-                                <th className="pb-2">Description</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-200">
-                            {endpoint.parameters.map((parameter) => (
-                                <tr key={parameter.name}>
-                                    <td className="py-3 pr-4 font-mono text-xs font-semibold">
-                                        {parameter.name}
-                                        {parameter.required && (
-                                            <span className="text-rose-600">
-                                                {' '}
-                                                *
-                                            </span>
-                                        )}
-                                    </td>
-                                    <td className="py-3 pr-4 font-mono text-xs text-slate-500">
-                                        {parameter.location}
-                                    </td>
-                                    <td className="py-3 leading-6 text-slate-600">
-                                        {parameter.description}
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            )}
-            <p className="mt-4 font-mono text-xs text-slate-500">
-                Example:{' '}
-                <span className="text-slate-800">
-                    GET {endpoint.examplePath ?? endpoint.path}
-                </span>
-            </p>
+            <div className="px-5 py-5 sm:px-6">
+                {endpoint.parameters && endpoint.parameters.length > 0 && (
+                    <div>
+                        <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+                            <h4 className="text-sm font-semibold text-slate-950">
+                                Request parameters
+                            </h4>
+                            <p className="font-mono text-[10px] text-slate-500">
+                                * required
+                            </p>
+                        </div>
+                        <div className="overflow-hidden border border-slate-200">
+                            <table className="w-full text-left text-sm">
+                                <thead className="bg-slate-100 font-mono text-[10px] tracking-wide text-slate-600 uppercase">
+                                    <tr>
+                                        <th className="px-3 py-2.5 sm:px-4">
+                                            Parameter
+                                        </th>
+                                        <th className="px-3 py-2.5 sm:px-4">
+                                            In
+                                        </th>
+                                        <th className="px-3 py-2.5 sm:px-4">
+                                            Description
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-200">
+                                    {endpoint.parameters.map((parameter) => (
+                                        <tr
+                                            key={parameter.name}
+                                            className="align-top"
+                                        >
+                                            <td className="px-3 py-3 font-mono text-xs font-semibold text-slate-900 sm:px-4">
+                                                {parameter.name}
+                                                {parameter.required && (
+                                                    <span className="text-rose-600">
+                                                        {' '}
+                                                        *
+                                                    </span>
+                                                )}
+                                            </td>
+                                            <td className="px-3 py-3 sm:px-4">
+                                                <span className="inline-block bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] text-slate-600">
+                                                    {parameter.location}
+                                                </span>
+                                            </td>
+                                            <td className="px-3 py-3 leading-6 text-slate-600 sm:px-4">
+                                                {parameter.description}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                )}
+                <p className="mt-4 border-l-2 border-[#8fb49f] pl-3 font-mono text-xs leading-5 text-slate-500">
+                    Example:{' '}
+                    <span className="text-slate-800">
+                        GET {endpoint.examplePath ?? endpoint.path}
+                    </span>
+                </p>
+            </div>
         </article>
     );
 }
 
 function InfoPair({ term, value }: { term: string; value: string }) {
     return (
-        <div>
+        <div className="px-5 py-4 sm:px-4">
             <dt className="font-mono text-[10px] font-bold tracking-wide text-slate-500 uppercase">
                 {term}
             </dt>
-            <dd className="mt-1 leading-5 text-slate-700">{value}</dd>
+            <dd className="mt-1 text-sm leading-5 text-slate-700">{value}</dd>
+        </div>
+    );
+}
+
+function SourceList({ label, items }: { label: string; items: string[] }) {
+    return (
+        <div>
+            <p className="font-mono text-[10px] font-bold tracking-wide text-slate-500 uppercase">
+                {label}
+            </p>
+            <ul className="mt-2 space-y-1.5 text-sm leading-5 text-slate-700">
+                {items.map((item) => (
+                    <li key={item} className="flex gap-2">
+                        <span
+                            aria-hidden="true"
+                            className="mt-2 size-1.5 shrink-0 rounded-full bg-[#2563c7]"
+                        />
+                        <span>{item}</span>
+                    </li>
+                ))}
+            </ul>
         </div>
     );
 }
