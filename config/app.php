@@ -52,7 +52,14 @@ return [
     |
     */
 
-    'url' => env('APP_URL', 'http://localhost'),
+    // Keep URL generation absolute when hosting supplies a bare hostname.
+    // Otherwise Laravel can generate paths such as /ukapi.co.uk/login.
+    'url' => (str_starts_with((string) env('APP_URL', 'http://localhost'), 'http://')
+        || str_starts_with((string) env('APP_URL', 'http://localhost'), 'https://'))
+        ? rtrim((string) env('APP_URL', 'http://localhost'), '/')
+        : ((string) env('APP_URL', 'http://localhost') === ''
+            ? 'http://localhost'
+            : 'https://'.trim((string) env('APP_URL', 'http://localhost'), '/')),
 
     /*
     |--------------------------------------------------------------------------

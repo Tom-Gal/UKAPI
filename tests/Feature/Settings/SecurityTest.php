@@ -21,8 +21,12 @@ class SecurityTest extends TestCase
     {
         $this->assertIsString(config('fortify.passkeys.relying_party_id'));
         $this->assertNotSame('', config('fortify.passkeys.relying_party_id'));
+        $this->assertNotSame('http', config('fortify.passkeys.relying_party_id'));
+        $this->assertNotSame('https', config('fortify.passkeys.relying_party_id'));
         $this->assertIsString(config('fortify.passkeys.allowed_origins.0'));
         $this->assertStringStartsWith('http', config('fortify.passkeys.allowed_origins.0'));
+        $this->assertSame('/login', route('login', absolute: false));
+        $this->assertSame('/register', route('register', absolute: false));
     }
 
     public function test_security_page_is_displayed()

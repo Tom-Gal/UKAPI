@@ -101,6 +101,12 @@ final class CompaniesHouseCompanyProvider implements CompanyProvider
             throw ApiException::providerNotConfigured();
         }
 
+        $apiKey = trim($apiKey);
+
+        if ($apiKey === '') {
+            throw ApiException::providerNotConfigured();
+        }
+
         $request = Http::baseUrl((string) config('ukapi.companies_house.base_url'))
             ->acceptJson()
             ->withBasicAuth($apiKey, '')
@@ -136,7 +142,11 @@ final class CompaniesHouseCompanyProvider implements CompanyProvider
             throw ApiException::companyNotFound();
         }
 
-        if (in_array($response->status(), [401, 403, 429], true) || $response->serverError()) {
+        if (in_array($response->status(), [401, 403], true)) {
+            throw ApiException::providerAuthenticationFailed();
+        }
+
+        if ($response->status() === 429 || $response->serverError()) {
             throw ApiException::providerUnavailable();
         }
 

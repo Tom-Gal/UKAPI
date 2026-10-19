@@ -185,6 +185,15 @@ final class ApiException extends RuntimeException
         );
     }
 
+    public static function providerAuthenticationFailed(): self
+    {
+        return new self(
+            apiCode: 'upstream_authentication_failed',
+            message: 'The configured credentials for the upstream data provider were rejected.',
+            status: 503,
+        );
+    }
+
     public static function providerInvalidResponse(): self
     {
         return new self(

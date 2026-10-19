@@ -264,6 +264,20 @@ class CompanyApiTest extends TestCase
             ->assertJsonPath('error.code', 'upstream_unavailable');
     }
 
+    public function test_rejected_companies_house_credentials_are_reported_as_an_authentication_failure(): void
+    {
+        $token = $this->createApiKey();
+        Http::fake([
+            'https://api.company-information.service.gov.uk/company/SC012345' => Http::response([
+                'error' => 'Invalid Authorization',
+            ], 401),
+        ]);
+
+        $this->getJson('/v1/companies/SC012345', ['Authorization' => "Bearer {$token}"])
+            ->assertStatus(503)
+            ->assertJsonPath('error.code', 'upstream_authentication_failed');
+    }
+
     public function test_schema_drift_is_a_controlled_bad_gateway_response(): void
     {
         $token = $this->createApiKey();
