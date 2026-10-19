@@ -143,8 +143,21 @@ return [
     */
 
     'passkeys' => [
-        'relying_party_id' => parse_url(config('app.url'), PHP_URL_HOST),
-        'allowed_origins' => [config('app.url')],
+        // APP_URL is sometimes supplied by hosting platforms as a bare
+        // hostname (for example, "ukapi.co.uk"). WebAuthn requires a
+        // non-null RP ID, so normalize both URL formats before booting the
+        // passkeys package.
+        'relying_party_id' => parse_url((string) config('app.url'), PHP_URL_HOST)
+            ?: parse_url('https://'.trim((string) config('app.url'), '/'), PHP_URL_HOST)
+            ?: 'localhost',
+        'allowed_origins' => [
+            str_starts_with((string) config('app.url'), 'http://')
+                || str_starts_with((string) config('app.url'), 'https://')
+                ? rtrim((string) config('app.url'), '/')
+                : ((string) config('app.url') === ''
+                    ? 'http://localhost'
+                    : 'https://'.trim((string) config('app.url'), '/')),
+        ],
         'user_handle_secret' => env('PASSKEYS_USER_HANDLE_SECRET', config('app.key')),
         'timeout' => 60000,
     ],

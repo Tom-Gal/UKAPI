@@ -13,7 +13,7 @@ never in Git:
 - `APP_ENV=production`, `APP_DEBUG=false`, and `APP_URL` set to the final HTTPS origin.
 - A unique `APP_KEY`, plus a release identifier in `APP_VERSION` (normally the commit SHA).
 - Attach the Laravel Cloud MySQL resource. Cloud injects its connection credentials; the application default is `DB_CONNECTION=mysql`. Do not copy database passwords into Git or duplicate Cloud-managed credentials.
-- Valkey settings with `CACHE_STORE=redis`, a unique `CACHE_PREFIX`, and either `VALKEY_URL` or host/credential values.
+- Valkey settings with `CACHE_STORE=failover`, a unique `CACHE_PREFIX`, and either `VALKEY_URL` or host/credential values. The failover store prefers Valkey and falls back to the database/array stores if Valkey is temporarily unavailable, keeping authentication and throttling available during a cache restart.
 - Mailtrap SMTP values: `MAIL_MAILER=smtp`, `MAIL_HOST=live.smtp.mailtrap.io`, `MAIL_PORT=587`, `MAIL_USERNAME=api`, and a `MAIL_PASSWORD` token in the Cloud secret manager. Set `MAIL_FROM_ADDRESS` to an address on a domain verified in Mailtrap; the local `log` mailer does not deliver verification or password-reset messages.
 - `SESSION_SECURE_COOKIE=true`, `SESSION_ENCRYPT=true`, and `SESSION_SAME_SITE=lax`.
 - `TRUSTED_PROXIES` only when the host terminates TLS through a proxy you trust. Use the host's documented proxy addresses, or `*` only when the application is reachable exclusively through that trusted ingress.

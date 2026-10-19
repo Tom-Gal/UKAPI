@@ -15,7 +15,10 @@ return [
     |
     */
 
-    'default' => env('CACHE_STORE', 'redis'),
+    // Keep Redis/Valkey as the preferred production store, but allow
+    // authentication and throttling to continue when the cache service is
+    // temporarily unavailable during deploys or local setup.
+    'default' => env('CACHE_STORE', 'failover'),
 
     /*
     |--------------------------------------------------------------------------

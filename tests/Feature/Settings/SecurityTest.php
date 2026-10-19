@@ -17,6 +17,14 @@ class SecurityTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_passkey_configuration_has_a_valid_relying_party_id_and_origin(): void
+    {
+        $this->assertIsString(config('fortify.passkeys.relying_party_id'));
+        $this->assertNotSame('', config('fortify.passkeys.relying_party_id'));
+        $this->assertIsString(config('fortify.passkeys.allowed_origins.0'));
+        $this->assertStringStartsWith('http', config('fortify.passkeys.allowed_origins.0'));
+    }
+
     public function test_security_page_is_displayed()
     {
         $this->skipUnlessFortifyHas(Features::twoFactorAuthentication());
