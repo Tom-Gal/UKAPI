@@ -61,7 +61,7 @@ class DashboardPageController extends Controller
             'plan' => $plans->forUser($user),
             'paidPlans' => array_values(array_filter(
                 $plans->paid(),
-                fn (array $plan): bool => filled($plan['stripe_price']),
+                fn (array $plan): bool => filled($plan['prices']['month']['stripe_price'] ?? null),
             )),
             'hasStripeCustomer' => $user->hasStripeId(),
             'hasActiveSubscription' => $user->subscribed('default'),

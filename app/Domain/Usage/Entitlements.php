@@ -13,17 +13,13 @@ final class Entitlements
         //
     }
 
-    /**
-     * @return array{key: string, label: string, stripe_price: string|null, monthly_request_quota: int, burst_requests_per_second: int}
-     */
+    /** @return array<string, mixed> */
     public function forApiKey(ApiKey $apiKey): array
     {
         return $this->forUser($apiKey->user);
     }
 
-    /**
-     * @return array{key: string, label: string, stripe_price: string|null, monthly_request_quota: int, burst_requests_per_second: int}
-     */
+    /** @return array<string, mixed> */
     public function forUser(User $user): array
     {
         return $this->plans->forUser($user);

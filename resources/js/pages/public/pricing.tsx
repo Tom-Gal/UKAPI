@@ -40,6 +40,9 @@ export default function Pricing() {
                                     /month
                                 </span>
                             </p>
+                            <p className="mt-1 text-xs text-slate-500">
+                                {plan.annualPrice}/year · two months free
+                            </p>
                             <p
                                 className={`mt-3 font-mono text-sm ${plan.emphasis ? 'text-[#b9cba6]' : 'text-[#2563c7]'}`}
                             >
@@ -53,18 +56,12 @@ export default function Pricing() {
                             <ul
                                 className={`mt-6 space-y-3 border-t pt-5 text-sm ${plan.emphasis ? 'border-[#526158] text-[#e7ece6]' : 'border-slate-300 text-slate-700'}`}
                             >
-                                <li className="flex gap-2">
-                                    <Check className="size-4 shrink-0 text-[#2563c7]" />
-                                    One API key account
-                                </li>
-                                <li className="flex gap-2">
-                                    <Check className="size-4 shrink-0 text-[#2563c7]" />
-                                    Predictable JSON contracts
-                                </li>
-                                <li className="flex gap-2">
-                                    <Check className="size-4 shrink-0 text-[#2563c7]" />
-                                    Documented coverage
-                                </li>
+                                {plan.features.map((feature) => (
+                                    <li key={feature} className="flex gap-2">
+                                        <Check className="size-4 shrink-0 text-[#2563c7]" />
+                                        {feature}
+                                    </li>
+                                ))}
                             </ul>
                             <Link
                                 href={auth.user ? '/billing' : '/register'}

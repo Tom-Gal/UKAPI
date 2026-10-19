@@ -33,7 +33,9 @@ class EnforceMonthlyQuota
             throw ApiException::invalidApiKey();
         }
 
-        $quota = $this->entitlements->forApiKey($apiKey)['monthly_request_quota'];
+        $plan = $request->attributes->get('ukapi.entitlements');
+        $plan = is_array($plan) ? $plan : $this->entitlements->forApiKey($apiKey);
+        $quota = $plan['monthly_request_quota'];
 
         if ($this->usageMeter->currentMonthlyUsage($apiKey) >= $quota) {
             throw ApiException::quotaExceeded($quota, $this->usageMeter->monthlyResetAt());

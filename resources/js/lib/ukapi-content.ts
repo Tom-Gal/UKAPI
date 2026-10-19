@@ -14,6 +14,12 @@ export type Endpoint = {
     coverage: string;
     source: string;
     freshness: string;
+    feature?:
+        | 'current_data'
+        | 'historical_data'
+        | 'change_feeds'
+        | 'commercial_use'
+        | 'bulk_export';
 };
 
 export type EndpointFamily = {
@@ -708,8 +714,7 @@ const allEndpointFamilies: EndpointFamily[] = [
             {
                 method: 'GET',
                 path: '/v1/flood/stations/nearby?postcode=',
-                examplePath:
-                    '/v1/flood/stations/nearby?postcode=BL2%206XX',
+                examplePath: '/v1/flood/stations/nearby?postcode=BL2%206XX',
                 exampleResponse: `{
   "data": {
     "postcode": "BL2 6XX",
@@ -792,7 +797,12 @@ const allEndpointFamilies: EndpointFamily[] = [
 export const endpointFamilies = allEndpointFamilies
     .map((family) => ({
         ...family,
-        endpoints: family.endpoints.filter((endpoint) => endpoint.live),
+        endpoints: family.endpoints
+            .filter((endpoint) => endpoint.live)
+            .map((endpoint) => ({
+                ...endpoint,
+                feature: endpoint.feature ?? 'current_data',
+            })),
     }))
     .filter((family) => family.endpoints.length > 0);
 
@@ -800,29 +810,42 @@ export const plans = [
     {
         name: 'Free',
         price: '£0',
+        annualPrice: '£0',
         quota: '5,000',
         description: 'Evaluation and hobby projects.',
+        features: ['Current data'],
         emphasis: false,
     },
     {
         name: 'Hobby',
-        price: '£4.99',
+        price: '£9',
+        annualPrice: '£90',
         quota: '50,000',
-        description: 'Small applications.',
+        description: 'Current UK data for personal and small projects.',
+        features: ['Current data'],
         emphasis: false,
     },
     {
         name: 'Pro',
-        price: '£12.99',
+        price: '£29',
+        annualPrice: '£290',
         quota: '250,000',
-        description: 'Production SaaS and agencies.',
+        description: 'Historical data, change feeds and commercial use.',
+        features: [
+            'Current data',
+            'Historical data',
+            'Change feeds',
+            'Commercial use',
+        ],
         emphasis: true,
     },
     {
         name: 'Scale',
-        price: '£29.99',
+        price: '£89',
+        annualPrice: '£890',
         quota: '1,000,000',
-        description: 'Higher-volume small businesses.',
+        description: 'Bulk export, higher limits and priority support.',
+        features: ['Everything in Pro', 'Bulk export'],
         emphasis: false,
     },
 ];

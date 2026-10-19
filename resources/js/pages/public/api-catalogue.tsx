@@ -49,6 +49,12 @@ export default function ApiCatalogue() {
                                                 <span className="truncate">
                                                     {endpoint.path}
                                                 </span>
+                                                <span className="shrink-0 text-[9px] tracking-wider text-slate-400 uppercase">
+                                                    {endpoint.feature?.replace(
+                                                        '_',
+                                                        ' ',
+                                                    )}
+                                                </span>
                                             </p>
                                         ))}
                                 </div>

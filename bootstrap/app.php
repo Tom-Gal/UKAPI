@@ -3,6 +3,7 @@
 use App\Http\Middleware\AssignApiRequestId;
 use App\Http\Middleware\EnsureUserIsAdmin;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\RequireApiFeature;
 use App\Http\Middleware\SetSecurityHeaders;
 use App\Http\Middleware\TrustConfiguredProxies;
 use App\Support\Api\ApiException;
@@ -27,6 +28,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->prepend(TrustConfiguredProxies::class);
         $middleware->alias([
             'admin' => EnsureUserIsAdmin::class,
+            'ukapi.feature' => RequireApiFeature::class,
         ]);
         $middleware->encryptCookies(except: ['sidebar_state']);
         // Cashier's production-default webhook route is /stripe/webhook. This

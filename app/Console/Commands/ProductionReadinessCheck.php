@@ -30,6 +30,7 @@ final class ProductionReadinessCheck extends Command
             ['Stripe webhook secret', filled(config('cashier.webhook.secret')), 'Create the Stripe webhook and set STRIPE_WEBHOOK_SECRET.'],
             ['Stripe webhook route', Route::has('cashier.webhook'), 'Ensure Laravel Cashier is installed and clear/rebuild the route cache.'],
             ['Stripe plan prices', $plans->hasConfiguredPrices(), 'Set STRIPE_PRICE_HOBBY, STRIPE_PRICE_PRO, and STRIPE_PRICE_SCALE.'],
+            ['Stripe annual plan prices', $plans->hasConfiguredAnnualPrices(), 'Run php artisan stripe:provision-plans in the applicable Stripe mode.'],
         ];
 
         $failed = false;

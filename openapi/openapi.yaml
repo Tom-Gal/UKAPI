@@ -7,6 +7,22 @@ info:
         and must be supplied with the Bearer authentication scheme.
         All operations are read-only GET requests and are safe to retry. X-Request-Id
         is a correlation identifier; it does not deduplicate requests or usage accounting.
+    x-ukapi-features:
+        current_data:
+            description: Current normalized data and calculations.
+            plans: [free, hobby, pro, scale]
+        historical_data:
+            description: Historical snapshots and time-qualified data.
+            plans: [pro, scale]
+        change_feeds:
+            description: Dataset change manifests and delivery feeds.
+            plans: [pro, scale]
+        commercial_use:
+            description: Commercial application use under the applicable source licences.
+            plans: [pro, scale]
+        bulk_export:
+            description: Asynchronous bulk dataset exports.
+            plans: [scale]
 servers:
     - url: https://api.ukapi.co.uk
       description: Production
@@ -16,6 +32,7 @@ paths:
     /v1/vat/calculate:
         get:
             operationId: calculateVat
+            x-ukapi-feature: current_data
             summary: Calculate VAT to add to a net amount
             parameters:
                 - $ref: '#/components/parameters/Amount'
@@ -36,6 +53,7 @@ paths:
     /v1/vat/remove:
         get:
             operationId: removeVat
+            x-ukapi-feature: current_data
             summary: Remove VAT from a gross amount
             parameters:
                 - $ref: '#/components/parameters/Amount'
@@ -56,6 +74,7 @@ paths:
     /v1/postcodes/{postcode}:
         get:
             operationId: lookupPostcode
+            x-ukapi-feature: current_data
             summary: Look up a normalised UK postcode
             parameters:
                 - $ref: '#/components/parameters/Postcode'
@@ -79,6 +98,7 @@ paths:
     /v1/postcodes/{postcode}/validate:
         get:
             operationId: validatePostcode
+            x-ukapi-feature: current_data
             summary: Check whether a normalised postcode has a provider record
             parameters:
                 - $ref: '#/components/parameters/Postcode'
@@ -100,6 +120,7 @@ paths:
     /v1/postcodes/{postcode}/nearby:
         get:
             operationId: findNearbyPostcodes
+            x-ukapi-feature: current_data
             summary: Find postcodes near a normalised postcode
             parameters:
                 - $ref: '#/components/parameters/Postcode'
@@ -125,6 +146,7 @@ paths:
     /v1/coordinates/{latitude}/{longitude}/postcode:
         get:
             operationId: reverseGeocodePostcode
+            x-ukapi-feature: current_data
             summary: Return the nearest postcode to WGS84 coordinates
             parameters:
                 - $ref: '#/components/parameters/Latitude'
@@ -149,6 +171,7 @@ paths:
     /v1/companies/{companyNumber}:
         get:
             operationId: lookupCompany
+            x-ukapi-feature: current_data
             summary: Look up a normalised Companies House company number
             parameters:
                 - $ref: '#/components/parameters/CompanyNumber'
@@ -174,6 +197,7 @@ paths:
     /v1/companies/search:
         get:
             operationId: searchCompanies
+            x-ukapi-feature: current_data
             summary: Search Companies House company records
             parameters:
                 - $ref: '#/components/parameters/CompanyQuery'
@@ -199,6 +223,7 @@ paths:
     /v1/companies/{companyNumber}/officers:
         get:
             operationId: listCompanyOfficers
+            x-ukapi-feature: current_data
             summary: List company officers
             parameters:
                 - $ref: '#/components/parameters/CompanyNumber'
@@ -226,6 +251,7 @@ paths:
     /v1/companies/{companyNumber}/filings:
         get:
             operationId: listCompanyFilings
+            x-ukapi-feature: current_data
             summary: List company filing metadata
             description: Filing-document links and document contents are intentionally not proxied.
             parameters:
@@ -254,6 +280,7 @@ paths:
     /v1/sic/search:
         get:
             operationId: searchSicCodes
+            x-ukapi-feature: current_data
             summary: Search the local Companies House condensed SIC 2007 snapshot
             parameters:
                 - $ref: '#/components/parameters/SicQuery'
@@ -277,6 +304,7 @@ paths:
     /v1/sic/{code}:
         get:
             operationId: lookupSicCode
+            x-ukapi-feature: current_data
             summary: Look up a code from the local Companies House condensed SIC 2007 snapshot
             parameters:
                 - $ref: '#/components/parameters/SicCode'
@@ -300,6 +328,7 @@ paths:
     /v1/crime/nearby:
         get:
             operationId: findNearbyCrime
+            x-ukapi-feature: current_data
             summary: Find approximate street-level crime records near a postcode
             description: |
                 Resolves the postcode to coordinates, then returns Police.uk's
@@ -330,6 +359,7 @@ paths:
     /v1/crime/summary:
         get:
             operationId: summariseNearbyCrime
+            x-ukapi-feature: current_data
             summary: Summarise approximate street-level crime near a postcode
             description: Uses the same approximate, anonymised Police.uk records as the nearby endpoint and aggregates them by category.
             parameters:
@@ -357,6 +387,7 @@ paths:
     /v1/crime/categories:
         get:
             operationId: listCrimeCategories
+            x-ukapi-feature: current_data
             summary: List Police.uk crime categories
             parameters:
                 - $ref: '#/components/parameters/CrimeMonth'
@@ -380,6 +411,7 @@ paths:
     /v1/flood/warnings:
         get:
             operationId: listFloodWarnings
+            x-ukapi-feature: current_data
             summary: List current Environment Agency flood warnings and alerts
             description: England-only near-real-time data. This endpoint is not an emergency alert service; follow official Environment Agency advice and warnings.
             responses:
@@ -400,6 +432,7 @@ paths:
     /v1/flood/nearby:
         get:
             operationId: findNearbyFloodWarnings
+            x-ukapi-feature: current_data
             summary: Find current flood warnings and alerts near a postcode
             description: Resolves the postcode to coordinates and searches the England-only Environment Agency source within UKApi.co.uk's documented nearby distance.
             parameters:
@@ -426,6 +459,7 @@ paths:
     /v1/flood/stations/nearby:
         get:
             operationId: findNearbyFloodStations
+            x-ukapi-feature: current_data
             summary: Find Environment Agency flood-monitoring stations near a postcode
             description: Resolves the postcode to coordinates and returns a bounded list of England-only monitoring stations.
             parameters:
@@ -452,6 +486,7 @@ paths:
     /v1/flood/stations/{id}/readings:
         get:
             operationId: listFloodStationReadings
+            x-ukapi-feature: current_data
             summary: List bounded recent readings for an Environment Agency station
             parameters:
                 - $ref: '#/components/parameters/FloodStationId'
@@ -1068,7 +1103,16 @@ components:
                     $ref: '#/components/schemas/FloodMeta'
         FloodMeta:
             type: object
-            required: [request_id, cached, source, retrieved_at, source_updated_at, coverage, safety_notice]
+            required:
+                [
+                    request_id,
+                    cached,
+                    source,
+                    retrieved_at,
+                    source_updated_at,
+                    coverage,
+                    safety_notice,
+                ]
             properties:
                 request_id:
                     type: string
@@ -1090,7 +1134,19 @@ components:
                     type: string
         FloodWarning:
             type: object
-            required: [id, severity, severity_level, type, message, description, raised_at, severity_changed_at, message_changed_at, area]
+            required:
+                [
+                    id,
+                    severity,
+                    severity_level,
+                    type,
+                    message,
+                    description,
+                    raised_at,
+                    severity_changed_at,
+                    message_changed_at,
+                    area,
+                ]
             properties:
                 id:
                     type: string
@@ -1127,7 +1183,18 @@ components:
                             type: [string, 'null']
         FloodStation:
             type: object
-            required: [id, name, latitude, longitude, river_name, town, catchment_name, status, measures]
+            required:
+                [
+                    id,
+                    name,
+                    latitude,
+                    longitude,
+                    river_name,
+                    town,
+                    catchment_name,
+                    status,
+                    measures,
+                ]
             properties:
                 id:
                     type: string
@@ -1149,7 +1216,15 @@ components:
                     type: array
                     items:
                         type: object
-                        required: [id, parameter, parameter_name, qualifier, unit, period_seconds]
+                        required:
+                            [
+                                id,
+                                parameter,
+                                parameter_name,
+                                qualifier,
+                                unit,
+                                period_seconds,
+                            ]
                         properties:
                             id:
                                 type: [string, 'null']
@@ -1236,7 +1311,15 @@ components:
                           properties:
                               pagination:
                                   type: object
-                                  required: [page, per_page, total, total_pages, next_page, previous_page]
+                                  required:
+                                      [
+                                          page,
+                                          per_page,
+                                          total,
+                                          total_pages,
+                                          next_page,
+                                          previous_page,
+                                      ]
                                   properties:
                                       page:
                                           type: integer
@@ -1277,7 +1360,15 @@ components:
                   properties:
                       pagination:
                           type: object
-                          required: [page, per_page, total, total_pages, next_page, previous_page]
+                          required:
+                              [
+                                  page,
+                                  per_page,
+                                  total,
+                                  total_pages,
+                                  next_page,
+                                  previous_page,
+                              ]
                           properties:
                               page:
                                   type: integer

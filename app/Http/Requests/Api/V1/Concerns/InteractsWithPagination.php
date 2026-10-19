@@ -11,9 +11,14 @@ trait InteractsWithPagination
     /** @return array<string, array<int, string>> */
     protected function paginationRules(): array
     {
+        $plan = request()->attributes->get('ukapi.entitlements');
+        $maxPerPage = is_array($plan)
+            ? min(self::MAX_PER_PAGE, max(1, (int) ($plan['max_page_size'] ?? self::MAX_PER_PAGE)))
+            : self::MAX_PER_PAGE;
+
         return [
             'page' => ['sometimes', 'integer', 'between:1,'.self::MAX_PAGE],
-            'per_page' => ['sometimes', 'integer', 'between:1,'.self::MAX_PER_PAGE],
+            'per_page' => ['sometimes', 'integer', 'between:1,'.$maxPerPage],
         ];
     }
 

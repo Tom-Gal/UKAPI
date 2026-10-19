@@ -67,6 +67,16 @@ final class ApiException extends RuntimeException
         );
     }
 
+    public static function featureUnavailable(string $feature, string $plan): self
+    {
+        return new self(
+            apiCode: 'feature_not_available',
+            message: 'This API feature is not available on the current plan.',
+            status: 403,
+            details: ['feature' => $feature, 'plan' => $plan],
+        );
+    }
+
     public static function invalidPostcode(): self
     {
         return new self(

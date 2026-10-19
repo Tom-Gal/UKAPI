@@ -22,6 +22,8 @@ export default function Billing({
     invoices: Invoice[];
     invoicesAvailable: boolean;
 }) {
+    const [interval, setInterval] = useState<'month' | 'year'>('month');
+
     return (
         <>
             <Head title="Billing" />
@@ -53,6 +55,16 @@ export default function Billing({
                         requests/month · {plan.burst_requests_per_second}{' '}
                         requests/second
                     </p>
+                    <div className="mt-4 flex flex-wrap gap-2 text-xs text-slate-600">
+                        {plan.features.map((feature) => (
+                            <span
+                                key={feature}
+                                className="rounded-full bg-slate-100 px-2.5 py-1"
+                            >
+                                {feature.replaceAll('_', ' ')}
+                            </span>
+                        ))}
+                    </div>
                     {hasStripeCustomer && (
                         <StripeRedirectForm
                             action="/billing/portal"
@@ -70,6 +82,20 @@ export default function Billing({
                             Secure checkout, invoices, and payment methods are
                             handled by Stripe.
                         </p>
+                        <div className="mt-4 inline-flex rounded-lg border border-slate-200 bg-white p-1 text-sm">
+                            {(['month', 'year'] as const).map((option) => (
+                                <button
+                                    key={option}
+                                    type="button"
+                                    onClick={() => setInterval(option)}
+                                    className={`rounded-md px-3 py-1.5 font-semibold ${interval === option ? 'bg-[#13231a] text-white' : 'text-slate-600'}`}
+                                >
+                                    {option === 'month'
+                                        ? 'Monthly'
+                                        : 'Annual · 2 months free'}
+                                </button>
+                            ))}
+                        </div>
                         <div className="mt-4 grid gap-4 lg:grid-cols-3">
                             {paidPlans.map((paidPlan) => (
                                 <article
@@ -79,6 +105,15 @@ export default function Billing({
                                     <h3 className="font-semibold">
                                         {paidPlan.label}
                                     </h3>
+                                    <p className="mt-2 text-2xl font-semibold">
+                                        {formatPrice(paidPlan.prices[interval])}
+                                        <span className="text-sm font-medium text-slate-500">
+                                            /
+                                            {interval === 'month'
+                                                ? 'month'
+                                                : 'year'}
+                                        </span>
+                                    </p>
                                     <p className="mt-2 font-mono text-sm text-[#2563c7]">
                                         {paidPlan.monthly_request_quota.toLocaleString()}{' '}
                                         requests/month
@@ -90,6 +125,7 @@ export default function Billing({
                                     <StripeRedirectForm
                                         action="/billing/checkout"
                                         plan={paidPlan.key}
+                                        interval={interval}
                                         className="mt-5 inline-flex items-center justify-center gap-2 border border-slate-950 bg-[#13231a] px-3.5 py-2 text-sm font-semibold text-white shadow-[3px_3px_0_#9dbbec] hover:bg-[#2563c7] disabled:cursor-not-allowed disabled:bg-slate-300"
                                     >
                                         <CreditCard className="size-4" />
@@ -186,6 +222,11 @@ type Plan = {
     stripe_price: string | null;
     monthly_request_quota: number;
     burst_requests_per_second: number;
+    features: string[];
+    prices: Record<
+        'month' | 'year',
+        { amount: number; currency: string; stripe_price: string } | undefined
+    >;
 };
 
 type Invoice = {
@@ -208,11 +249,13 @@ function Notice({ children }: { children: ReactNode }) {
 function StripeRedirectForm({
     action,
     plan,
+    interval,
     className,
     children,
 }: {
     action: string;
     plan?: string;
+    interval?: 'month' | 'year';
     className: string;
     children: ReactNode;
 }) {
@@ -229,9 +272,26 @@ function StripeRedirectForm({
         >
             <input name="_token" type="hidden" value={csrfToken ?? ''} />
             {plan && <input name="plan" type="hidden" value={plan} />}
+            {interval && (
+                <input name="interval" type="hidden" value={interval} />
+            )}
             <button type="submit" disabled={submitting} className={className}>
                 {children}
             </button>
         </form>
     );
+}
+
+function formatPrice(
+    price: { amount: number; currency: string } | undefined,
+): string {
+    if (!price) {
+        return 'Unavailable';
+    }
+
+    return new Intl.NumberFormat('en-GB', {
+        style: 'currency',
+        currency: price.currency.toUpperCase(),
+        maximumFractionDigits: 2,
+    }).format(price.amount / 100);
 }

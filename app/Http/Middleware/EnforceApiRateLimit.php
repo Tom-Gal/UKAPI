@@ -25,7 +25,10 @@ class EnforceApiRateLimit
             throw ApiException::invalidApiKey();
         }
 
-        $limit = $this->entitlements->forApiKey($apiKey)['burst_requests_per_second'];
+        $plan = $request->attributes->get('ukapi.entitlements');
+        $plan = is_array($plan) ? $plan : $this->entitlements->forApiKey($apiKey);
+        $request->attributes->set('ukapi.entitlements', $plan);
+        $limit = $plan['burst_requests_per_second'];
         $rateLimitKey = sprintf('ukapi:rate:%d:%s', $apiKey->id, now()->format('YmdHis'));
 
         if (RateLimiter::tooManyAttempts($rateLimitKey, $limit)) {

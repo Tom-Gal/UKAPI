@@ -13,9 +13,11 @@ class BillingController extends Controller
     {
         $request->validate([
             'plan' => ['required', 'string', Rule::in(array_map(fn (array $plan): string => $plan['key'], $plans->paid()))],
+            'interval' => ['sometimes', 'string', Rule::in(['month', 'year'])],
         ]);
 
-        $plan = $plans->checkoutable((string) $request->input('plan'));
+        $interval = (string) $request->input('interval', 'month');
+        $plan = $plans->checkoutable((string) $request->input('plan'), $interval);
 
         if ($plan === null) {
             abort(422, 'This plan is not configured for checkout.');

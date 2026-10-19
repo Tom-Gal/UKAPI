@@ -17,6 +17,7 @@ Route::get('openapi/v1.yaml', OpenApiController::class)->name('api.openapi.v1');
 Route::prefix('v1')
     ->middleware([
         AuthenticateApiKey::class,
+        'ukapi.feature:current_data',
         EnforceApiRateLimit::class,
         EnforceMonthlyQuota::class,
     ])

@@ -2,6 +2,8 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Plan;
+use App\Models\PlanPrice;
 use Illuminate\Console\Command;
 use Illuminate\Support\Collection;
 use Stripe\Price;
@@ -29,21 +31,25 @@ class ProvisionStripePlans extends Command
 
         foreach ($this->plans() as $key => $plan) {
             $product = $this->findOrCreateProduct($stripe, $products, $key, $plan['label']);
-            $price = $this->findOrCreatePrice($stripe, $product, $plan['amount']);
 
-            $this->line(sprintf('STRIPE_PRICE_%s=%s', strtoupper($key), $price->id));
+            foreach (['month' => $plan['monthly_amount'], 'year' => $plan['annual_amount']] as $interval => $amount) {
+                $price = $this->findOrCreatePrice($stripe, $product, $amount, $interval);
+                $this->syncLocalPrice($key, $price->id, $interval, $amount);
+                $suffix = $interval === 'year' ? '_ANNUAL' : '';
+                $this->line(sprintf('STRIPE_PRICE_%s%s=%s', strtoupper($key), $suffix, $price->id));
+            }
         }
 
         return self::SUCCESS;
     }
 
-    /** @return array<string, array{label: string, amount: int}> */
+    /** @return array<string, array{label: string, monthly_amount: int, annual_amount: int}> */
     private function plans(): array
     {
         return [
-            'hobby' => ['label' => 'UKAPI Hobby', 'amount' => 499],
-            'pro' => ['label' => 'UKAPI Pro', 'amount' => 1299],
-            'scale' => ['label' => 'UKAPI Scale', 'amount' => 2999],
+            'hobby' => ['label' => 'UKAPI Hobby', 'monthly_amount' => 900, 'annual_amount' => 9_000],
+            'pro' => ['label' => 'UKAPI Pro', 'monthly_amount' => 2_900, 'annual_amount' => 29_000],
+            'scale' => ['label' => 'UKAPI Scale', 'monthly_amount' => 8_900, 'annual_amount' => 89_000],
         ];
     }
 
@@ -65,7 +71,7 @@ class ProvisionStripePlans extends Command
         ]);
     }
 
-    private function findOrCreatePrice(StripeClient $stripe, Product $product, int $amount): Price
+    private function findOrCreatePrice(StripeClient $stripe, Product $product, int $amount, string $interval): Price
     {
         /** @var Collection<int, Price> $prices */
         $prices = collect($stripe->prices->all([
@@ -78,7 +84,7 @@ class ProvisionStripePlans extends Command
         $price = $prices->first(
             fn (Price $candidate): bool => $candidate->currency === 'gbp'
                 && $candidate->unit_amount === $amount
-                && $candidate->recurring?->interval === 'month',
+                    && $candidate->recurring?->interval === $interval,
         );
 
         if ($price) {
@@ -88,8 +94,28 @@ class ProvisionStripePlans extends Command
         return $stripe->prices->create([
             'currency' => 'gbp',
             'product' => $product->id,
-            'recurring' => ['interval' => 'month'],
+            'recurring' => ['interval' => $interval],
             'unit_amount' => $amount,
         ]);
+    }
+
+    private function syncLocalPrice(string $key, string $stripePrice, string $interval, int $amount): void
+    {
+        $plan = Plan::query()->where('key', $key)->first();
+
+        if ($plan === null) {
+            return;
+        }
+
+        PlanPrice::query()->updateOrCreate(
+            ['stripe_price' => $stripePrice],
+            [
+                'plan_id' => $plan->id,
+                'interval' => $interval,
+                'amount' => $amount,
+                'currency' => 'gbp',
+                'active' => true,
+            ],
+        );
     }
 }
