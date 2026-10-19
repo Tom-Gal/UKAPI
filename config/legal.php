@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'entity_name' => env('LEGAL_ENTITY_NAME', '[FULL LEGAL NAME]'),
+    'entity_name' => env('LEGAL_ENTITY_NAME', 'UKAPI'),
     'company_number' => env('LEGAL_COMPANY_NUMBER', '[COMPANY NUMBER]'),
     'registered_office' => env('LEGAL_REGISTERED_OFFICE', '[REGISTERED OFFICE ADDRESS]'),
     'support_email' => env('LEGAL_SUPPORT_EMAIL', 'support@ukapi.co.uk'),
