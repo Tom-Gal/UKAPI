@@ -27,5 +27,4 @@ class CompanySearchRequest extends FormRequest
     {
         return (string) preg_replace('/\\s+/', ' ', trim((string) $this->validated('q')));
     }
-
 }

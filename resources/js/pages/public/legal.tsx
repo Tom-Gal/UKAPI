@@ -82,7 +82,7 @@ const documents: Record<string, LegalDocument> = {
             {
                 title: 'Features, limits, changes, and cancellation',
                 paragraphs: [
-                    'Each Plan has a documented feature set, monthly request quota, burst Rate Limit, and maximum page size. When the monthly quota is reached, requests are blocked until the next monthly reset or an upgrade. Upgrades take effect immediately; cancellation takes effect at the end of the period already paid for and access continues until then.',
+                    'Each Plan has a documented feature set, monthly request quota, burst Rate Limit, and maximum page size. When the monthly quota is reached, requests are blocked until the next monthly reset or an upgrade. There is no overage billing at launch and UKApi does not automatically charge for requests above quota. Upgrades take effect immediately; cancellation takes effect at the end of the period already paid for and access continues until then.',
                     'Historical data, change feeds, commercial use and bulk export are available only on the Plans shown on the Pricing page. We may change prices with at least 30 days’ written notice, effective only from the next renewal. You can cancel before the change takes effect without being charged the new price.',
                 ],
             },

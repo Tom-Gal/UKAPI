@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Domain\Snapshots\SnapshotStore;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Request as HttpClientRequest;
@@ -104,6 +105,42 @@ class FloodApiTest extends TestCase
         Http::assertSent(fn (HttpClientRequest $request): bool => str_contains($request->url(), '_limit=100'));
     }
 
+    public function test_pro_can_read_flood_reading_changes_between_snapshots(): void
+    {
+        $token = $this->createProApiKey();
+        $old = app(SnapshotStore::class)->capture(
+            'environment_agency.flood.readings',
+            '5380TH',
+            'environment_agency_flood_monitoring',
+            [
+                [
+                    'measure_id' => 'http://environment.data.gov.uk/flood-monitoring/id/measures/5380TH-level-stage-i-15_min-mASD',
+                    'recorded_at' => '2026-08-27T00:00:00+00:00',
+                    'value' => 0.010,
+                ],
+                [
+                    'measure_id' => 'http://environment.data.gov.uk/flood-monitoring/id/measures/5380TH-level-stage-i-15_min-mASD',
+                    'recorded_at' => '2026-08-26T00:00:00+00:00',
+                    'value' => 0.020,
+                ],
+            ],
+        );
+        Http::fake([
+            'https://environment.data.gov.uk/flood-monitoring/id/stations/5380TH/readings*' => Http::response($this->fixture('readings'), 200),
+        ]);
+
+        $this->getJson("/v1/flood/stations/5380TH/changes?since={$old->version}", [
+            'Authorization' => "Bearer {$token}",
+        ])
+            ->assertOk()
+            ->assertJsonPath('data.station_id', '5380TH')
+            ->assertJsonPath('data.since', $old->version)
+            ->assertJsonCount(1, 'data.removed')
+            ->assertJsonCount(1, 'data.changed')
+            ->assertJsonPath('meta.source', 'environment_agency_flood_monitoring')
+            ->assertJsonPath('meta.to_snapshot.checksum', fn ($checksum): bool => is_string($checksum));
+    }
+
     public function test_invalid_station_ids_are_rejected_without_calling_the_provider(): void
     {
         $token = $this->createApiKey();
@@ -151,6 +188,28 @@ class FloodApiTest extends TestCase
             'public_id' => 'k_'.Str::lower(Str::random(10)),
             'secret_hash' => Hash::make($secret),
             'name' => 'Flood test key',
+            'environment' => 'test',
+            'status' => 'active',
+        ]);
+
+        return "uk_test_{$apiKey->public_id}.{$secret}";
+    }
+
+    private function createProApiKey(): string
+    {
+        config()->set('ukapi.paid_plans.pro.stripe_price', 'price_pro_flood_test');
+        $user = User::factory()->create();
+        $user->subscriptions()->create([
+            'type' => 'default',
+            'stripe_id' => 'sub_pro_flood_test',
+            'stripe_status' => 'active',
+            'stripe_price' => 'price_pro_flood_test',
+        ]);
+        $secret = Str::lower(Str::random(43));
+        $apiKey = $user->apiKeys()->create([
+            'public_id' => 'k_'.Str::lower(Str::random(10)),
+            'secret_hash' => Hash::make($secret),
+            'name' => 'Flood changes test key',
             'environment' => 'test',
             'status' => 'active',
         ]);

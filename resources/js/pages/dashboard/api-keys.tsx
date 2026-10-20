@@ -1,4 +1,4 @@
-import { Form, Head, usePage } from '@inertiajs/react';
+import { Form, Head, Link, usePage } from '@inertiajs/react';
 import { Copy, ShieldAlert } from 'lucide-react';
 import {
     DashboardPageHeader,
@@ -127,6 +127,22 @@ export default function ApiKeys({ apiKeys }: Props) {
                                             <Copy className="size-4" />
                                         </button>
                                     </div>
+                                    <p className="mt-3 text-sm text-amber-900">
+                                        Start with this test-key request, then
+                                        swap the token for your server-side
+                                        environment variable.
+                                    </p>
+                                    <div className="mt-3 rounded-lg bg-slate-950 p-3 text-xs leading-5 text-blue-100">
+                                        <code className="break-all">
+                                            {`curl "https://api.ukapi.co.uk/v1/postcodes/BL2%206XX" -H "Authorization: Bearer ${newKey.token}" -H "Accept: application/json"`}
+                                        </code>
+                                    </div>
+                                    <Link
+                                        href="/docs#quickstart"
+                                        className="mt-3 inline-flex text-sm font-semibold text-amber-950 underline underline-offset-4"
+                                    >
+                                        Open the quickstart →
+                                    </Link>
                                 </div>
                             </div>
                         </div>

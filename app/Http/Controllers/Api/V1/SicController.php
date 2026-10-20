@@ -7,6 +7,7 @@ use App\Domain\Companies\SicData;
 use App\Domain\Companies\SicLookup;
 use App\Domain\Companies\SicSnapshot;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\SicChangesRequest;
 use App\Http\Requests\Api\V1\SicSearchRequest;
 use App\Support\Api\ApiResponse;
 use App\Support\Api\Pagination;
@@ -32,7 +33,7 @@ final class SicController extends Controller
         return ApiResponse::success(
             $request,
             $result['sic']->toArray(),
-            $this->meta($result['snapshot'], $result['cached']),
+            $this->meta($result['snapshot'], $result['cached'], $result['snapshot_version']),
         );
     }
 
@@ -51,14 +52,44 @@ final class SicController extends Controller
             $request,
             array_map(static fn (SicData $record): array => $record->toArray(), $result['records']),
             [
-                ...$this->meta($result['snapshot'], $result['cached']),
+                ...$this->meta($result['snapshot'], $result['cached'], $result['snapshot_version']),
                 'pagination' => Pagination::from($page, $perPage, $result['total'])->toArray(),
             ],
         );
     }
 
-    /** @return array{cached: bool, source: string, source_updated_at: string, coverage: string, reference_version: string} */
-    private function meta(SicSnapshot $snapshot, bool $cached): array
+    public function changes(SicChangesRequest $request, SicLookup $sic): JsonResponse
+    {
+        $changes = $sic->changes($request->since(), $request->until());
+        $from = $changes['from'];
+        $to = $changes['to'];
+
+        return ApiResponse::success($request, [
+            'since' => $changes['since'],
+            'until' => $changes['until'],
+            'added' => $changes['diff']['added'],
+            'removed' => $changes['diff']['removed'],
+            'changed' => $changes['diff']['changed'],
+        ], [
+            'cached' => true,
+            'source' => 'companies_house_sic_2007',
+            'source_updated_at' => $to->source_updated_at?->toISOString(),
+            'coverage' => 'UK',
+            'from_snapshot' => [
+                'version' => $from->version,
+                'checksum' => $from->checksum,
+                'captured_at' => $from->captured_at?->toISOString(),
+            ],
+            'to_snapshot' => [
+                'version' => $to->version,
+                'checksum' => $to->checksum,
+                'captured_at' => $to->captured_at?->toISOString(),
+            ],
+        ]);
+    }
+
+    /** @return array<string, mixed> */
+    private function meta(SicSnapshot $snapshot, bool $cached, ?string $snapshotVersion = null): array
     {
         return [
             'cached' => $cached,
@@ -66,6 +97,7 @@ final class SicController extends Controller
             'source_updated_at' => $snapshot->retrievedAt,
             'coverage' => 'UK',
             'reference_version' => $snapshot->version,
+            'snapshot_version' => $snapshotVersion,
         ];
     }
 }

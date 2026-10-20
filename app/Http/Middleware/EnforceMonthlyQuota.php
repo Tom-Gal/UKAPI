@@ -37,24 +37,24 @@ class EnforceMonthlyQuota
         $plan = is_array($plan) ? $plan : $this->entitlements->forApiKey($apiKey);
         $quota = $plan['monthly_request_quota'];
 
-        if ($this->usageMeter->currentMonthlyUsage($apiKey) >= $quota) {
-            throw ApiException::quotaExceeded($quota, $this->usageMeter->monthlyResetAt());
-        }
-
-        $response = $next($request);
         $route = $request->route();
         $endpointCode = $route instanceof Route
             ? (string) ($route->defaults['ukapi_endpoint'] ?? 'unknown')
             : 'unknown';
-        $usage = $response->getStatusCode() === 422
-            ? $this->usageMeter->currentMonthlyUsage($apiKey)
-            : $this->usageMeter->record($apiKey, $endpointCode);
+        $usage = $this->usageMeter->reserve($apiKey, $endpointCode, $quota);
+
+        if ($usage === null) {
+            throw ApiException::quotaExceeded($quota, $this->usageMeter->monthlyResetAt());
+        }
+
         $this->usageLimitNotifier->notifyIfThresholdReached(
             $apiKey,
             $usage,
             $quota,
             $this->usageMeter->monthlyResetAt(),
         );
+
+        $response = $next($request);
         $response->headers->set('X-Quota-Limit', (string) $quota);
         $response->headers->set('X-Quota-Remaining', (string) max(0, $quota - $usage));
         $response->headers->set('X-Quota-Reset', (string) $this->usageMeter->monthlyResetAt());

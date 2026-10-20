@@ -17,7 +17,7 @@ export default function Pricing() {
             <PageHero
                 eyebrow="Pricing"
                 title="Pay for more headroom, not a more complicated product."
-                description="Every MVP endpoint counts as one request. There are no launch overages; upgrade when your quota needs to grow."
+                description="Every MVP endpoint counts as one request. Monthly quotas are hard, with no launch overages or surprise usage charges. Upgrade when your quota needs to grow."
             />
             <div className="atlas-shell pb-24">
                 <div className="grid border-t border-l border-slate-950 md:grid-cols-2 lg:grid-cols-4">
@@ -76,7 +76,8 @@ export default function Pricing() {
                 </div>
                 <p className="mt-8 max-w-2xl text-sm leading-6 text-slate-500">
                     The Free plan is available when you create an account. Paid
-                    plans are managed securely through Stripe.
+                    plans are managed securely through Stripe. Requests stop at
+                    the included monthly quota; upgrade or wait for reset.
                 </p>
             </div>
         </>

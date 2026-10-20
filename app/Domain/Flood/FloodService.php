@@ -5,17 +5,23 @@ namespace App\Domain\Flood;
 use App\Domain\Geography\Coordinates;
 use App\Domain\Geography\GeographyService;
 use App\Domain\Geography\UkPostcode;
+use App\Domain\Snapshots\SnapshotStore;
 use App\Integrations\Contracts\FloodProvider;
+use App\Models\DatasetSnapshot;
 use App\Support\Api\ApiException;
+use Carbon\CarbonImmutable;
 use Illuminate\Contracts\Cache\Repository;
 use InvalidArgumentException;
 
 final class FloodService
 {
+    private const READINGS_SNAPSHOT_DATASET = 'environment_agency.flood.readings';
+
     public function __construct(
         private readonly FloodProvider $provider,
         private readonly GeographyService $geography,
         private readonly Repository $cache,
+        private readonly SnapshotStore $snapshots,
     ) {}
 
     public function warnings(): FloodWarnings
@@ -101,6 +107,7 @@ final class FloodService
                     true,
                     $this->retrievedAt($cached),
                     $this->sourceUpdatedAt($cached),
+                    ...$this->snapshotMetadata($station, $this->readingsFromCache($cached['data'])),
                 );
             } catch (InvalidArgumentException) {
                 $this->cache->forget($key);
@@ -116,7 +123,59 @@ final class FloodService
             'source_updated_at' => $sourceUpdatedAt,
         ], $this->ttl());
 
-        return new FloodReadings($readings, false, $retrievedAt, $sourceUpdatedAt);
+        $snapshot = $this->captureReadingSnapshot($station, $readings);
+
+        return new FloodReadings(
+            $readings,
+            false,
+            $retrievedAt,
+            $sourceUpdatedAt,
+            $snapshot->version,
+            $snapshot->checksum,
+            $snapshot->captured_at?->toISOString(),
+        );
+    }
+
+    /**
+     * @return array{
+     *     since: string,
+     *     until: string,
+     *     from: DatasetSnapshot,
+     *     to: DatasetSnapshot,
+     *     diff: array<string, mixed>
+     * }
+     */
+    public function readingChanges(FloodStationReference $station, string $since, ?string $until = null): array
+    {
+        $this->readings($station);
+        $from = $this->snapshots->find(self::READINGS_SNAPSHOT_DATASET, $since);
+        $to = $until === null
+            ? $this->snapshots->active(self::READINGS_SNAPSHOT_DATASET, $station->value())
+            : $this->snapshots->find(self::READINGS_SNAPSHOT_DATASET, $until);
+
+        if ($from === null) {
+            throw ApiException::invalidParameter('since', 'The requested flood readings snapshot version was not found.');
+        }
+
+        if ($to === null) {
+            throw ApiException::invalidParameter('until', 'The requested flood readings snapshot version was not found.');
+        }
+
+        return [
+            'since' => $from->version,
+            'until' => $to->version,
+            'from' => $from,
+            'to' => $to,
+            'diff' => $this->snapshots->diff(
+                $from,
+                $to,
+                static fn (array $record): string => sprintf(
+                    '%s|%s',
+                    (string) ($record['measure_id'] ?? ''),
+                    (string) ($record['recorded_at'] ?? ''),
+                ),
+            ),
+        ];
     }
 
     public function nearbyDistanceKilometres(): int
@@ -239,5 +298,39 @@ final class FloodService
     private function ttl(): \DateTimeInterface
     {
         return now()->addMinutes(max(1, (int) config('ukapi.environment_agency.cache_ttl_minutes')));
+    }
+
+    /** @param list<FloodReading> $readings */
+    private function captureReadingSnapshot(FloodStationReference $station, array $readings): DatasetSnapshot
+    {
+        $payload = array_map(static fn (FloodReading $reading): array => $reading->toArray(), $readings);
+        usort($payload, static fn (array $left, array $right): int => strcmp(
+            sprintf('%s|%s', $left['measure_id'], $left['recorded_at']),
+            sprintf('%s|%s', $right['measure_id'], $right['recorded_at']),
+        ));
+        $sourceUpdatedAt = $this->latestReadingAt($readings);
+
+        return $this->snapshots->captureIfChanged(
+            self::READINGS_SNAPSHOT_DATASET,
+            $station->value(),
+            'environment_agency_flood_monitoring',
+            $payload,
+            $sourceUpdatedAt === null ? null : CarbonImmutable::parse($sourceUpdatedAt),
+        );
+    }
+
+    /**
+     * @param  list<FloodReading>  $readings
+     * @return array{0: string, 1: string, 2: ?string}
+     */
+    private function snapshotMetadata(FloodStationReference $station, array $readings): array
+    {
+        $snapshot = $this->captureReadingSnapshot($station, $readings);
+
+        return [
+            $snapshot->version,
+            $snapshot->checksum,
+            $snapshot->captured_at?->toISOString(),
+        ];
     }
 }

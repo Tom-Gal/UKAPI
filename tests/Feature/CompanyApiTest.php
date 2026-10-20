@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Domain\Snapshots\SnapshotStore;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Request as HttpClientRequest;
@@ -224,6 +225,31 @@ class CompanyApiTest extends TestCase
             ->assertJsonPath('error.code', 'sic_reference_unavailable');
     }
 
+    public function test_pro_can_read_deterministic_sic_snapshot_changes(): void
+    {
+        config()->set('ukapi.sic_reference.snapshot_path', base_path('tests/Fixtures/CompaniesHouse/sic-reference.json'));
+        $token = $this->createProApiKey();
+        $old = app(SnapshotStore::class)->capture(
+            'companies_house.sic_2007',
+            'reference',
+            'companies_house',
+            [
+                ['code' => '62012', 'description' => 'Old software description'],
+                ['code' => '00001', 'description' => 'Removed activity'],
+            ],
+        );
+
+        $this->getJson("/v1/sic/changes?since={$old->version}", [
+            'Authorization' => "Bearer {$token}",
+        ])
+            ->assertOk()
+            ->assertJsonPath('data.since', $old->version)
+            ->assertJsonCount(2, 'data.added')
+            ->assertJsonCount(1, 'data.removed')
+            ->assertJsonPath('data.changed.0.key', '62012')
+            ->assertJsonPath('meta.source', 'companies_house_sic_2007');
+    }
+
     public function test_invalid_company_numbers_do_not_reach_the_provider(): void
     {
         $token = $this->createApiKey();
@@ -298,6 +324,28 @@ class CompanyApiTest extends TestCase
             'public_id' => 'k_'.Str::lower(Str::random(10)),
             'secret_hash' => Hash::make($secret),
             'name' => 'Company test key',
+            'environment' => 'test',
+            'status' => 'active',
+        ]);
+
+        return "uk_test_{$apiKey->public_id}.{$secret}";
+    }
+
+    private function createProApiKey(): string
+    {
+        config()->set('ukapi.paid_plans.pro.stripe_price', 'price_pro_sic_test');
+        $user = User::factory()->create();
+        $user->subscriptions()->create([
+            'type' => 'default',
+            'stripe_id' => 'sub_pro_sic_test',
+            'stripe_status' => 'active',
+            'stripe_price' => 'price_pro_sic_test',
+        ]);
+        $secret = Str::lower(Str::random(43));
+        $apiKey = $user->apiKeys()->create([
+            'public_id' => 'k_'.Str::lower(Str::random(10)),
+            'secret_hash' => Hash::make($secret),
+            'name' => 'SIC changes test key',
             'environment' => 'test',
             'status' => 'active',
         ]);

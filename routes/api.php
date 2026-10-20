@@ -45,6 +45,10 @@ Route::prefix('v1')
         Route::get('sic/search', [SicController::class, 'search'])
             ->defaults('ukapi_endpoint', 'sic.search')
             ->name('api.v1.sic.search');
+        Route::get('sic/changes', [SicController::class, 'changes'])
+            ->middleware('ukapi.feature:change_feeds')
+            ->defaults('ukapi_endpoint', 'sic.changes')
+            ->name('api.v1.sic.changes');
         Route::get('sic/{code}', [SicController::class, 'show'])
             ->defaults('ukapi_endpoint', 'sic.show')
             ->name('api.v1.sic.show');
@@ -58,6 +62,10 @@ Route::prefix('v1')
         Route::get('crime/categories', [CrimeController::class, 'categories'])
             ->defaults('ukapi_endpoint', 'crime.categories')
             ->name('api.v1.crime.categories');
+        Route::get('crime/changes', [CrimeController::class, 'changes'])
+            ->middleware('ukapi.feature:change_feeds')
+            ->defaults('ukapi_endpoint', 'crime.changes')
+            ->name('api.v1.crime.changes');
 
         Route::get('flood/warnings', [FloodController::class, 'warnings'])
             ->defaults('ukapi_endpoint', 'flood.warnings')
@@ -71,6 +79,10 @@ Route::prefix('v1')
         Route::get('flood/stations/{id}/readings', [FloodController::class, 'readings'])
             ->defaults('ukapi_endpoint', 'flood.stations.readings')
             ->name('api.v1.flood.stations.readings');
+        Route::get('flood/stations/{id}/changes', [FloodController::class, 'changes'])
+            ->middleware('ukapi.feature:change_feeds')
+            ->defaults('ukapi_endpoint', 'flood.stations.changes')
+            ->name('api.v1.flood.stations.changes');
 
         Route::get('postcodes/{postcode}/validate', [PostcodeController::class, 'validate'])
             ->defaults('ukapi_endpoint', 'postcodes.validate')

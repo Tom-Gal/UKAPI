@@ -8,6 +8,7 @@ use App\Domain\Crime\CrimeService;
 use App\Domain\Crime\YearMonth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\CrimeCategoriesRequest;
+use App\Http\Requests\Api\V1\CrimeChangesRequest;
 use App\Http\Requests\Api\V1\CrimePostcodeRequest;
 use App\Support\Api\ApiResponse;
 use Illuminate\Http\JsonResponse;
@@ -81,10 +82,46 @@ final class CrimeController extends Controller
         ], $this->meta($result, $month));
     }
 
-    /** @return array<string, bool|string|null> */
+    /**
+     * List changes between two Police.uk monthly snapshots for a postcode.
+     */
+    public function changes(CrimeChangesRequest $request, CrimeService $crime): JsonResponse
+    {
+        $postcode = $request->postcode();
+        $changes = $crime->changes($postcode, $request->since(), $request->until());
+        $from = $changes['from'];
+        $to = $changes['to'];
+
+        return ApiResponse::success($request, [
+            'postcode' => $postcode->display(),
+            'since' => $changes['since'],
+            'until' => $changes['until'],
+            'added' => $changes['diff']['added'],
+            'removed' => $changes['diff']['removed'],
+            'changed' => $changes['diff']['changed'],
+        ], [
+            'cached' => true,
+            'source' => 'police_uk',
+            'source_updated_at' => null,
+            'coverage' => 'England, Wales and Northern Ireland; Scotland has British Transport Police data only.',
+            'data_is_approximate' => true,
+            'from_snapshot' => [
+                'version' => $from->version,
+                'checksum' => $from->checksum,
+                'captured_at' => $from->captured_at?->toISOString(),
+            ],
+            'to_snapshot' => [
+                'version' => $to->version,
+                'checksum' => $to->checksum,
+                'captured_at' => $to->captured_at?->toISOString(),
+            ],
+        ]);
+    }
+
+    /** @return array<string, mixed> */
     private function meta(CrimeResults|CrimeCategories $result, ?YearMonth $month): array
     {
-        return [
+        $meta = [
             'cached' => $result->cached,
             'source' => 'police_uk',
             'source_updated_at' => null,
@@ -92,6 +129,16 @@ final class CrimeController extends Controller
             'requested_month' => $month?->value(),
             'data_is_approximate' => true,
         ];
+
+        if ($result instanceof CrimeResults && $result->snapshotVersion !== null) {
+            $meta['snapshot'] = [
+                'version' => $result->snapshotVersion,
+                'checksum' => $result->snapshotChecksum,
+                'captured_at' => $result->snapshotCapturedAt,
+            ];
+        }
+
+        return $meta;
     }
 
     private function sourceMonth(CrimeResults $result): ?string

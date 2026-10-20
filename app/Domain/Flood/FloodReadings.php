@@ -10,5 +10,8 @@ final readonly class FloodReadings
         public bool $cached,
         public string $retrievedAt,
         public ?string $sourceUpdatedAt,
+        public ?string $snapshotVersion = null,
+        public ?string $snapshotChecksum = null,
+        public ?string $snapshotCapturedAt = null,
     ) {}
 }

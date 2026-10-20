@@ -1,9 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
-import { ArrowRight, KeyRound, Zap } from 'lucide-react';
-import {
-    DashboardPageHeader,
-    EmptyState,
-} from '@/components/dashboard-page-header';
+import { ArrowRight, KeyRound } from 'lucide-react';
+import { DashboardPageHeader } from '@/components/dashboard-page-header';
 
 type Props = {
     summary: {
@@ -82,35 +79,72 @@ export default function Dashboard({ summary }: Props) {
                         View usage details <ArrowRight className="size-4" />
                     </Link>
                 </section>
-                {summary.active_keys === 0 ? (
-                    <EmptyState title="Create your first API key">
-                        <p>
-                            Keys are displayed only once, stored as hashes, and
-                            can be revoked at any time.
-                        </p>
-                        <Link
+                <section className="rounded-xl border border-slate-200 bg-white p-6">
+                    <p className="text-xs font-bold tracking-[.14em] text-slate-500 uppercase">
+                        First request checklist
+                    </p>
+                    <h2 className="mt-2 text-xl font-semibold">
+                        {summary.monthly_requests > 0
+                            ? 'You are connected'
+                            : 'Get from signup to data in three steps'}
+                    </h2>
+                    <div className="mt-5 grid gap-3 md:grid-cols-3">
+                        <OnboardingStep
+                            complete={summary.active_keys > 0}
+                            number="1"
+                            title="Create a test key"
                             href="/api-keys"
-                            className="mt-4 inline-flex items-center gap-2 font-semibold text-[#2563c7]"
-                        >
-                            Create a key <ArrowRight className="size-4" />
-                        </Link>
-                    </EmptyState>
-                ) : (
-                    <EmptyState title="Your next request starts here">
-                        <p>
-                            Start with a test key and the live VAT endpoints,
-                            then return here to follow this month’s usage.
-                        </p>
-                        <Link
-                            href="/docs"
-                            className="mt-4 inline-flex items-center gap-2 font-semibold text-[#2563c7]"
-                        >
-                            Open documentation <Zap className="size-4" />
-                        </Link>
-                    </EmptyState>
-                )}
+                        />
+                        <OnboardingStep
+                            complete={summary.monthly_requests > 0}
+                            number="2"
+                            title="Copy the quickstart"
+                            href="/docs#quickstart"
+                        />
+                        <OnboardingStep
+                            complete={summary.monthly_requests > 0}
+                            number="3"
+                            title="Make your first request"
+                            href="/docs#quickstart"
+                        />
+                    </div>
+                    <p className="mt-5 text-sm text-slate-600">
+                        Keys are shown once and stored as hashes. Test and live
+                        keys use the same API format; keep both on your server,
+                        never in browser code.
+                    </p>
+                </section>
             </main>
         </>
+    );
+}
+
+function OnboardingStep({
+    complete,
+    number,
+    title,
+    href,
+}: {
+    complete: boolean;
+    number: string;
+    title: string;
+    href: string;
+}) {
+    return (
+        <Link
+            href={href}
+            className={`border p-4 transition hover:border-[#2563c7] ${complete ? 'border-emerald-200 bg-emerald-50' : 'border-slate-200 bg-slate-50'}`}
+        >
+            <span className="font-mono text-xs font-bold text-[#2563c7]">
+                {complete ? '✓' : number}
+            </span>
+            <span className="mt-3 block text-sm font-semibold text-slate-900">
+                {title}
+            </span>
+            <span className="mt-1 block text-xs text-slate-500">
+                {complete ? 'Complete' : 'Open →'}
+            </span>
+        </Link>
     );
 }
 

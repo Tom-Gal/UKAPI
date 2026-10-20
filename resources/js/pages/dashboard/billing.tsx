@@ -55,6 +55,10 @@ export default function Billing({
                         requests/month · {plan.burst_requests_per_second}{' '}
                         requests/second
                     </p>
+                    <p className="mt-3 text-sm text-slate-600">
+                        Monthly quotas are hard. Requests stop at the included
+                        allowance; there is no overage billing at launch.
+                    </p>
                     <div className="mt-4 flex flex-wrap gap-2 text-xs text-slate-600">
                         {plan.features.map((feature) => (
                             <span

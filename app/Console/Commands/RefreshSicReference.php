@@ -2,6 +2,8 @@
 
 namespace App\Console\Commands;
 
+use App\Domain\Snapshots\SnapshotStore;
+use Carbon\CarbonImmutable;
 use DOMDocument;
 use DOMElement;
 use DOMXPath;
@@ -15,7 +17,7 @@ final class RefreshSicReference extends Command
 
     protected $description = 'Refresh the local Companies House condensed SIC 2007 reference snapshot.';
 
-    public function handle(): int
+    public function handle(SnapshotStore $snapshots): int
     {
         $sourceUrl = config('ukapi.sic_reference.source_url');
         $snapshotPath = config('ukapi.sic_reference.snapshot_path');
@@ -70,6 +72,13 @@ final class RefreshSicReference extends Command
                 $snapshotPath,
                 json_encode($snapshot, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR).PHP_EOL,
             );
+            $durableSnapshot = $snapshots->captureIfChanged(
+                'companies_house.sic_2007',
+                'reference',
+                'companies_house',
+                $records,
+                CarbonImmutable::parse($snapshot['retrieved_at']),
+            );
         } catch (\Throwable $exception) {
             report($exception);
             $this->error('The SIC reference snapshot could not be written.');
@@ -77,7 +86,11 @@ final class RefreshSicReference extends Command
             return self::FAILURE;
         }
 
-        $this->info(sprintf('Refreshed %d Companies House condensed SIC 2007 records.', count($records)));
+        $this->info(sprintf(
+            'Refreshed %d Companies House condensed SIC 2007 records as snapshot %s.',
+            count($records),
+            $durableSnapshot->version,
+        ));
 
         return self::SUCCESS;
     }

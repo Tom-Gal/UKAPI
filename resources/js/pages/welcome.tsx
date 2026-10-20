@@ -9,12 +9,16 @@ import {
 } from 'lucide-react';
 import { endpointFamilies, plans } from '@/lib/ukapi-content';
 
-const example = `curl https://api.ukapi.co.uk/v1/postcodes/BL2 \\\n+  -H "Authorization: Bearer uk_live_…"
-
-{
-  "data": { "postcode": "BL2 6XX", "country": "England" },
-  "meta": { "request_id": "req_01…", "cached": true }
-}`;
+const example = [
+    'curl https://api.ukapi.co.uk/v1/postcodes/BL2',
+    '  -H "Authorization: Bearer uk_test_…"',
+    '  -H "Accept: application/json"',
+    '',
+    '{',
+    '  "data": { "postcode": "BL2 6XX", "country": "England" },',
+    '  "meta": { "request_id": "req_01…", "cached": true }',
+    '}',
+].join('\n');
 
 export default function Welcome() {
     const liveEndpoints = endpointFamilies.reduce(
@@ -49,8 +53,8 @@ export default function Welcome() {
                         </h1>
                         <p className="ukapi-enter ukapi-enter-delay-2 mt-9 max-w-xl text-lg leading-8 text-slate-600 sm:text-xl">
                             Postcodes, companies, crime, flood information and
-                            more, normalised into a single, dependable API for UK
-                            products.
+                            more, normalised into a single, dependable API for
+                            UK products.
                         </p>
                         <div className="ukapi-enter ukapi-enter-delay-3 mt-9 flex flex-col gap-4 sm:flex-row sm:flex-wrap">
                             <Link
@@ -181,7 +185,8 @@ export default function Welcome() {
                         </h2>
                         <p className="mt-5 max-w-md leading-7 text-slate-600">
                             Every live endpoint counts as one request. Pick a
-                            monthly allowance; the API stays the same.
+                            monthly allowance; the API stays the same. Quotas
+                            are hard at launch, with no overage billing.
                         </p>
                     </div>
                     <div className="grid border-t border-l border-slate-950 sm:grid-cols-2">

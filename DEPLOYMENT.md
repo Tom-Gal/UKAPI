@@ -54,3 +54,36 @@ an active key reaches 90 days and again no sooner than every 90 days.
 - Run `php artisan ukapi:sic:refresh` deliberately after confirming the source and its terms. It never runs during a customer request.
 - Promote the first verified operator with `php artisan ukapi:grant-admin operator@example.com`.
 - Back up MySQL before migrations and verify email delivery, Valkey connectivity, CORS, API-key issuance, and the live Companies House credential before widening access.
+
+## Dataset snapshots and change feeds
+
+The dataset_snapshots table stores immutable, checksummed payloads. The
+dataset_snapshot_heads table is only a mutable pointer to the active version,
+so publishing a new source extract never rewrites history. The daily
+ukapi:snapshots:prune task removes snapshots older than
+SNAPSHOT_RETENTION_DAYS while retaining every active version.
+
+Police.uk monthly crime snapshots, Companies House SIC reference snapshots, and
+Environment Agency station-reading snapshots now use the store. Their scopes
+are respectively postcode/month, the SIC reference, and station id. Each has a
+stable record identity so deterministic added, removed, and changed diffs do
+not rely on a mutable upstream response.
+
+The same store can support the next datasets with different scope and identity
+rules:
+
+- Flood change feeds currently cover station readings, scoped by station id and
+  using the measure id plus observation timestamp as identity. Warnings remain
+  operationally sensitive and rapidly mutable, so they are explicitly excluded
+  from the historical feed and must not be treated as an alerting or safety
+  guarantee.
+- Companies House should start with company profile snapshots, scoped by
+  company number and capture date, then add officers and filings as separate
+  dataset names. Stable company numbers, officer appointment ids, and filing
+  transaction ids should be used as identities. The implementation must also
+  confirm Companies House API caching, retention, and redistribution terms
+  before making these snapshots customer-visible.
+
+Both extensions should reuse SnapshotStore, but each provider should define
+its own canonical normalisation, source timestamp, identity function, and
+retention policy rather than treating all upstream records as interchangeable.

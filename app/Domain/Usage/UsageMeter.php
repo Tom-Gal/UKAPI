@@ -21,9 +21,7 @@ final class UsageMeter
 
     public function record(ApiKey $apiKey, string $endpointCode): int
     {
-        $expiresAt = now()->startOfMonth()
-            ->addMonth()
-            ->addDays((int) config('ukapi.usage_counter_retention_days'));
+        $expiresAt = $this->counterExpiresAt();
 
         $this->cache->add($this->accountKey($apiKey->user_id), 0, $expiresAt);
         $this->cache->add($this->accountEndpointKey($apiKey->user_id, $endpointCode), 0, $expiresAt);
@@ -34,6 +32,35 @@ final class UsageMeter
         $this->cache->increment($this->accountKey($apiKey->user_id));
 
         return $this->currentMonthlyUsageForUser($apiKey->user_id);
+    }
+
+    /**
+     * Reserve one request before the endpoint runs.
+     *
+     * The account counter is incremented atomically and rolled back when the
+     * reservation would exceed the plan quota. This prevents concurrent
+     * requests from passing a read-then-write quota check together.
+     */
+    public function reserve(ApiKey $apiKey, string $endpointCode, int $quota): ?int
+    {
+        $expiresAt = $this->counterExpiresAt();
+        $accountKey = $this->accountKey($apiKey->user_id);
+
+        $this->cache->add($accountKey, 0, $expiresAt);
+        $usage = $this->cache->increment($accountKey);
+
+        if ($usage > $quota) {
+            $this->cache->decrement($accountKey);
+
+            return null;
+        }
+
+        $this->cache->add($this->accountEndpointKey($apiKey->user_id, $endpointCode), 0, $expiresAt);
+        $this->cache->add($this->endpointKey($apiKey, $endpointCode), 0, $expiresAt);
+        $this->cache->increment($this->accountEndpointKey($apiKey->user_id, $endpointCode));
+        $this->cache->increment($this->endpointKey($apiKey, $endpointCode));
+
+        return $usage;
     }
 
     public function monthlyResetAt(): int
@@ -70,6 +97,13 @@ final class UsageMeter
     private function accountKey(int $userId): string
     {
         return sprintf('ukapi:usage:%s:account:%d', now()->format('Ym'), $userId);
+    }
+
+    private function counterExpiresAt(): \DateTimeInterface
+    {
+        return now()->startOfMonth()
+            ->addMonth()
+            ->addDays((int) config('ukapi.usage_counter_retention_days'));
     }
 
     private function endpointKey(ApiKey $apiKey, string $endpointCode): string

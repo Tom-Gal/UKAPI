@@ -99,6 +99,14 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Dataset snapshot retention
+    |--------------------------------------------------------------------------
+    */
+
+    'snapshot_retention_days' => (int) env('SNAPSHOT_RETENTION_DAYS', 365),
+
+    /*
+    |--------------------------------------------------------------------------
     | Dashboard usage labels
     |--------------------------------------------------------------------------
     |
@@ -117,13 +125,16 @@ return [
         'companies.filings' => 'Company filings',
         'sic.search' => 'SIC searches',
         'sic.show' => 'SIC lookups',
+        'sic.changes' => 'SIC changes',
         'crime.nearby' => 'Crime nearby',
         'crime.summary' => 'Crime summaries',
         'crime.categories' => 'Crime categories',
+        'crime.changes' => 'Crime changes',
         'flood.warnings' => 'Flood warnings',
         'flood.nearby' => 'Flood nearby',
         'flood.stations.nearby' => 'Flood stations',
         'flood.stations.readings' => 'Flood readings',
+        'flood.stations.changes' => 'Flood reading changes',
         'postcodes.validate' => 'Postcode validation',
         'postcodes.nearby' => 'Nearby postcodes',
         'postcodes.show' => 'Postcode lookups',

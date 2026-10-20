@@ -35,5 +35,4 @@ class SicSearchRequest extends FormRequest
     {
         return (string) $this->validated('q');
     }
-
 }

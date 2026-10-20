@@ -325,6 +325,32 @@ paths:
                     $ref: '#/components/responses/RateLimited'
                 '503':
                     $ref: '#/components/responses/SicReferenceUnavailable'
+    /v1/sic/changes:
+        get:
+            operationId: listSicChanges
+            x-ukapi-feature: change_feeds
+            summary: List changes between Companies House SIC snapshots
+            description: Compares immutable local SIC reference snapshots. until defaults to the active snapshot.
+            parameters:
+                - $ref: '#/components/parameters/SnapshotSince'
+                - $ref: '#/components/parameters/SnapshotUntil'
+            responses:
+                '200':
+                    description: Added, removed and changed SIC records
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/SicChangesEnvelope'
+                '401':
+                    $ref: '#/components/responses/InvalidApiKey'
+                '403':
+                    $ref: '#/components/responses/FeatureUnavailable'
+                '422':
+                    $ref: '#/components/responses/InvalidParameter'
+                '429':
+                    $ref: '#/components/responses/RateLimited'
+                '503':
+                    $ref: '#/components/responses/SicReferenceUnavailable'
     /v1/crime/nearby:
         get:
             operationId: findNearbyCrime
@@ -400,6 +426,40 @@ paths:
                                 $ref: '#/components/schemas/CrimeCategoriesEnvelope'
                 '401':
                     $ref: '#/components/responses/InvalidApiKey'
+                '422':
+                    $ref: '#/components/responses/InvalidParameter'
+                '429':
+                    $ref: '#/components/responses/RateLimited'
+                '502':
+                    $ref: '#/components/responses/UpstreamInvalidResponse'
+                '503':
+                    $ref: '#/components/responses/UpstreamUnavailable'
+    /v1/crime/changes:
+        get:
+            operationId: listCrimeChanges
+            x-ukapi-feature: change_feeds
+            summary: List deterministic changes between Police.uk monthly snapshots
+            description: |
+                Compares immutable monthly snapshots for approximate,
+                anonymised street-level crime near a postcode. If until is
+                omitted, the latest completed month is used.
+            parameters:
+                - $ref: '#/components/parameters/CrimePostcode'
+                - $ref: '#/components/parameters/CrimeSince'
+                - $ref: '#/components/parameters/CrimeUntil'
+            responses:
+                '200':
+                    description: Added, removed and changed crime records
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CrimeChangesEnvelope'
+                '401':
+                    $ref: '#/components/responses/InvalidApiKey'
+                '403':
+                    $ref: '#/components/responses/FeatureUnavailable'
+                '404':
+                    $ref: '#/components/responses/NotFound'
                 '422':
                     $ref: '#/components/responses/InvalidParameter'
                 '429':
@@ -509,6 +569,37 @@ paths:
                     $ref: '#/components/responses/UpstreamInvalidResponse'
                 '503':
                     $ref: '#/components/responses/UpstreamUnavailable'
+    /v1/flood/stations/{id}/changes:
+        get:
+            operationId: listFloodReadingChanges
+            x-ukapi-feature: change_feeds
+            summary: List changes between flood-monitoring reading snapshots
+            description: Compares immutable Environment Agency reading snapshots for one station. This is an archive, not an emergency alert service.
+            parameters:
+                - $ref: '#/components/parameters/FloodStationId'
+                - $ref: '#/components/parameters/SnapshotSince'
+                - $ref: '#/components/parameters/SnapshotUntil'
+            responses:
+                '200':
+                    description: Added, removed and changed station readings
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/FloodChangesEnvelope'
+                '401':
+                    $ref: '#/components/responses/InvalidApiKey'
+                '403':
+                    $ref: '#/components/responses/FeatureUnavailable'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '422':
+                    $ref: '#/components/responses/InvalidParameter'
+                '429':
+                    $ref: '#/components/responses/RateLimited'
+                '502':
+                    $ref: '#/components/responses/UpstreamInvalidResponse'
+                '503':
+                    $ref: '#/components/responses/UpstreamUnavailable'
 components:
     securitySchemes:
         bearerApiKey:
@@ -557,6 +648,24 @@ components:
                 type: string
                 pattern: '^\d{4}-(0[1-9]|1[0-2])$'
             example: '2026-07'
+        CrimeSince:
+            name: since
+            in: query
+            required: true
+            description: The first non-future monthly snapshot to compare, in YYYY-MM format.
+            schema:
+                type: string
+                pattern: '^\d{4}-(0[1-9]|1[0-2])$'
+            example: '2026-07'
+        CrimeUntil:
+            name: until
+            in: query
+            required: false
+            description: The final non-future monthly snapshot to compare, in YYYY-MM format. Defaults to the latest completed month.
+            schema:
+                type: string
+                pattern: '^\d{4}-(0[1-9]|1[0-2])$'
+            example: '2026-08'
         FloodPostcode:
             name: postcode
             in: query
@@ -574,6 +683,24 @@ components:
                 type: string
                 pattern: '^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$'
             example: 5380TH
+        SnapshotSince:
+            name: since
+            in: query
+            required: true
+            description: An immutable snapshot version returned by an earlier response.
+            schema:
+                type: string
+                maxLength: 26
+            example: 01J8SNAPSHOT00000000000000
+        SnapshotUntil:
+            name: until
+            in: query
+            required: false
+            description: An immutable snapshot version. Omit to compare with the active snapshot.
+            schema:
+                type: string
+                maxLength: 26
+            example: 01J8SNAPSHOT00000000000001
         NearbyLimit:
             name: limit
             in: query
@@ -673,6 +800,12 @@ components:
     responses:
         InvalidApiKey:
             description: Missing, malformed, invalid, or revoked API key.
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/ErrorEnvelope'
+        FeatureUnavailable:
+            description: The requested feature is not included in the current plan.
             content:
                 application/json:
                     schema:
@@ -940,6 +1073,117 @@ components:
                                 $ref: '#/components/schemas/CrimeCategory'
                 meta:
                     $ref: '#/components/schemas/CrimeMeta'
+        CrimeChangesEnvelope:
+            type: object
+            required: [data, meta]
+            properties:
+                data:
+                    type: object
+                    required: [postcode, since, until, added, removed, changed]
+                    properties:
+                        postcode:
+                            type: string
+                        since:
+                            type: string
+                            pattern: '^\d{4}-(0[1-9]|1[0-2])$'
+                        until:
+                            type: string
+                            pattern: '^\d{4}-(0[1-9]|1[0-2])$'
+                        added:
+                            type: array
+                            items:
+                                $ref: '#/components/schemas/Crime'
+                        removed:
+                            type: array
+                            items:
+                                $ref: '#/components/schemas/Crime'
+                        changed:
+                            type: array
+                            items:
+                                type: object
+                                required: [key, before, after]
+                                properties:
+                                    key:
+                                        type: string
+                                    before:
+                                        $ref: '#/components/schemas/Crime'
+                                    after:
+                                        $ref: '#/components/schemas/Crime'
+                meta:
+                    $ref: '#/components/schemas/CrimeChangesMeta'
+        CrimeChangesMeta:
+            type: object
+            required:
+                [
+                    request_id,
+                    cached,
+                    source,
+                    source_updated_at,
+                    coverage,
+                    data_is_approximate,
+                    from_snapshot,
+                    to_snapshot,
+                ]
+            properties:
+                request_id:
+                    type: string
+                cached:
+                    type: boolean
+                source:
+                    type: string
+                    example: police_uk
+                source_updated_at:
+                    type: [string, 'null']
+                    format: date-time
+                coverage:
+                    type: string
+                data_is_approximate:
+                    type: boolean
+                from_snapshot:
+                    $ref: '#/components/schemas/SnapshotMetadata'
+                to_snapshot:
+                    $ref: '#/components/schemas/SnapshotMetadata'
+        SnapshotMetadata:
+            type: object
+            required: [version, checksum, captured_at]
+            properties:
+                version:
+                    type: string
+                checksum:
+                    type: string
+                captured_at:
+                    type: string
+                    format: date-time
+        SnapshotChangesMeta:
+            type: object
+            required:
+                [
+                    request_id,
+                    cached,
+                    source,
+                    source_updated_at,
+                    coverage,
+                    from_snapshot,
+                    to_snapshot,
+                ]
+            properties:
+                request_id:
+                    type: string
+                cached:
+                    type: boolean
+                source:
+                    type: string
+                source_updated_at:
+                    type: [string, 'null']
+                    format: date-time
+                coverage:
+                    type: string
+                safety_notice:
+                    type: string
+                from_snapshot:
+                    $ref: '#/components/schemas/SnapshotMetadata'
+                to_snapshot:
+                    $ref: '#/components/schemas/SnapshotMetadata'
         CrimeMeta:
             type: object
             required:
@@ -972,6 +1216,8 @@ components:
                 data_is_approximate:
                     type: boolean
                     example: true
+                snapshot:
+                    $ref: '#/components/schemas/SnapshotMetadata'
         Crime:
             type: object
             required: [category, persistent_id, month, location, outcome]
@@ -1101,6 +1347,43 @@ components:
                                 $ref: '#/components/schemas/FloodReading'
                 meta:
                     $ref: '#/components/schemas/FloodMeta'
+        FloodChangesEnvelope:
+            type: object
+            required: [data, meta]
+            properties:
+                data:
+                    type: object
+                    required:
+                        [station_id, since, until, added, removed, changed]
+                    properties:
+                        station_id:
+                            type: string
+                        since:
+                            type: string
+                        until:
+                            type: string
+                        added:
+                            type: array
+                            items:
+                                $ref: '#/components/schemas/FloodReading'
+                        removed:
+                            type: array
+                            items:
+                                $ref: '#/components/schemas/FloodReading'
+                        changed:
+                            type: array
+                            items:
+                                type: object
+                                required: [key, before, after]
+                                properties:
+                                    key:
+                                        type: string
+                                    before:
+                                        $ref: '#/components/schemas/FloodReading'
+                                    after:
+                                        $ref: '#/components/schemas/FloodReading'
+                meta:
+                    $ref: '#/components/schemas/SnapshotChangesMeta'
         FloodMeta:
             type: object
             required:
@@ -1132,6 +1415,8 @@ components:
                     example: England
                 safety_notice:
                     type: string
+                snapshot:
+                    $ref: '#/components/schemas/SnapshotMetadata'
         FloodWarning:
             type: object
             required:
@@ -1333,6 +1618,40 @@ components:
                                           type: [integer, 'null']
                                       previous_page:
                                           type: [integer, 'null']
+        SicChangesEnvelope:
+            type: object
+            required: [data, meta]
+            properties:
+                data:
+                    type: object
+                    required: [since, until, added, removed, changed]
+                    properties:
+                        since:
+                            type: string
+                        until:
+                            type: string
+                        added:
+                            type: array
+                            items:
+                                $ref: '#/components/schemas/Sic'
+                        removed:
+                            type: array
+                            items:
+                                $ref: '#/components/schemas/Sic'
+                        changed:
+                            type: array
+                            items:
+                                type: object
+                                required: [key, before, after]
+                                properties:
+                                    key:
+                                        type: string
+                                    before:
+                                        $ref: '#/components/schemas/Sic'
+                                    after:
+                                        $ref: '#/components/schemas/Sic'
+                meta:
+                    $ref: '#/components/schemas/SnapshotChangesMeta'
         CompanyMeta:
             type: object
             required: [request_id, cached, stale, source, coverage]
@@ -1515,6 +1834,9 @@ components:
                 reference_version:
                     type: string
                     example: companies_house_condensed_sic_2007
+                snapshot_version:
+                    type: [string, 'null']
+                    description: Durable local snapshot version used for historical comparisons.
         CompanyAddress:
             type: [object, 'null']
             properties:

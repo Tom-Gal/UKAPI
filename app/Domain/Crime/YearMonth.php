@@ -9,7 +9,7 @@ final readonly class YearMonth
 {
     private function __construct(private string $value) {}
 
-    public static function from(?string $value): ?self
+    public static function from(?string $value, string $field = 'month'): ?self
     {
         if ($value === null || $value === '') {
             return null;
@@ -18,7 +18,7 @@ final readonly class YearMonth
         $date = CarbonImmutable::createFromFormat('!Y-m', $value);
 
         if ($date === null || $date->format('Y-m') !== $value || $date->isFuture()) {
-            throw ApiException::invalidParameter('month', 'Month must use the YYYY-MM format and cannot be in the future.');
+            throw ApiException::invalidParameter($field, 'Month must use the YYYY-MM format and cannot be in the future.');
         }
 
         return new self($value);

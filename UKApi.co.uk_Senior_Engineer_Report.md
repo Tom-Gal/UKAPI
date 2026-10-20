@@ -338,15 +338,15 @@ Implement shared API response helpers/resources, but avoid wrapping internal Lar
 
 ```json
 {
-  "data": {},
-  "meta": {
-    "request_id": "req_...",
-    "cached": false,
-    "source": "food_standards_agency",
-    "retrieved_at": "2026-09-23T18:00:00Z",
-    "source_updated_at": null,
-    "coverage": "UK"
-  }
+    "data": {},
+    "meta": {
+        "request_id": "req_...",
+        "cached": false,
+        "source": "food_standards_agency",
+        "retrieved_at": "2026-09-23T18:00:00Z",
+        "source_updated_at": null,
+        "coverage": "UK"
+    }
 }
 ```
 
@@ -477,11 +477,11 @@ FHRS/FHIS rating models differ geographically. Model the public response around 
 
 ```json
 {
-  "scheme": "FHRS",
-  "rating": {
-    "value": "5",
-    "label": "Very good"
-  }
+    "scheme": "FHRS",
+    "rating": {
+        "value": "5",
+        "label": "Very good"
+    }
 }
 ```
 
@@ -527,11 +527,9 @@ Return a stable structure such as:
 
 ```json
 {
-  "type": "conservation_area",
-  "matched": true,
-  "entities": [
-    { "reference": "...", "name": "..." }
-  ]
+    "type": "conservation_area",
+    "matched": true,
+    "entities": [{ "reference": "...", "name": "..." }]
 }
 ```
 
@@ -586,11 +584,11 @@ Store cache metadata alongside payload:
 
 ```json
 {
-  "payload": {},
-  "retrieved_at": "...",
-  "source_updated_at": "...",
-  "fresh_until": "...",
-  "stale_until": "..."
+    "payload": {},
+    "retrieved_at": "...",
+    "source_updated_at": "...",
+    "fresh_until": "...",
+    "stale_until": "..."
 }
 ```
 

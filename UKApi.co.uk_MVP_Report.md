@@ -234,13 +234,13 @@ Keys should have a visible prefix (`uk_live_`, `uk_test_`) and only the hash sho
 
 ```json
 {
-  "data": {},
-  "meta": {
-    "request_id": "req_01...",
-    "cached": true,
-    "source": "companies_house",
-    "source_updated_at": "2026-09-23T12:30:00Z"
-  }
+    "data": {},
+    "meta": {
+        "request_id": "req_01...",
+        "cached": true,
+        "source": "companies_house",
+        "source_updated_at": "2026-09-23T12:30:00Z"
+    }
 }
 ```
 
@@ -248,15 +248,15 @@ For list endpoints:
 
 ```json
 {
-  "data": [],
-  "meta": {
-    "request_id": "req_01...",
-    "pagination": {
-      "page": 1,
-      "per_page": 25,
-      "total": 113
+    "data": [],
+    "meta": {
+        "request_id": "req_01...",
+        "pagination": {
+            "page": 1,
+            "per_page": 25,
+            "total": 113
+        }
     }
-  }
 }
 ```
 
@@ -264,12 +264,12 @@ For list endpoints:
 
 ```json
 {
-  "error": {
-    "code": "postcode_not_found",
-    "message": "The postcode could not be found.",
-    "status": 404,
-    "request_id": "req_01..."
-  }
+    "error": {
+        "code": "postcode_not_found",
+        "message": "The postcode could not be found.",
+        "status": 404,
+        "request_id": "req_01..."
+    }
 }
 ```
 
@@ -299,12 +299,12 @@ API key values are shown only once at creation. Users can create multiple keys s
 
 Keep pricing extremely simple at launch.
 
-| Plan | Suggested price | Included requests/month | Intended user |
-|---|---:|---:|---|
-| Free | £0 | 5,000 | evaluation, hobby projects |
-| Hobby | £4.99 | 50,000 | small applications |
-| Pro | £12.99 | 250,000 | production SaaS / agencies |
-| Scale | £29.99 | 1,000,000 | higher-volume small businesses |
+| Plan  | Suggested price | Included requests/month | Intended user                  |
+| ----- | --------------: | ----------------------: | ------------------------------ |
+| Free  |              £0 |                   5,000 | evaluation, hobby projects     |
+| Hobby |           £4.99 |                  50,000 | small applications             |
+| Pro   |          £12.99 |                 250,000 | production SaaS / agencies     |
+| Scale |          £29.99 |               1,000,000 | higher-volume small businesses |
 
 Initial overage billing should be avoided. Hard or soft quota limits are easier to understand and reduce billing disputes. Allow users to upgrade instantly when a quota is reached.
 
@@ -365,19 +365,19 @@ Not every endpoint needs live upstream calls.
 
 Suggested defaults:
 
-| Endpoint family | Initial cache TTL |
-|---|---:|
-| postcode lookup | 30 days |
-| council metadata | 30 days |
-| company profile | 15 minutes |
-| company officers | 1 hour |
-| company filings | 15 minutes |
-| bank holidays | 24 hours |
-| food hygiene | 6 hours |
-| crime month data | 24 hours |
-| flood warnings | 5 minutes |
-| flood readings | 5 minutes |
-| planning constraints | 24 hours |
+| Endpoint family      | Initial cache TTL |
+| -------------------- | ----------------: |
+| postcode lookup      |           30 days |
+| council metadata     |           30 days |
+| company profile      |        15 minutes |
+| company officers     |            1 hour |
+| company filings      |        15 minutes |
+| bank holidays        |          24 hours |
+| food hygiene         |           6 hours |
+| crime month data     |          24 hours |
+| flood warnings       |         5 minutes |
+| flood readings       |         5 minutes |
+| planning constraints |          24 hours |
 
 Cache TTLs are product defaults, not guarantees about source freshness. Return `source_updated_at` and, where useful, `retrieved_at` so consumers can reason about data age.
 

@@ -108,7 +108,11 @@ export default function Docs({ section }: DocsProps) {
                                 </ol>
                                 <CodeBlock
                                     title="First request"
-                                    code={`curl "https://api.ukapi.co.uk/v1/postcodes/BL2%206XX" \\\n+  -H "Authorization: Bearer uk_live_your_api_key" \\\n+  -H "Accept: application/json"`}
+                                    code={[
+                                        'curl "https://api.ukapi.co.uk/v1/postcodes/BL2%206XX"',
+                                        '  -H "Authorization: Bearer uk_test_your_api_key"',
+                                        '  -H "Accept: application/json"',
+                                    ].join('\n')}
                                 />
                                 <Callout title="Keep keys out of client code">
                                     Do not place an API key in browser
@@ -240,6 +244,11 @@ Accept: application/json`}
                                                 action="Wait for the supplied retry window."
                                             />
                                             <ErrorRow
+                                                status="429"
+                                                code="quota_exceeded"
+                                                action="Upgrade your plan or wait for the next monthly reset; launch overages are not billed."
+                                            />
+                                            <ErrorRow
                                                 status="503"
                                                 code="upstream_unavailable"
                                                 action="Retry with exponential backoff and jitter."
@@ -282,9 +291,11 @@ Retry-After: 12`}
                                 </div>
                                 <p className="mt-6 leading-7 text-slate-600">
                                     Monthly usage is visible in the dashboard.
-                                    When the allowance is exhausted, requests
-                                    resume at the next monthly reset or after a
-                                    plan upgrade.
+                                    Every admitted request counts, including
+                                    validation errors. When the hard allowance
+                                    is exhausted, requests are blocked until the
+                                    next monthly reset or after a plan upgrade.
+                                    There is no overage billing at launch.
                                 </p>
                             </DocSection>
 

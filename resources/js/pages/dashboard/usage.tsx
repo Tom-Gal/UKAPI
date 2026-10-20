@@ -37,7 +37,7 @@ export default function Usage({
             <DashboardPageHeader
                 eyebrow="Usage"
                 title="Request usage"
-                description="Track the requests included in your current monthly plan."
+                description="Track the requests included in your current monthly plan. Requests stop at the hard monthly quota; there is no launch overage billing."
             />
             <main className="p-5 lg:p-8">
                 {cancelledPlanEndsAt && (
@@ -111,7 +111,7 @@ export default function Usage({
                     <p className="mt-2">
                         {monthlyUsage === 0
                             ? 'Make your first API request to start using your monthly allowance.'
-                            : 'Every successful API request counts toward the monthly allowance shown above.'}
+                            : 'Every admitted API request counts toward the monthly allowance shown above, including validation errors.'}
                     </p>
                     <Link
                         href="/docs"

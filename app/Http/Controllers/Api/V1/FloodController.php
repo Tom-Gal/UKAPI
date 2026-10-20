@@ -8,6 +8,7 @@ use App\Domain\Flood\FloodStationReference;
 use App\Domain\Flood\FloodStations;
 use App\Domain\Flood\FloodWarnings;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\FloodChangesRequest;
 use App\Http\Requests\Api\V1\FloodPostcodeRequest;
 use App\Support\Api\ApiResponse;
 use Illuminate\Http\JsonResponse;
@@ -84,10 +85,43 @@ final class FloodController extends Controller
         ], $this->meta($result));
     }
 
-    /** @return array<string, bool|string|null> */
+    public function changes(FloodChangesRequest $request, string $id, FloodService $flood): JsonResponse
+    {
+        $station = FloodStationReference::from($id);
+        $changes = $flood->readingChanges($station, $request->since(), $request->until());
+        $from = $changes['from'];
+        $to = $changes['to'];
+
+        return ApiResponse::success($request, [
+            'station_id' => $station->value(),
+            'since' => $changes['since'],
+            'until' => $changes['until'],
+            'added' => $changes['diff']['added'],
+            'removed' => $changes['diff']['removed'],
+            'changed' => $changes['diff']['changed'],
+        ], [
+            'cached' => true,
+            'source' => 'environment_agency_flood_monitoring',
+            'source_updated_at' => $to->source_updated_at?->toISOString(),
+            'coverage' => 'England',
+            'safety_notice' => 'This data is an archive of monitoring readings, not an emergency alert service. Follow official Environment Agency advice and warnings.',
+            'from_snapshot' => [
+                'version' => $from->version,
+                'checksum' => $from->checksum,
+                'captured_at' => $from->captured_at?->toISOString(),
+            ],
+            'to_snapshot' => [
+                'version' => $to->version,
+                'checksum' => $to->checksum,
+                'captured_at' => $to->captured_at?->toISOString(),
+            ],
+        ]);
+    }
+
+    /** @return array<string, mixed> */
     private function meta(FloodWarnings|FloodStations|FloodReadings $result): array
     {
-        return [
+        $meta = [
             'cached' => $result->cached,
             'source' => 'environment_agency_flood_monitoring',
             'retrieved_at' => $result->retrievedAt,
@@ -95,5 +129,15 @@ final class FloodController extends Controller
             'coverage' => 'England',
             'safety_notice' => 'This data is not an emergency alert service. Follow official Environment Agency advice and warnings.',
         ];
+
+        if ($result instanceof FloodReadings && $result->snapshotVersion !== null) {
+            $meta['snapshot'] = [
+                'version' => $result->snapshotVersion,
+                'checksum' => $result->snapshotChecksum,
+                'captured_at' => $result->snapshotCapturedAt,
+            ];
+        }
+
+        return $meta;
     }
 }

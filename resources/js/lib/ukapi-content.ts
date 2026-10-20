@@ -423,6 +423,33 @@ const allEndpointFamilies: EndpointFamily[] = [
                 source: 'Companies House SIC 2007 snapshot',
                 freshness: 'Local snapshot; result cache 24 hours',
             },
+            {
+                method: 'GET',
+                path: '/v1/sic/changes?since=&until=',
+                examplePath: '/v1/sic/changes?since=01J8SNAPSHOT00000000000000',
+                parameters: [
+                    {
+                        name: 'since',
+                        location: 'query',
+                        required: true,
+                        description:
+                            'An immutable SIC snapshot version returned by an earlier response.',
+                    },
+                    {
+                        name: 'until',
+                        location: 'query',
+                        required: false,
+                        description:
+                            'An immutable SIC snapshot version. Omit to compare with the active snapshot.',
+                    },
+                ],
+                description:
+                    'Compare immutable Companies House SIC snapshots and return deterministic added, removed, and changed records. Pro and Scale plans.',
+                coverage: 'UK',
+                source: 'Companies House SIC 2007 snapshot',
+                freshness: 'On refresh',
+                live: true,
+            },
         ],
     },
     {
@@ -667,6 +694,59 @@ const allEndpointFamilies: EndpointFamily[] = [
                 freshness: '24 hours',
                 live: true,
             },
+            {
+                method: 'GET',
+                path: '/v1/crime/changes?postcode=&since=&until=',
+                examplePath:
+                    '/v1/crime/changes?postcode=BL2%206XX&since=2026-07&until=2026-08',
+                exampleResponse: `{
+  "data": {
+    "postcode": "BL2 6XX",
+    "since": "2026-07",
+    "until": "2026-08",
+    "added": [],
+    "removed": [],
+    "changed": [{ "key": "persistent:example", "before": {}, "after": {} }]
+  },
+  "meta": {
+    "request_id": "req_01…",
+    "cached": true,
+    "source": "police_uk",
+    "from_snapshot": { "version": "01…", "checksum": "…", "captured_at": "2026-08-01T00:00:00+00:00" },
+    "to_snapshot": { "version": "01…", "checksum": "…", "captured_at": "2026-09-01T00:00:00+00:00" }
+  }
+}`,
+                parameters: [
+                    {
+                        name: 'postcode',
+                        location: 'query',
+                        required: true,
+                        description:
+                            'A UK postcode. It is normalised and resolved to coordinates before comparing snapshots.',
+                    },
+                    {
+                        name: 'since',
+                        location: 'query',
+                        required: true,
+                        description:
+                            'The first non-future YYYY-MM snapshot to compare.',
+                    },
+                    {
+                        name: 'until',
+                        location: 'query',
+                        required: false,
+                        description:
+                            'The final non-future YYYY-MM snapshot. Defaults to the latest completed month.',
+                    },
+                ],
+                description:
+                    'Compare immutable monthly Police.uk snapshots and return deterministic added, removed, and changed records. Pro and Scale plans.',
+                coverage:
+                    'England, Wales and Northern Ireland; Scotland has British Transport Police data only',
+                source: 'Police.uk',
+                freshness: 'Monthly snapshots',
+                live: true,
+            },
         ],
     },
     {
@@ -761,6 +841,41 @@ const allEndpointFamilies: EndpointFamily[] = [
                 ],
                 description:
                     'Get a bounded recent set of England Environment Agency station readings.',
+                coverage: 'England',
+                source: 'Environment Agency',
+                freshness: '5 minutes',
+                live: true,
+            },
+            {
+                method: 'GET',
+                path: '/v1/flood/stations/{id}/changes?since=&until=',
+                examplePath:
+                    '/v1/flood/stations/5380TH/changes?since=01J8SNAPSHOT00000000000000',
+                parameters: [
+                    {
+                        name: 'id',
+                        location: 'path',
+                        required: true,
+                        description:
+                            'An Environment Agency station id. Only letters, numbers, hyphens and underscores are accepted.',
+                    },
+                    {
+                        name: 'since',
+                        location: 'query',
+                        required: true,
+                        description:
+                            'An immutable reading snapshot version returned by an earlier response.',
+                    },
+                    {
+                        name: 'until',
+                        location: 'query',
+                        required: false,
+                        description:
+                            'An immutable reading snapshot version. Omit to compare with the active snapshot.',
+                    },
+                ],
+                description:
+                    'Compare immutable Environment Agency station-reading snapshots. This is an archive, not an emergency alert service. Pro and Scale plans.',
                 coverage: 'England',
                 source: 'Environment Agency',
                 freshness: '5 minutes',

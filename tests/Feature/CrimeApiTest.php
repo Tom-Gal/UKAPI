@@ -72,6 +72,45 @@ class CrimeApiTest extends TestCase
             ->assertJsonPath('data.by_category.1.count', 1);
     }
 
+    public function test_pro_can_read_deterministic_crime_changes_between_monthly_snapshots(): void
+    {
+        $token = $this->createProApiKey();
+        $july = $this->fixture('crimes-street');
+        $july[0]['persistent_id'] = 'stable-crime-1';
+        $august = [
+            array_replace($july[0], [
+                'category' => 'burglary',
+                'month' => '2026-08',
+            ]),
+            array_replace($july[1], [
+                'persistent_id' => 'stable-crime-3',
+                'month' => '2026-08',
+            ]),
+        ];
+
+        Http::fake([
+            'https://api.postcodes.io/postcodes/BL26XX' => Http::response($this->postcodeFixture(), 200),
+            'https://data.police.uk/api/crimes-street/all-crime*date=2026-07*' => Http::response($july, 200),
+            'https://data.police.uk/api/crimes-street/all-crime*date=2026-08*' => Http::response($august, 200),
+        ]);
+
+        $this->getJson('/v1/crime/changes?postcode=BL2%206XX&since=2026-07&until=2026-08', [
+            'Authorization' => "Bearer {$token}",
+        ])
+            ->assertOk()
+            ->assertJsonPath('data.postcode', 'BL2 6XX')
+            ->assertJsonPath('data.since', '2026-07')
+            ->assertJsonPath('data.until', '2026-08')
+            ->assertJsonCount(1, 'data.added')
+            ->assertJsonCount(1, 'data.removed')
+            ->assertJsonPath('data.changed.0.key', 'persistent:stable-crime-1')
+            ->assertJsonPath('data.changed.0.before.category', 'anti-social-behaviour')
+            ->assertJsonPath('data.changed.0.after.category', 'burglary')
+            ->assertJsonPath('meta.source', 'police_uk')
+            ->assertJsonPath('meta.from_snapshot.checksum', fn ($checksum): bool => is_string($checksum))
+            ->assertJsonPath('meta.to_snapshot.version', fn ($version): bool => is_string($version));
+    }
+
     public function test_crime_categories_are_cached_without_a_postcode_lookup(): void
     {
         $token = $this->createApiKey();
@@ -137,7 +176,25 @@ class CrimeApiTest extends TestCase
 
     private function createApiKey(): string
     {
+        return $this->createApiKeyForUser(User::factory()->create());
+    }
+
+    private function createProApiKey(): string
+    {
+        config()->set('ukapi.paid_plans.pro.stripe_price', 'price_pro_crime_test');
         $user = User::factory()->create();
+        $user->subscriptions()->create([
+            'type' => 'default',
+            'stripe_id' => 'sub_pro_crime_test',
+            'stripe_status' => 'active',
+            'stripe_price' => 'price_pro_crime_test',
+        ]);
+
+        return $this->createApiKeyForUser($user);
+    }
+
+    private function createApiKeyForUser(User $user): string
+    {
         $secret = Str::lower(Str::random(43));
         $apiKey = $user->apiKeys()->create([
             'public_id' => 'k_'.Str::lower(Str::random(10)),

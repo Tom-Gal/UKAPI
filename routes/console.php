@@ -9,3 +9,4 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('ukapi:remind-key-rotation')->daily()->onOneServer();
+Schedule::command('ukapi:snapshots:prune')->daily()->onOneServer();

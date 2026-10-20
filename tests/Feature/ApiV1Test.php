@@ -96,7 +96,7 @@ class ApiV1Test extends TestCase
             ->assertJsonPath('error.code', 'rate_limit_exceeded');
     }
 
-    public function test_invalid_parameters_use_the_standard_error_envelope_without_consuming_quota(): void
+    public function test_invalid_parameters_use_the_standard_error_envelope_and_consume_quota(): void
     {
         [$apiKey, $token] = $this->createApiKey();
 
@@ -111,7 +111,7 @@ class ApiV1Test extends TestCase
             'Authorization' => "Bearer {$token}",
         ])
             ->assertOk()
-            ->assertHeader('X-Quota-Remaining', '4999');
+            ->assertHeader('X-Quota-Remaining', '4998');
 
         $this->assertNotNull($apiKey->fresh()->last_used_at);
     }
