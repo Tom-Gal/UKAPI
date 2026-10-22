@@ -96,7 +96,7 @@ export default function Pricing() {
                             ))}
                         </ul>
                         <a
-                            href="mailto:support@ukapi.co.uk?subject=Enterprise%20API%20enquiry"
+                            href="mailto:contact@ukapi.co.uk?subject=Enterprise%20API%20enquiry"
                             className="mt-8 border border-slate-950 bg-transparent px-4 py-3 text-center text-sm font-bold transition hover:bg-white"
                         >
                             Contact us

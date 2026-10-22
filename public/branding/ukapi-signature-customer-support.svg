@@ -1,0 +1,16 @@
+<svg width="860" height="220" viewBox="0 0 860 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="860" height="220" fill="#F5F7F4"/>
+  <path d="M0 0H454V220H0V0Z" fill="#F5F7F4"/>
+  <path d="M0 0V220M32 0V220M64 0V220M96 0V220M128 0V220M160 0V220M192 0V220M224 0V220M256 0V220M288 0V220M320 0V220M352 0V220M384 0V220M416 0V220M448 0V220M0 0H454M0 32H454M0 64H454M0 96H454M0 128H454M0 160H454M0 192H454" stroke="#13231A" stroke-opacity=".08"/>
+  <rect x="454" width="406" height="220" fill="#122019"/>
+  <rect x="32" y="42" width="136" height="136" stroke="#13231A" stroke-width="5"/>
+  <path d="M66 76v39c0 20 13 32 34 32s34-12 34-32V76" stroke="#13231A" stroke-width="12"/>
+  <circle cx="145" cy="73" r="17" fill="#2563C7"/>
+  <text x="202" y="95" fill="#13231A" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700">UKApi.co.uk</text>
+  <text x="204" y="125" fill="#65736A" font-family="Consolas, 'Courier New', monospace" font-size="12" font-weight="700" letter-spacing="3">DATA FIELD SERVICE</text>
+  <text x="492" y="70" fill="#8FB49F" font-family="Consolas, 'Courier New', monospace" font-size="12" font-weight="700" letter-spacing="2">CUSTOMER SUPPORT</text>
+  <text x="492" y="112" fill="#F5F7F4" font-family="Arial, Helvetica, sans-serif" font-size="29" font-weight="700">Customer Support</text>
+  <path d="M492 132H780" stroke="#6EA1F2" stroke-width="2"/>
+  <text x="492" y="162" fill="#CBD2C7" font-family="Arial, Helvetica, sans-serif" font-size="15">contact@ukapi.co.uk</text>
+  <text x="492" y="188" fill="#CBD2C7" font-family="Arial, Helvetica, sans-serif" font-size="15">ukapi.co.uk</text>
+</svg>

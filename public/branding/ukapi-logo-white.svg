@@ -1,0 +1,7 @@
+<svg width="1200" height="320" viewBox="0 0 1200 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="16" y="16" width="288" height="288" stroke="#FFFFFF" stroke-width="10"/>
+  <path d="M72 86v82c0 42 28 68 70 68s70-26 70-68V86" stroke="#FFFFFF" stroke-width="24"/>
+  <circle cx="232" cy="81" r="35" fill="#6EA1F2"/>
+  <text x="360" y="162" fill="#FFFFFF" font-family="Arial, Helvetica, sans-serif" font-size="86" font-weight="700" letter-spacing="-5">UKApi.co.uk</text>
+  <text x="366" y="220" fill="#8FB49F" font-family="Consolas, 'Courier New', monospace" font-size="25" font-weight="700" letter-spacing="6">DATA FIELD SERVICE</text>
+</svg>

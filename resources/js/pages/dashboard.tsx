@@ -17,6 +17,8 @@ export default function Dashboard({ summary }: Props) {
         100,
         Math.round((summary.monthly_requests / summary.monthly_quota) * 100),
     );
+    const checklistComplete =
+        summary.active_keys > 0 && summary.first_api_success_at !== null;
     return (
         <>
             <Head title="Dashboard" />
@@ -81,41 +83,41 @@ export default function Dashboard({ summary }: Props) {
                         View usage details <ArrowRight className="size-4" />
                     </Link>
                 </section>
-                <section className="rounded-xl border border-slate-200 bg-white p-6">
-                    <p className="text-xs font-bold tracking-[.14em] text-slate-500 uppercase">
-                        First request checklist
-                    </p>
-                    <h2 className="mt-2 text-xl font-semibold">
-                        {summary.first_api_success_at
-                            ? 'You are connected'
-                            : 'Get from signup to data in three steps'}
-                    </h2>
-                    <div className="mt-5 grid gap-3 md:grid-cols-3">
-                        <OnboardingStep
-                            complete={summary.active_keys > 0}
-                            number="1"
-                            title="Create a test key"
-                            href="/api-keys"
-                        />
-                        <OnboardingStep
-                            complete={summary.first_api_success_at !== null}
-                            number="2"
-                            title="Open the quickstart"
-                            href="/docs#quickstart"
-                        />
-                        <OnboardingStep
-                            complete={summary.first_api_success_at !== null}
-                            number="3"
-                            title="Make your first request"
-                            href="/docs#quickstart"
-                        />
-                    </div>
-                    <p className="mt-5 text-sm text-slate-600">
-                        Keys are shown once and stored as hashes. Test and live
-                        keys use the same API format; keep both on your server,
-                        never in browser code.
-                    </p>
-                </section>
+                {!checklistComplete && (
+                    <section className="rounded-xl border border-slate-200 bg-white p-6">
+                        <p className="text-xs font-bold tracking-[.14em] text-slate-500 uppercase">
+                            First request checklist
+                        </p>
+                        <h2 className="mt-2 text-xl font-semibold">
+                            Get from signup to data in three steps
+                        </h2>
+                        <div className="mt-5 grid gap-3 md:grid-cols-3">
+                            <OnboardingStep
+                                complete={summary.active_keys > 0}
+                                number="1"
+                                title="Create a test key"
+                                href="/api-keys"
+                            />
+                            <OnboardingStep
+                                complete={summary.first_api_success_at !== null}
+                                number="2"
+                                title="Open the quickstart"
+                                href="/docs#quickstart"
+                            />
+                            <OnboardingStep
+                                complete={summary.first_api_success_at !== null}
+                                number="3"
+                                title="Make your first request"
+                                href="/docs#quickstart"
+                            />
+                        </div>
+                        <p className="mt-5 text-sm text-slate-600">
+                            Keys are shown once and stored as hashes. Test and
+                            live keys use the same API format; keep both on
+                            your server, never in browser code.
+                        </p>
+                    </section>
+                )}
             </main>
         </>
     );
