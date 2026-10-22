@@ -1,6 +1,6 @@
 # UKApi.co.uk
 
-> A UK data API for developers. UKApi.co.uk normalises postcode, company, crime and flood data into a consistent versioned API.
+> A UK data API for developers. UKApi.co.uk normalises postcode, company, crime, flood and MOT history data into a consistent versioned API.
 
 ## Public resources
 
@@ -13,6 +13,13 @@
 - [Paid Plan Terms](https://ukapi.co.uk/paid-plan-terms): Paid subscriptions, billing, cancellation and refunds.
 - [Privacy Notice](https://ukapi.co.uk/privacy): How UKApi handles personal information.
 - [Acceptable Use Policy](https://ukapi.co.uk/acceptable-use): Security, fair-use and conduct rules.
+
+## MOT history endpoints
+
+- `GET /v1/mot/registration/{registration}`: Vehicle details and MOT history by registration.
+- `GET /v1/mot/vin/{vin}`: Vehicle details and MOT history by 17-character VIN.
+
+These endpoints use the DVSA MOT History API and cover Great Britain and Northern Ireland. They return the standard `data` and `meta` envelope and require the normal UKApi Bearer API key.
 
 ## Notes
 

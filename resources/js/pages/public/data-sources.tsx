@@ -27,6 +27,12 @@ const sources = [
         'England',
         'Near-real-time warnings, monitoring stations and bounded station readings (Open Government Licence v3.0; beta source; not an emergency alert service)',
     ],
+    [
+        'DVSA MOT History API',
+        'https://documentation.history.mot.api.gov.uk/',
+        'Great Britain and Northern Ireland',
+        'Vehicle details and MOT test history by registration number or vehicle identification number',
+    ],
 ];
 
 export default function DataSources() {

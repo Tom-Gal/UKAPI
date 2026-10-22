@@ -119,6 +119,8 @@ return [
     'usage_endpoint_labels' => [
         'vat.calculate' => 'VAT calculations',
         'vat.remove' => 'VAT removal',
+        'mot.registration' => 'MOT history by registration',
+        'mot.vin' => 'MOT history by VIN',
         'companies.search' => 'Company searches',
         'companies.show' => 'Company profiles',
         'companies.officers' => 'Company officers',
@@ -208,6 +210,16 @@ return [
         // Kept below the provider's published hard limit.
         'provider_request_limit' => (int) env('COMPANIES_HOUSE_PROVIDER_REQUEST_LIMIT', 500),
         'provider_limit_window_seconds' => (int) env('COMPANIES_HOUSE_PROVIDER_LIMIT_WINDOW_SECONDS', 300),
+    ],
+
+    'mot_history' => [
+        'base_url' => env('MOT_HISTORY_BASE_URL', 'https://history.mot.api.gov.uk'),
+        'client_id' => env('MOT_HISTORY_CLIENT_ID'),
+        'client_secret' => env('MOT_HISTORY_CLIENT_SECRET'),
+        'api_key' => env('MOT_HISTORY_API_KEY'),
+        'access_token' => env('MOT_HISTORY_ACCESS_TOKEN'),
+        'connect_timeout_seconds' => (int) env('MOT_HISTORY_CONNECT_TIMEOUT', 2),
+        'timeout_seconds' => (int) env('MOT_HISTORY_TIMEOUT', 10),
     ],
 
     /*

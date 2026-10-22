@@ -222,4 +222,13 @@ final class ApiException extends RuntimeException
             status: 502,
         );
     }
+
+    public static function motVehicleNotFound(): self
+    {
+        return new self(
+            apiCode: 'mot_vehicle_not_found',
+            message: 'No MOT history was found for the supplied vehicle identifier.',
+            status: 404,
+        );
+    }
 }

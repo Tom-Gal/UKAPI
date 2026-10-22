@@ -29,7 +29,7 @@ export default function Welcome() {
             <Head title="One clean route into useful UK data">
                 <meta
                     name="description"
-                    content="Postcodes, companies, crime, flood information and more through one carefully normalised API."
+                    content="Postcodes, companies, crime, flood, MOT history and more through one carefully normalised API."
                 />
             </Head>
 
@@ -50,7 +50,7 @@ export default function Welcome() {
                             UK data, one clean API.
                         </h1>
                         <p className="ukapi-enter ukapi-enter-delay-2 mt-9 max-w-xl text-lg leading-8 text-slate-600 sm:text-xl">
-                            Postcodes, companies, crime, flood information and
+                            Postcodes, companies, crime, flood, MOT history and
                             more, normalised into a single, dependable API for
                             UK products.
                         </p>
@@ -232,7 +232,7 @@ export default function Welcome() {
                                 {enterprisePlan.description}
                             </p>
                             <a
-                                href="mailto:support@ukapi.co.uk?subject=Enterprise%20API%20enquiry"
+                                href="mailto:contact@ukapi.co.uk?subject=Enterprise%20API%20enquiry"
                                 className="mt-6 inline-flex items-center justify-center border border-slate-950 bg-transparent px-4 py-3 text-sm font-bold transition hover:bg-white"
                             >
                                 Contact us <ArrowRight className="ml-2 size-4" />

@@ -7,9 +7,11 @@ use App\Integrations\Contracts\CompanyProvider;
 use App\Integrations\Contracts\CrimeProvider;
 use App\Integrations\Contracts\FloodProvider;
 use App\Integrations\Contracts\PostcodeProvider;
+use App\Integrations\Contracts\MotHistoryProvider;
 use App\Integrations\EnvironmentAgency\EnvironmentAgencyFloodProvider;
 use App\Integrations\PoliceUk\PoliceUkCrimeProvider;
 use App\Integrations\PostcodesIo\PostcodesIoPostcodeProvider;
+use App\Integrations\MotHistory\MotHistoryProvider as MotHistoryProviderImplementation;
 use App\Listeners\SendSubscriptionLifecycleNotification;
 use App\Models\User;
 use App\Notifications\SecurityAlertNotification;
@@ -35,6 +37,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(CrimeProvider::class, PoliceUkCrimeProvider::class);
         $this->app->bind(FloodProvider::class, EnvironmentAgencyFloodProvider::class);
         $this->app->bind(PostcodeProvider::class, PostcodesIoPostcodeProvider::class);
+        $this->app->bind(MotHistoryProvider::class, MotHistoryProviderImplementation::class);
     }
 
     /**

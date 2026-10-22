@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\V1\PostcodeController;
 use App\Http\Controllers\Api\V1\SicController;
 use App\Http\Controllers\Api\V1\SicExportController;
 use App\Http\Controllers\Api\V1\VatController;
+use App\Http\Controllers\Api\V1\MotHistoryController;
 use App\Http\Middleware\AuthenticateApiKey;
 use App\Http\Middleware\EnforceApiRateLimit;
 use App\Http\Middleware\EnforceMonthlyQuota;
@@ -31,6 +32,13 @@ Route::prefix('v1')
         Route::get('vat/remove', [VatController::class, 'remove'])
             ->defaults('ukapi_endpoint', 'vat.remove')
             ->name('api.v1.vat.remove');
+
+        Route::get('mot/registration/{registration}', [MotHistoryController::class, 'registration'])
+            ->defaults('ukapi_endpoint', 'mot.registration')
+            ->name('api.v1.mot.registration');
+        Route::get('mot/vin/{vin}', [MotHistoryController::class, 'vin'])
+            ->defaults('ukapi_endpoint', 'mot.vin')
+            ->name('api.v1.mot.vin');
 
         Route::get('companies/search', [CompanyController::class, 'search'])
             ->defaults('ukapi_endpoint', 'companies.search')

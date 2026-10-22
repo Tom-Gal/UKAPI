@@ -242,6 +242,11 @@ Accept: application/json`}
                                                 action="Check the path and confirm the requested record exists."
                                             />
                                             <ErrorRow
+                                                status="404"
+                                                code="mot_vehicle_not_found"
+                                                action="Check the registration or VIN and confirm that DVSA has MOT history for the vehicle."
+                                            />
+                                            <ErrorRow
                                                 status="422"
                                                 code="invalid_parameter"
                                                 action="Correct the supplied fields before retrying."

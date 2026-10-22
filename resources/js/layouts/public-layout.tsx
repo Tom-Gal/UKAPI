@@ -12,7 +12,7 @@ const navigation = [
 
 const siteUrl = 'https://ukapi.co.uk';
 const defaultDescription =
-    'A dependable UK data API for postcodes, companies, crime and flood information.';
+    'A dependable UK data API for postcodes, companies, crime, flood and MOT history information.';
 
 export default function PublicLayout({ children }: PropsWithChildren) {
     const page = usePage();
@@ -33,8 +33,12 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                 <meta property="og:url" content={canonicalUrl} />
                 <meta property="og:locale" content="en_GB" />
                 <meta property="og:description" content={defaultDescription} />
-                <meta name="twitter:card" content="summary" />
+                <meta property="og:image" content={`${siteUrl}/branding/ukapi-social-card.png`} />
+                <meta property="og:image:width" content="1200" />
+                <meta property="og:image:height" content="630" />
+                <meta name="twitter:card" content="summary_large_image" />
                 <meta name="twitter:description" content={defaultDescription} />
+                <meta name="twitter:image" content={`${siteUrl}/branding/ukapi-social-card.png`} />
             </Head>
             <a
                 href="#main-content"

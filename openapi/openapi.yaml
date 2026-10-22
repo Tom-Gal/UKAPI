@@ -34,6 +34,54 @@ servers:
 security:
     - bearerApiKey: []
 paths:
+    /v1/mot/registration/{registration}:
+        get:
+            operationId: lookupMotHistoryByRegistration
+            x-ukapi-feature: current_data
+            summary: Look up MOT history by vehicle registration
+            parameters:
+                - $ref: '#/components/parameters/MotRegistration'
+            responses:
+                '200':
+                    description: MOT history returned by DVSA
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/SuccessEnvelope'
+                '401':
+                    $ref: '#/components/responses/InvalidApiKey'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '422':
+                    $ref: '#/components/responses/InvalidParameter'
+                '429':
+                    $ref: '#/components/responses/RateLimited'
+                '503':
+                    $ref: '#/components/responses/UpstreamUnavailable'
+    /v1/mot/vin/{vin}:
+        get:
+            operationId: lookupMotHistoryByVin
+            x-ukapi-feature: current_data
+            summary: Look up MOT history by vehicle identification number
+            parameters:
+                - $ref: '#/components/parameters/MotVin'
+            responses:
+                '200':
+                    description: MOT history returned by DVSA
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/SuccessEnvelope'
+                '401':
+                    $ref: '#/components/responses/InvalidApiKey'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '422':
+                    $ref: '#/components/responses/InvalidParameter'
+                '429':
+                    $ref: '#/components/responses/RateLimited'
+                '503':
+                    $ref: '#/components/responses/UpstreamUnavailable'
     /v1/vat/calculate:
         get:
             operationId: calculateVat
@@ -682,6 +730,22 @@ components:
             scheme: bearer
             bearerFormat: uk_live_k_<id>.<secret>
     parameters:
+        MotRegistration:
+            name: registration
+            in: path
+            required: true
+            description: UK vehicle registration, with spaces omitted or included.
+            schema:
+                type: string
+                pattern: '^(?=.*[A-Za-z0-9])[A-Za-z0-9\\s]{2,8}$'
+        MotVin:
+            name: vin
+            in: path
+            required: true
+            description: 17-character vehicle identification number.
+            schema:
+                type: string
+                pattern: '^[A-HJ-NPR-Z0-9]{17}$'
         Amount:
             name: amount
             in: query

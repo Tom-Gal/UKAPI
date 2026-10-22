@@ -465,6 +465,67 @@ const allEndpointFamilies: EndpointFamily[] = [
         ],
     },
     {
+        slug: 'mot-history',
+        name: 'MOT history',
+        summary:
+            'Vehicle details and MOT test history for Great Britain and Northern Ireland.',
+        endpoints: [
+            {
+                method: 'GET',
+                path: '/v1/mot/registration/{registration}',
+                examplePath: '/v1/mot/registration/AB12%20CDE',
+                exampleResponse: `{
+  "data": {
+    "registration": "AB12CDE",
+    "make": "TOYOTA",
+    "model": "Corolla",
+    "motTests": []
+  },
+  "meta": {
+    "request_id": "req_01…",
+    "source": "mot_history",
+    "coverage": "GB and Northern Ireland"
+  }
+}`,
+                live: true,
+                parameters: [
+                    {
+                        name: 'registration',
+                        location: 'path',
+                        required: true,
+                        description:
+                            'A UK vehicle registration. Spaces are optional and are removed before lookup; letters are uppercased.',
+                    },
+                ],
+                description:
+                    'Look up vehicle details and MOT test history by registration number.',
+                coverage: 'Great Britain and Northern Ireland',
+                source: 'DVSA MOT History API',
+                freshness: 'Live provider response',
+            },
+            {
+                method: 'GET',
+                path: '/v1/mot/vin/{vin}',
+                examplePath: '/v1/mot/vin/WVWZZZ1JZXW000001',
+                live: true,
+                parameters: [
+                    {
+                        name: 'vin',
+                        location: 'path',
+                        required: true,
+                        description:
+                            'A 17-character vehicle identification number. Letters are uppercased.',
+                    },
+                ],
+                description:
+                    'Look up vehicle details and MOT test history by vehicle identification number.',
+                coverage: 'Great Britain and Northern Ireland',
+                source: 'DVSA MOT History API',
+                freshness: 'Live provider response',
+            },
+        ],
+    },
+    {
         slug: 'vat',
         name: 'VAT',
         summary: 'Straightforward VAT calculations for UK amounts.',
