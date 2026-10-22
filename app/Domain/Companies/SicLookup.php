@@ -129,6 +129,14 @@ final class SicLookup
         ];
     }
 
+    /** Capture once so export records and metadata share the same immutable version. */
+    public function exportSnapshot(): DatasetSnapshot
+    {
+        [, $snapshot] = $this->currentSnapshots();
+
+        return $snapshot;
+    }
+
     /**
      * @return array{0: SicSnapshot, 1: DatasetSnapshot}
      */

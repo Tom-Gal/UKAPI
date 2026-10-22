@@ -1,5 +1,6 @@
 import { Form, Head, Link, usePage } from '@inertiajs/react';
 import { Copy, ShieldAlert } from 'lucide-react';
+import { useState } from 'react';
 import {
     DashboardPageHeader,
     EmptyState,
@@ -25,6 +26,9 @@ export default function ApiKeys({ apiKeys }: Props) {
         flash: { api_key_created?: { name: string; token: string } };
     }>().props;
     const newKey = flash.api_key_created;
+    const command = newKey
+        ? `curl "https://api.ukapi.co.uk/v1/postcodes/BL2%206XX" -H "Authorization: Bearer ${newKey.token}" -H "Accept: application/json"`
+        : '';
     return (
         <>
             <Head title="API keys" />
@@ -114,29 +118,33 @@ export default function ApiKeys({ apiKeys }: Props) {
                                         <code className="min-w-0 flex-1 text-xs break-all text-slate-800">
                                             {newKey.token}
                                         </code>
-                                        <button
-                                            type="button"
-                                            onClick={() =>
-                                                void navigator.clipboard.writeText(
-                                                    newKey.token,
-                                                )
-                                            }
-                                            className="rounded p-1.5 text-amber-800 hover:bg-amber-100"
-                                            aria-label="Copy API key"
-                                        >
-                                            <Copy className="size-4" />
-                                        </button>
+                                        <CopyButton
+                                            key={newKey.token}
+                                            text={newKey.token}
+                                            label="Copy API key"
+                                        />
                                     </div>
                                     <p className="mt-3 text-sm text-amber-900">
-                                        Start with this test-key request, then
-                                        swap the token for your server-side
-                                        environment variable.
+                                        Start with this request, then swap the
+                                        token for your server-side environment
+                                        variable.
                                     </p>
                                     <div className="mt-3 rounded-lg bg-slate-950 p-3 text-xs leading-5 text-blue-100">
                                         <code className="break-all">
-                                            {`curl "https://api.ukapi.co.uk/v1/postcodes/BL2%206XX" -H "Authorization: Bearer ${newKey.token}" -H "Accept: application/json"`}
+                                            {command}
                                         </code>
                                     </div>
+                                    <div className="mt-3">
+                                        <CopyButton
+                                            key={command}
+                                            text={command}
+                                            label="Copy request command"
+                                        />
+                                    </div>
+                                    <p className="mt-3 text-sm text-amber-900">
+                                        In Windows PowerShell, use curl.exe if
+                                        curl is an alias for Invoke-WebRequest.
+                                    </p>
                                     <Link
                                         href="/docs#quickstart"
                                         className="mt-3 inline-flex text-sm font-semibold text-amber-950 underline underline-offset-4"
@@ -210,6 +218,41 @@ export default function ApiKeys({ apiKeys }: Props) {
                 </section>
             </main>
         </>
+    );
+}
+
+function CopyButton({ text, label }: { text: string; label: string }) {
+    const [status, setStatus] = useState<
+        'idle' | 'copying' | 'copied' | 'error'
+    >('idle');
+
+    const copy = async () => {
+        setStatus('copying');
+        try {
+            await navigator.clipboard.writeText(text);
+            setStatus('copied');
+        } catch {
+            setStatus('error');
+        }
+    };
+
+    return (
+        <div>
+            <button
+                type="button"
+                onClick={() => void copy()}
+                disabled={status === 'copying'}
+                className="inline-flex items-center gap-2 rounded p-1.5 text-sm text-amber-800 hover:bg-amber-100 disabled:opacity-50"
+            >
+                <Copy className="size-4" />
+                {label}
+            </button>
+            <p role="status" className="text-xs text-amber-900">
+                {status === 'copied' && 'Copied to clipboard.'}
+                {status === 'error' &&
+                    'Could not copy. Select the text above and copy it manually.'}
+            </p>
+        </div>
     );
 }
 

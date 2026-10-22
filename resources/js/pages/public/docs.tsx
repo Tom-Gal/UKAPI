@@ -108,12 +108,15 @@ export default function Docs({ section }: DocsProps) {
                                 </ol>
                                 <CodeBlock
                                     title="First request"
-                                    code={[
-                                        'curl "https://api.ukapi.co.uk/v1/postcodes/BL2%206XX"',
-                                        '  -H "Authorization: Bearer uk_test_your_api_key"',
-                                        '  -H "Accept: application/json"',
-                                    ].join('\n')}
+                                    code={
+                                        'curl "https://api.ukapi.co.uk/v1/postcodes/BL2%206XX" -H "Authorization: Bearer YOUR_API_KEY" -H "Accept: application/json"'
+                                    }
                                 />
+                                <p className="mt-3 text-sm text-slate-600">
+                                    Replace YOUR_API_KEY with your full key. In
+                                    Windows PowerShell, use curl.exe if curl is
+                                    an alias for Invoke-WebRequest.
+                                </p>
                                 <Callout title="Keep keys out of client code">
                                     Do not place an API key in browser
                                     JavaScript, a mobile app or public source
@@ -145,6 +148,11 @@ Accept: application/json`}
                                         rotation.
                                     </Info>
                                 </div>
+                                <p className="mt-6 leading-7 text-slate-600">
+                                    Test and live keys share the same account
+                                    quota. Creating or rotating a key does not
+                                    create a separate allowance.
+                                </p>
                                 <p className="mt-6 leading-7 text-slate-600">
                                     A missing, revoked or malformed key returns{' '}
                                     <InlineCode>401</InlineCode> with the stable
@@ -291,7 +299,10 @@ Retry-After: 12`}
                                 </div>
                                 <p className="mt-6 leading-7 text-slate-600">
                                     Monthly usage is visible in the dashboard.
-                                    Every admitted request counts, including
+                                    All test and live keys share one account
+                                    allowance, which resets at 00:00 UTC on the
+                                    first day of each calendar month. Every
+                                    admitted request counts, including
                                     validation errors. When the hard allowance
                                     is exhausted, requests are blocked until the
                                     next monthly reset or after a plan upgrade.
@@ -738,10 +749,17 @@ function CodeBlock({
     compact?: boolean;
 }) {
     const [copied, setCopied] = useState(false);
+    const [copyError, setCopyError] = useState(false);
     const copy = async () => {
-        await navigator.clipboard?.writeText(code);
-        setCopied(true);
-        window.setTimeout(() => setCopied(false), 1800);
+        setCopied(false);
+        setCopyError(false);
+        try {
+            await navigator.clipboard.writeText(code);
+            setCopied(true);
+            window.setTimeout(() => setCopied(false), 1800);
+        } catch {
+            setCopyError(true);
+        }
     };
     return (
         <section
@@ -764,6 +782,11 @@ function CodeBlock({
                     {copied ? 'Copied' : 'Copy'}
                 </button>
             </div>
+            {copyError && (
+                <p role="alert" className="px-4 pt-3 text-sm text-amber-200">
+                    Could not copy. Select the code below and copy it manually.
+                </p>
+            )}
             <pre className="overflow-x-auto p-4 font-mono text-[12px] leading-6 text-blue-100 sm:text-[13px]">
                 <code>{code}</code>
             </pre>

@@ -3,12 +3,11 @@
 namespace App\Domain\Usage;
 
 use App\Models\ApiKey;
-use Illuminate\Contracts\Cache\Repository;
+use Carbon\CarbonImmutable;
+use Illuminate\Support\Facades\DB;
 
 final class UsageMeter
 {
-    public function __construct(private readonly Repository $cache) {}
-
     public function currentMonthlyUsage(ApiKey $apiKey): int
     {
         return $this->currentMonthlyUsageForUser($apiKey->user_id);
@@ -16,103 +15,75 @@ final class UsageMeter
 
     public function currentMonthlyUsageForUser(int $userId): int
     {
-        return (int) $this->cache->get($this->accountKey($userId), 0);
-    }
-
-    public function record(ApiKey $apiKey, string $endpointCode): int
-    {
-        $expiresAt = $this->counterExpiresAt();
-
-        $this->cache->add($this->accountKey($apiKey->user_id), 0, $expiresAt);
-        $this->cache->add($this->accountEndpointKey($apiKey->user_id, $endpointCode), 0, $expiresAt);
-        $this->cache->add($this->endpointKey($apiKey, $endpointCode), 0, $expiresAt);
-
-        $this->cache->increment($this->endpointKey($apiKey, $endpointCode));
-        $this->cache->increment($this->accountEndpointKey($apiKey->user_id, $endpointCode));
-        $this->cache->increment($this->accountKey($apiKey->user_id));
-
-        return $this->currentMonthlyUsageForUser($apiKey->user_id);
+        return (int) DB::table('monthly_usage')->where('user_id', $userId)
+            ->where('month', $this->periodStart()->toDateString())->value('requests');
     }
 
     /**
-     * Reserve one request before the endpoint runs.
-     *
-     * The account counter is incremented atomically and rolled back when the
-     * reservation would exceed the plan quota. This prevents concurrent
-     * requests from passing a read-then-write quota check together.
+     * The conditional update takes a database write lock. The account total
+     * and breakdown commit together; failures never fall back to a cache.
      */
-    public function reserve(ApiKey $apiKey, string $endpointCode, int $quota): ?int
+    public function reserve(ApiKey $apiKey, string $endpointCode, int $quota, ?CarbonImmutable $at = null): ?int
     {
-        $expiresAt = $this->counterExpiresAt();
-        $accountKey = $this->accountKey($apiKey->user_id);
+        $at ??= CarbonImmutable::now('UTC');
+        $month = $this->periodStart($at)->toDateString();
 
-        $this->cache->add($accountKey, 0, $expiresAt);
-        $usage = $this->cache->increment($accountKey);
+        return DB::transaction(function () use ($apiKey, $endpointCode, $quota, $at, $month): ?int {
+            DB::table('monthly_usage')->insertOrIgnore([
+                'user_id' => $apiKey->user_id,
+                'month' => $month,
+                'requests' => 0,
+                'created_at' => $at,
+                'updated_at' => $at,
+            ]);
+            $account = DB::table('monthly_usage')->where('user_id', $apiKey->user_id)->where('month', $month);
 
-        if ($usage > $quota) {
-            $this->cache->decrement($accountKey);
+            if ((clone $account)->where('requests', '<', $quota)->increment('requests', 1, ['updated_at' => $at]) !== 1) {
+                return null;
+            }
 
-            return null;
-        }
+            DB::table('monthly_endpoint_usage')->insertOrIgnore([
+                'user_id' => $apiKey->user_id,
+                'month' => $month,
+                'endpoint' => $endpointCode,
+                'requests' => 0,
+            ]);
+            DB::table('monthly_endpoint_usage')->where('user_id', $apiKey->user_id)
+                ->where('month', $month)->where('endpoint', $endpointCode)->increment('requests');
 
-        $this->cache->add($this->accountEndpointKey($apiKey->user_id, $endpointCode), 0, $expiresAt);
-        $this->cache->add($this->endpointKey($apiKey, $endpointCode), 0, $expiresAt);
-        $this->cache->increment($this->accountEndpointKey($apiKey->user_id, $endpointCode));
-        $this->cache->increment($this->endpointKey($apiKey, $endpointCode));
-
-        return $usage;
+            return (int) $account->value('requests');
+        }, 5);
     }
 
-    public function monthlyResetAt(): int
+    public function periodStart(?CarbonImmutable $at = null): CarbonImmutable
     {
-        return now()->startOfMonth()->addMonth()->getTimestamp();
+        return ($at ?? CarbonImmutable::now('UTC'))->utc()->startOfMonth();
     }
 
-    /**
-     * @return list<array{endpoint: string, label: string, requests: int}>
-     */
+    public function monthlyResetAt(?CarbonImmutable $at = null): int
+    {
+        return $this->periodStart($at)->addMonth()->getTimestamp();
+    }
+
+    /** @return list<array{endpoint: string, label: string, requests: int}> */
     public function currentMonthlyBreakdownForUser(int $userId): array
     {
         /** @var array<string, string> $labels */
         $labels = config('ukapi.usage_endpoint_labels', []);
+
+        $rows = DB::table('monthly_endpoint_usage')->where('user_id', $userId)
+            ->where('month', $this->periodStart()->toDateString())->where('requests', '>', 0)
+            ->orderByDesc('requests')->orderBy('endpoint')->get();
         $breakdown = [];
-
-        foreach ($labels as $endpoint => $label) {
-            $requests = (int) $this->cache->get($this->accountEndpointKey($userId, $endpoint), 0);
-
-            if ($requests > 0) {
-                $breakdown[] = [
-                    'endpoint' => $endpoint,
-                    'label' => $label,
-                    'requests' => $requests,
-                ];
-            }
+        foreach ($rows as $row) {
+            $endpoint = (string) $row->endpoint;
+            $breakdown[] = [
+                'endpoint' => $endpoint,
+                'label' => $labels[$endpoint] ?? $endpoint,
+                'requests' => (int) $row->requests,
+            ];
         }
 
-        usort($breakdown, static fn (array $left, array $right): int => $right['requests'] <=> $left['requests']);
-
         return $breakdown;
-    }
-
-    private function accountKey(int $userId): string
-    {
-        return sprintf('ukapi:usage:%s:account:%d', now()->format('Ym'), $userId);
-    }
-
-    private function counterExpiresAt(): \DateTimeInterface
-    {
-        return now()->startOfMonth()
-            ->addMonth()
-            ->addDays((int) config('ukapi.usage_counter_retention_days'));
-    }
-
-    private function endpointKey(ApiKey $apiKey, string $endpointCode): string
-    {
-        return sprintf('ukapi:usage:%s:key:%d:%s', now()->format('Ym'), $apiKey->id, $endpointCode);
-    }
-
-    private function accountEndpointKey(int $userId, string $endpointCode): string
-    {
-        return sprintf('ukapi:usage:%s:account:%d:endpoint:%s', now()->format('Ym'), $userId, $endpointCode);
     }
 }

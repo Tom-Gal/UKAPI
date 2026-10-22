@@ -147,17 +147,20 @@ final class FloodService
      */
     public function readingChanges(FloodStationReference $station, string $since, ?string $until = null): array
     {
-        $this->readings($station);
         $from = $this->snapshots->find(self::READINGS_SNAPSHOT_DATASET, $since);
-        $to = $until === null
-            ? $this->snapshots->active(self::READINGS_SNAPSHOT_DATASET, $station->value())
-            : $this->snapshots->find(self::READINGS_SNAPSHOT_DATASET, $until);
 
-        if ($from === null) {
+        if ($from === null || $from->scope_key !== $station->value()) {
             throw ApiException::invalidParameter('since', 'The requested flood readings snapshot version was not found.');
         }
 
-        if ($to === null) {
+        if ($until === null) {
+            $this->readings($station);
+            $to = $this->snapshots->active(self::READINGS_SNAPSHOT_DATASET, $station->value());
+        } else {
+            $to = $this->snapshots->find(self::READINGS_SNAPSHOT_DATASET, $until);
+        }
+
+        if ($to === null || $to->scope_key !== $station->value()) {
             throw ApiException::invalidParameter('until', 'The requested flood readings snapshot version was not found.');
         }
 

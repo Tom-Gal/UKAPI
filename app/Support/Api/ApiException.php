@@ -67,6 +67,16 @@ final class ApiException extends RuntimeException
         );
     }
 
+    public static function usageUnavailable(): self
+    {
+        return new self(
+            apiCode: 'usage_unavailable',
+            message: 'Request accounting is temporarily unavailable. Please retry shortly.',
+            status: 503,
+            headers: ['Retry-After' => '30'],
+        );
+    }
+
     public static function featureUnavailable(string $feature, string $plan): self
     {
         return new self(

@@ -7,6 +7,7 @@ use App\Domain\Usage\UsageLimitNotifier;
 use App\Domain\Usage\UsageMeter;
 use App\Models\ApiKey;
 use App\Support\Api\ApiException;
+use Carbon\CarbonImmutable;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
@@ -41,23 +42,30 @@ class EnforceMonthlyQuota
         $endpointCode = $route instanceof Route
             ? (string) ($route->defaults['ukapi_endpoint'] ?? 'unknown')
             : 'unknown';
-        $usage = $this->usageMeter->reserve($apiKey, $endpointCode, $quota);
-
-        if ($usage === null) {
-            throw ApiException::quotaExceeded($quota, $this->usageMeter->monthlyResetAt());
+        $admittedAt = CarbonImmutable::now('UTC');
+        $resetAt = $this->usageMeter->monthlyResetAt($admittedAt);
+        try {
+            $usage = $this->usageMeter->reserve($apiKey, $endpointCode, $quota, $admittedAt);
+        } catch (\Throwable $exception) {
+            report($exception);
+            throw ApiException::usageUnavailable();
         }
 
-        $this->usageLimitNotifier->notifyIfThresholdReached(
-            $apiKey,
-            $usage,
-            $quota,
-            $this->usageMeter->monthlyResetAt(),
-        );
+        if ($usage === null) {
+            throw ApiException::quotaExceeded($quota, $resetAt);
+        }
+
+        try {
+            $this->usageLimitNotifier->notifyIfThresholdReached($apiKey, $usage, $quota, $resetAt);
+        } catch (\Throwable $exception) {
+            // Notification transport must not turn a reserved request into an error.
+            report($exception);
+        }
 
         $response = $next($request);
         $response->headers->set('X-Quota-Limit', (string) $quota);
         $response->headers->set('X-Quota-Remaining', (string) max(0, $quota - $usage));
-        $response->headers->set('X-Quota-Reset', (string) $this->usageMeter->monthlyResetAt());
+        $response->headers->set('X-Quota-Reset', (string) $resetAt);
 
         return $response;
     }

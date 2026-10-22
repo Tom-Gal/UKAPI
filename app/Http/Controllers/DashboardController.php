@@ -25,6 +25,7 @@ class DashboardController extends Controller
                 'monthly_requests' => $usageMeter->currentMonthlyUsageForUser($user->id),
                 'monthly_quota' => $plan['monthly_request_quota'],
                 'plan_label' => $plan['label'],
+                'first_api_success_at' => $user->first_api_success_at?->toIso8601String(),
             ],
         ]);
     }

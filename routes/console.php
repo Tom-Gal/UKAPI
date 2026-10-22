@@ -10,3 +10,5 @@ Artisan::command('inspire', function () {
 
 Schedule::command('ukapi:remind-key-rotation')->daily()->onOneServer();
 Schedule::command('ukapi:snapshots:prune')->daily()->onOneServer();
+
+Schedule::command('ukapi:health:check')->everyFiveMinutes()->onOneServer()->withoutOverlapping(10);

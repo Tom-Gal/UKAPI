@@ -13,7 +13,7 @@ never in Git:
 - `APP_ENV=production`, `APP_DEBUG=false`, and `APP_URL` set to the final HTTPS origin.
 - A unique `APP_KEY`, plus a release identifier in `APP_VERSION` (normally the commit SHA).
 - Attach the Laravel Cloud MySQL resource. Cloud injects its connection credentials; the application default is `DB_CONNECTION=mysql`. Do not copy database passwords into Git or duplicate Cloud-managed credentials.
-- Valkey settings with `CACHE_STORE=failover`, a unique `CACHE_PREFIX`, and either `VALKEY_URL` or host/credential values. The failover store prefers Valkey and falls back to the database/array stores if Valkey is temporarily unavailable, keeping authentication and throttling available during a cache restart.
+- Valkey settings with `CACHE_STORE=failover`, a unique `CACHE_PREFIX`, and either `VALKEY_URL` or host/credential values. The failover store prefers Valkey and then uses the database or process-local array cache. Monthly quotas use MySQL separately and never fall back to cache.
 - Mailtrap SMTP values: `MAIL_MAILER=smtp`, `MAIL_HOST=live.smtp.mailtrap.io`, `MAIL_PORT=587`, `MAIL_USERNAME=api`, and a `MAIL_PASSWORD` token in the Cloud secret manager. Set `MAIL_FROM_ADDRESS` to an address on a domain verified in Mailtrap; the local `log` mailer does not deliver verification or password-reset messages.
 - `SESSION_SECURE_COOKIE=true`, `SESSION_ENCRYPT=true`, and `SESSION_SAME_SITE=lax`.
 - `TRUSTED_PROXIES` only when the host terminates TLS through a proxy you trust. Use the host's documented proxy addresses, or `*` only when the application is reachable exclusively through that trusted ingress.
@@ -46,6 +46,8 @@ as part of the release.
 Enable Laravel Cloud's Scheduler for the production environment. It runs the
 daily API-key rotation reminder, which sends customers a grouped reminder when
 an active key reaches 90 days and again no sooner than every 90 days.
+It also runs sampled service checks every five minutes and snapshot pruning
+daily. See `HEALTH_MONITORING.md` before enabling operator alerts.
 
 ## Operational checks
 
@@ -87,3 +89,37 @@ rules:
 Both extensions should reuse SnapshotStore, but each provider should define
 its own canonical normalisation, source timestamp, identity function, and
 retention policy rather than treating all upstream records as interchangeable.
+
+## Launch-hardening release notes
+
+Apply all migrations before serving traffic. This release adds durable usage
+counters, service-health observations and the permanent first-success marker.
+Restart application and queue workers after migration.
+
+### Import current-month usage
+
+If an existing installation has already admitted requests this month, use a
+maintenance window. Stop old web workers, run migrations, and import from the
+shared store that held the old counters before reopening traffic:
+
+```sh
+php artisan ukapi:usage:import-cache --store=redis
+# Or, only when the old counters were in the database cache:
+php artisan ukapi:usage:import-cache --store=database
+```
+
+Run with the original `CACHE_PREFIX` and do not clear the old cache first. The
+import is idempotent and never lowers a durable total. It cannot recover lost
+process-local counters or combine counters split across failover stores; those
+must be reconciled before reopening. New installations can skip this command.
+
+All account keys share a hard quota for a UTC calendar month. Validation errors
+count after admission; quota-rejected requests do not. An accounting database
+failure returns HTTP 503 rather than granting unmetered access. Annual billing
+does not change the monthly reset. No overage billing is enabled.
+
+First successful API requests are recorded from this deployment onward;
+historical usage cannot reliably prove that an earlier request succeeded.
+
+Scale accounts can download `GET /v1/sic/export`. A complete CSV download is
+one quota-counted request and includes immutable snapshot and attribution data.

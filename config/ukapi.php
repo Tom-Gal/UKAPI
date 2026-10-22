@@ -86,12 +86,12 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Usage-counter retention
+    | Legacy usage-counter retention
     |--------------------------------------------------------------------------
     |
-    | Counters are kept past the current month to allow dashboard reads and a
-    | later durable roll-up job to reconcile them. The configured Valkey cache
-    | is used for this hot path (Laravel retains "redis" as its driver name).
+    | Retained for legacy cache migration compatibility. New usage is stored
+    | in monthly_usage and monthly_endpoint_usage in the primary database.
+    | Hard quotas never fall back to a cache or process-local counters.
     |
     */
 
@@ -126,6 +126,7 @@ return [
         'sic.search' => 'SIC searches',
         'sic.show' => 'SIC lookups',
         'sic.changes' => 'SIC changes',
+        'sic.export' => 'SIC CSV exports',
         'crime.nearby' => 'Crime nearby',
         'crime.summary' => 'Crime summaries',
         'crime.categories' => 'Crime categories',

@@ -6,10 +6,12 @@ use App\Http\Controllers\Api\V1\CrimeController;
 use App\Http\Controllers\Api\V1\FloodController;
 use App\Http\Controllers\Api\V1\PostcodeController;
 use App\Http\Controllers\Api\V1\SicController;
+use App\Http\Controllers\Api\V1\SicExportController;
 use App\Http\Controllers\Api\V1\VatController;
 use App\Http\Middleware\AuthenticateApiKey;
 use App\Http\Middleware\EnforceApiRateLimit;
 use App\Http\Middleware\EnforceMonthlyQuota;
+use App\Http\Middleware\TrackFirstApiSuccess;
 use Illuminate\Support\Facades\Route;
 
 Route::get('openapi/v1.yaml', OpenApiController::class)->name('api.openapi.v1');
@@ -20,6 +22,7 @@ Route::prefix('v1')
         'ukapi.feature:current_data',
         EnforceApiRateLimit::class,
         EnforceMonthlyQuota::class,
+        TrackFirstApiSuccess::class,
     ])
     ->group(function (): void {
         Route::get('vat/calculate', [VatController::class, 'calculate'])
@@ -42,6 +45,10 @@ Route::prefix('v1')
             ->defaults('ukapi_endpoint', 'companies.show')
             ->name('api.v1.companies.show');
 
+        Route::get('sic/export', SicExportController::class)
+            ->middleware('ukapi.feature:bulk_export')
+            ->defaults('ukapi_endpoint', 'sic.export')
+            ->name('api.v1.sic.export');
         Route::get('sic/search', [SicController::class, 'search'])
             ->defaults('ukapi_endpoint', 'sic.search')
             ->name('api.v1.sic.search');

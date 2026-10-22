@@ -9,6 +9,7 @@ use Illuminate\Http\Client\Request as HttpClientRequest;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class FloodApiTest extends TestCase
@@ -139,6 +140,80 @@ class FloodApiTest extends TestCase
             ->assertJsonCount(1, 'data.changed')
             ->assertJsonPath('meta.source', 'environment_agency_flood_monitoring')
             ->assertJsonPath('meta.to_snapshot.checksum', fn ($checksum): bool => is_string($checksum));
+
+        Http::assertSentCount(1);
+        $this->assertDatabaseCount('dataset_snapshots', 2);
+    }
+
+    public function test_explicit_reading_versions_are_compared_without_fetching_or_changing_the_active_snapshot(): void
+    {
+        $token = $this->createProApiKey();
+        $store = app(SnapshotStore::class);
+        $record = ['measure_id' => 'measure-a', 'recorded_at' => '2026-08-27T00:00:00+00:00', 'value' => 1];
+        $from = $store->capture('environment_agency.flood.readings', '5380TH', 'test', [$record]);
+        $to = $store->capture('environment_agency.flood.readings', '5380TH', 'test', [array_replace($record, ['value' => 2])]);
+        $active = $store->capture('environment_agency.flood.readings', '5380TH', 'test', []);
+        Http::fake(['*' => Http::response([], 503)]);
+
+        $this->getJson("/v1/flood/stations/5380th/changes?since={$from->version}&until={$to->version}", [
+            'Authorization' => "Bearer {$token}",
+        ])
+            ->assertOk()
+            ->assertJsonPath('data.station_id', '5380TH')
+            ->assertJsonPath('data.since', $from->version)
+            ->assertJsonPath('data.until', $to->version)
+            ->assertJsonPath('data.added', [])
+            ->assertJsonPath('data.removed', [])
+            ->assertJsonCount(1, 'data.changed')
+            ->assertJsonPath('data.changed.0.before.value', 1)
+            ->assertJsonPath('data.changed.0.after.value', 2)
+            ->assertJsonPath('meta.from_snapshot.checksum', $from->checksum)
+            ->assertJsonPath('meta.to_snapshot.checksum', $to->checksum);
+
+        Http::assertNothingSent();
+        $this->assertDatabaseCount('dataset_snapshots', 3);
+        $this->assertSame($active->id, $store->active('environment_agency.flood.readings', '5380TH')?->id);
+    }
+
+    #[DataProvider('invalidReadingVersions')]
+    public function test_invalid_reading_versions_are_rejected_before_fetching(string $field, string $kind, bool $explicitUntil): void
+    {
+        $token = $this->createProApiKey();
+        $store = app(SnapshotStore::class);
+        $valid = $store->capture('environment_agency.flood.readings', '5380TH', 'test', []);
+        $invalidVersion = $kind === 'missing'
+            ? (string) Str::ulid()
+            : $store->capture(
+                $kind === 'dataset' ? 'other.dataset' : 'environment_agency.flood.readings',
+                $kind === 'station' ? 'OTHER' : '5380TH',
+                'test',
+                [],
+            )->version;
+        $since = $field === 'since' ? $invalidVersion : $valid->version;
+        $until = $field === 'until' ? $invalidVersion : $valid->version;
+        $query = 'since='.$since.($explicitUntil ? '&until='.$until : '');
+        Http::fake(['*' => Http::response($this->fixture('readings'), 200)]);
+
+        $this->getJson('/v1/flood/stations/5380TH/changes?'.$query, [
+            'Authorization' => "Bearer {$token}",
+        ])
+            ->assertUnprocessable()
+            ->assertJsonPath('error.code', 'invalid_parameter')
+            ->assertJsonPath('error.details.fields.'.$field.'.0', 'The requested flood readings snapshot version was not found.');
+
+        Http::assertNothingSent();
+        $this->assertDatabaseCount('dataset_snapshots', $kind === 'missing' ? 1 : 2);
+        $this->assertSame($valid->id, $store->active('environment_agency.flood.readings', '5380TH')?->id);
+    }
+
+    /** @return iterable<string, array{string, string, bool}> */
+    public static function invalidReadingVersions(): iterable
+    {
+        foreach (['missing', 'station', 'dataset'] as $kind) {
+            yield 'since-'.$kind.'-latest' => ['since', $kind, false];
+            yield 'since-'.$kind.'-explicit' => ['since', $kind, true];
+            yield 'until-'.$kind => ['until', $kind, true];
+        }
     }
 
     public function test_invalid_station_ids_are_rejected_without_calling_the_provider(): void

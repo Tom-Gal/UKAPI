@@ -8,12 +8,14 @@ type Props = {
         monthly_requests: number;
         monthly_quota: number;
         plan_label: string;
+        first_api_success_at: string | null;
     };
 };
 
 export default function Dashboard({ summary }: Props) {
-    const percentage = Math.round(
-        (summary.monthly_requests / summary.monthly_quota) * 100,
+    const percentage = Math.min(
+        100,
+        Math.round((summary.monthly_requests / summary.monthly_quota) * 100),
     );
     return (
         <>
@@ -84,7 +86,7 @@ export default function Dashboard({ summary }: Props) {
                         First request checklist
                     </p>
                     <h2 className="mt-2 text-xl font-semibold">
-                        {summary.monthly_requests > 0
+                        {summary.first_api_success_at
                             ? 'You are connected'
                             : 'Get from signup to data in three steps'}
                     </h2>
@@ -96,13 +98,13 @@ export default function Dashboard({ summary }: Props) {
                             href="/api-keys"
                         />
                         <OnboardingStep
-                            complete={summary.monthly_requests > 0}
+                            complete={summary.first_api_success_at !== null}
                             number="2"
-                            title="Copy the quickstart"
+                            title="Open the quickstart"
                             href="/docs#quickstart"
                         />
                         <OnboardingStep
-                            complete={summary.monthly_requests > 0}
+                            complete={summary.first_api_success_at !== null}
                             number="3"
                             title="Make your first request"
                             href="/docs#quickstart"
@@ -125,7 +127,7 @@ function OnboardingStep({
     title,
     href,
 }: {
-    complete: boolean;
+    complete?: boolean;
     number: string;
     title: string;
     href: string;

@@ -450,6 +450,18 @@ const allEndpointFamilies: EndpointFamily[] = [
                 freshness: 'On refresh',
                 live: true,
             },
+            {
+                method: 'GET',
+                path: '/v1/sic/export',
+                examplePath: '/v1/sic/export',
+                description:
+                    'Download the full condensed SIC reference as UTF-8 CSV. Scale only; each download counts as one request against the hard account quota for the UTC calendar month. No query parameters. Rows are sorted by code and include the immutable snapshot version, payload SHA-256 checksum, source URL and Open Government Licence v3.0 attribution. Spreadsheet formula cells are prefixed with an apostrophe; import codes as text to preserve leading zeroes.',
+                coverage: 'UK',
+                source: 'Companies House SIC 2007 snapshot (OGL v3.0)',
+                freshness: 'One immutable local snapshot per download',
+                feature: 'bulk_export',
+                live: true,
+            },
         ],
     },
     {

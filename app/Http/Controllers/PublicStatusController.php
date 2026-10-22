@@ -2,36 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Domain\Health\HealthStatus;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Inertia\Response;
+use Symfony\Component\HttpFoundation\Response;
 
 final class PublicStatusController extends Controller
 {
-    public function __invoke(): Response
+    public function __invoke(Request $request, HealthStatus $health): Response
     {
-        $sicSnapshotPath = config('ukapi.sic_reference.snapshot_path');
-        $sicSeedSnapshotPath = config('ukapi.sic_reference.seed_snapshot_path');
-        $sicReferenceAvailable = (is_string($sicSnapshotPath) && is_file($sicSnapshotPath))
-            || (is_string($sicSeedSnapshotPath) && is_file($sicSeedSnapshotPath));
+        $response = Inertia::render('public/status', [
+            'services' => $health->services(),
+            'measured_at' => now()->toIso8601String(),
+        ])->toResponse($request);
+        $response->headers->set('Cache-Control', 'no-store');
 
-        return Inertia::render('public/status', [
-            'services' => [
-                ['name' => 'Account dashboard', 'detail' => 'Available', 'state' => 'available'],
-                ['name' => 'UKAPI v1', 'detail' => 'Available', 'state' => 'available'],
-                ['name' => 'Postcode data', 'detail' => 'Available', 'state' => 'available'],
-                ['name' => 'Crime data', 'detail' => 'Available', 'state' => 'available'],
-                ['name' => 'Flood data', 'detail' => 'Available (England)', 'state' => 'available'],
-                [
-                    'name' => 'Company data',
-                    'detail' => filled(config('ukapi.companies_house.api_key')) ? 'Available' : 'Unavailable',
-                    'state' => filled(config('ukapi.companies_house.api_key')) ? 'available' : 'unavailable',
-                ],
-                [
-                    'name' => 'SIC reference data',
-                    'detail' => $sicReferenceAvailable ? 'Available' : 'Unavailable',
-                    'state' => $sicReferenceAvailable ? 'available' : 'unavailable',
-                ],
-            ],
-        ]);
+        return $response;
     }
 }

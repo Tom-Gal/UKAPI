@@ -8,6 +8,8 @@ use Carbon\CarbonImmutable;
 use Closure;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
+use stdClass;
 
 final class SnapshotStore
 {
@@ -41,12 +43,9 @@ final class SnapshotStore
         array $payload,
         ?CarbonImmutable $sourceUpdatedAt = null,
     ): DatasetSnapshot {
-        $canonical = json_encode(
-            $payload,
-            JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION | JSON_THROW_ON_ERROR,
-        );
+        $checksum = $this->checksum($payload);
 
-        return DB::transaction(function () use ($dataset, $scopeKey, $source, $payload, $sourceUpdatedAt, $canonical): DatasetSnapshot {
+        return DB::transaction(function () use ($dataset, $scopeKey, $source, $payload, $sourceUpdatedAt, $checksum): DatasetSnapshot {
             $snapshot = DatasetSnapshot::query()->create([
                 'dataset' => $dataset,
                 'scope_key' => $scopeKey,
@@ -54,7 +53,7 @@ final class SnapshotStore
                 'source' => $source,
                 'captured_at' => now(),
                 'source_updated_at' => $sourceUpdatedAt,
-                'checksum' => hash('sha256', $canonical),
+                'checksum' => $checksum,
                 'record_count' => count($payload),
                 'payload' => $payload,
             ]);
@@ -107,6 +106,8 @@ final class SnapshotStore
     /**
      * @param  Closure(array<string, mixed>): string  $identity
      * @return array{added: list<array<string, mixed>>, removed: list<array<string, mixed>>, changed: list<array{key: string, before: array<string, mixed>, after: array<string, mixed>}>}
+     *
+     * @throws InvalidArgumentException When either snapshot contains duplicate identities.
      */
     public function diff(DatasetSnapshot $from, DatasetSnapshot $to, Closure $identity): array
     {
@@ -160,7 +161,13 @@ final class SnapshotStore
     {
         $indexed = [];
         foreach ($records as $record) {
-            $indexed[$identity($record)] = $record;
+            $key = $identity($record);
+
+            if (array_key_exists($key, $indexed)) {
+                throw new InvalidArgumentException(sprintf('Duplicate snapshot diff identity: "%s".', $key));
+            }
+
+            $indexed[$key] = $record;
         }
 
         ksort($indexed, SORT_STRING);
@@ -168,21 +175,41 @@ final class SnapshotStore
         return $indexed;
     }
 
-    /** @param array<string, mixed> $value */
+    /** @param array<array-key, mixed> $value */
     private function canonical(array $value): string
     {
         return json_encode(
-            $value,
+            $this->canonicalValue($value),
             JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION | JSON_THROW_ON_ERROR,
         );
+    }
+
+    private function canonicalValue(mixed $value): mixed
+    {
+        if (! is_array($value) && ! $value instanceof stdClass) {
+            return $value;
+        }
+
+        $isList = is_array($value) && array_is_list($value);
+        $values = is_array($value) ? $value : get_object_vars($value);
+
+        foreach ($values as $key => $item) {
+            $values[$key] = $this->canonicalValue($item);
+        }
+
+        if ($isList) {
+            return $values;
+        }
+
+        ksort($values, SORT_STRING);
+
+        // Sorting numeric object keys must not turn an object into a JSON list.
+        return (object) $values;
     }
 
     /** @param list<array<string, mixed>> $payload */
     private function checksum(array $payload): string
     {
-        return hash('sha256', json_encode(
-            $payload,
-            JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION | JSON_THROW_ON_ERROR,
-        ));
+        return hash('sha256', $this->canonical($payload));
     }
 }

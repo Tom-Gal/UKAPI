@@ -4,12 +4,11 @@ namespace App\Domain\Usage;
 
 use App\Models\ApiKey;
 use App\Notifications\UsageLimitNotification;
-use Illuminate\Contracts\Cache\Repository;
+use Carbon\CarbonImmutable;
+use Illuminate\Support\Facades\DB;
 
 final class UsageLimitNotifier
 {
-    public function __construct(private readonly Repository $cache) {}
-
     public function notifyIfThresholdReached(ApiKey $apiKey, int $used, int $limit, int $resetsAt): void
     {
         $user = $apiKey->user;
@@ -18,19 +17,28 @@ final class UsageLimitNotifier
             return;
         }
 
+        // Derive the period from the reservation, even if delivery crosses midnight.
+        $month = CarbonImmutable::createFromTimestampUTC($resetsAt)->subMonth()->toDateString();
         foreach ($this->thresholds() as $percentage) {
             $threshold = (int) ceil($limit * ($percentage / 100));
 
-            if ($used < max(1, $threshold) || ! $this->markAsSent($apiKey->user_id, $percentage)) {
+            if ($used < max(1, $threshold) || ! $this->markAsSent($apiKey->user_id, $percentage, $month)) {
                 continue;
             }
 
-            $user->notify(new UsageLimitNotification(
-                used: $used,
-                limit: $limit,
-                percentage: $percentage,
-                resetsAt: $resetsAt,
-            ));
+            try {
+                $user->notify(new UsageLimitNotification(
+                    used: $used,
+                    limit: $limit,
+                    percentage: $percentage,
+                    resetsAt: $resetsAt,
+                ));
+            } catch (\Throwable $exception) {
+                // Allow a later request to retry a failed transport.
+                DB::table('usage_notifications')->where('user_id', $apiKey->user_id)
+                    ->where('month', $month)->where('percentage', $percentage)->delete();
+                throw $exception;
+            }
         }
     }
 
@@ -47,16 +55,13 @@ final class UsageLimitNotifier
         )));
     }
 
-    private function markAsSent(int $userId, int $percentage): bool
+    private function markAsSent(int $userId, int $percentage, string $month): bool
     {
-        $expiresAt = now()->startOfMonth()
-            ->addMonth()
-            ->addDays((int) config('ukapi.usage_counter_retention_days'));
-
-        return $this->cache->add(
-            sprintf('ukapi:usage:notification:%s:account:%d:%d', now()->format('Ym'), $userId, $percentage),
-            true,
-            $expiresAt,
-        );
+        return DB::table('usage_notifications')->insertOrIgnore([
+            'user_id' => $userId,
+            'month' => $month,
+            'percentage' => $percentage,
+            'claimed_at' => CarbonImmutable::now('UTC'),
+        ]) === 1;
     }
 }

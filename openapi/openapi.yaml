@@ -7,6 +7,11 @@ info:
         and must be supplied with the Bearer authentication scheme.
         All operations are read-only GET requests and are safe to retry. X-Request-Id
         is a correlation identifier; it does not deduplicate requests or usage accounting.
+        Monthly request quotas are hard limits shared by all API keys on an account,
+        measured in UTC calendar months and reset at 00:00 UTC on the first day of each month.
+        When durable usage accounting is unavailable, requests fail closed with HTTP 503
+        and error.code usage_unavailable; no dataset is returned. Error responses use JSON,
+        including for CSV downloads.
     x-ukapi-features:
         current_data:
             description: Current normalized data and calculations.
@@ -21,7 +26,7 @@ info:
             description: Commercial application use under the applicable source licences.
             plans: [pro, scale]
         bulk_export:
-            description: Asynchronous bulk dataset exports.
+            description: Synchronous CSV download of the small full condensed SIC reference dataset.
             plans: [scale]
 servers:
     - url: https://api.ukapi.co.uk
@@ -351,6 +356,76 @@ paths:
                     $ref: '#/components/responses/RateLimited'
                 '503':
                     $ref: '#/components/responses/SicReferenceUnavailable'
+    /v1/sic/export:
+        get:
+            operationId: exportSicCsv
+            x-ukapi-feature: bulk_export
+            summary: Download the full condensed SIC reference as CSV (Scale only)
+            description: |
+                Downloads one immutable local snapshot with rows sorted by five-digit SIC code.
+                Accepts no query parameters, filters, pagination, dataset selectors or historical versions.
+                This bounded export supports at most 2,000 records; it is not an arbitrary bulk query API.
+                Counts as one request against the account's hard UTC calendar-month quota and normal burst limit.
+                CSV is UTF-8 with a header, comma delimiters, double-quote escaping and CRLF row endings.
+                Columns, in order: code, description, snapshot_version, snapshot_checksum, source,
+                source_url, licence, licence_url, attribution. Metadata is repeated on every row.
+                snapshot_checksum is the SHA-256 of the canonical stored JSON payload, not the CSV bytes
+                or upstream file. The version and checksum always identify the payload used for this download.
+                Spreadsheet formula cells (including =, +, -, @ after whitespace/control characters)
+                are prefixed with an apostrophe. Import code as text to retain leading zeroes.
+                Source: https://resources.companieshouse.gov.uk/sic/
+                Licence: Open Government Licence v3.0, https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/
+                Attribution: Contains public sector information licensed under the Open Government Licence v3.0.
+                Source and licence reference: https://www.gov.uk/government/publications/standard-industrial-classification-of-economic-activities-sic
+            responses:
+                '200':
+                    description: Complete SIC CSV attachment with immutable snapshot metadata and source attribution.
+                    headers:
+                        Content-Disposition:
+                            schema:
+                                type: string
+                            description: Attachment named sic-{snapshot_version}.csv.
+                        X-Snapshot-Version:
+                            schema:
+                                type: string
+                        X-Snapshot-Checksum:
+                            schema:
+                                type: string
+                                pattern: '^[a-f0-9]{64}$'
+                        X-Quota-Limit:
+                            schema:
+                                type: integer
+                        X-Quota-Remaining:
+                            schema:
+                                type: integer
+                        X-Quota-Reset:
+                            description: Unix timestamp of the next UTC calendar-month boundary.
+                            schema:
+                                type: integer
+                    content:
+                        text/csv:
+                            schema:
+                                type: string
+                '401':
+                    $ref: '#/components/responses/InvalidApiKey'
+                '403':
+                    $ref: '#/components/responses/FeatureUnavailable'
+                '422':
+                    $ref: '#/components/responses/InvalidParameter'
+                '429':
+                    $ref: '#/components/responses/RateLimited'
+                '503':
+                    description: Local SIC reference unavailable or too large (sic_reference_unavailable), or durable usage accounting unavailable (usage_unavailable). No CSV is returned.
+                    headers:
+                        Retry-After:
+                            description: Retry delay in seconds when usage accounting is unavailable.
+                            schema:
+                                type: integer
+                                example: 30
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ErrorEnvelope'
     /v1/crime/nearby:
         get:
             operationId: findNearbyCrime
@@ -817,7 +892,7 @@ components:
                     schema:
                         $ref: '#/components/schemas/ErrorEnvelope'
         RateLimited:
-            description: The per-key burst limit or monthly quota has been reached.
+            description: The per-key burst limit or hard account-wide UTC calendar-month quota has been reached.
             headers:
                 RateLimit-Limit:
                     schema:
@@ -838,6 +913,7 @@ components:
                     schema:
                         type: integer
                 X-Quota-Reset:
+                    description: Unix timestamp of the next UTC calendar-month boundary.
                     schema:
                         type: integer
             content:
@@ -858,6 +934,17 @@ components:
                         $ref: '#/components/schemas/ErrorEnvelope'
         UpstreamInvalidResponse:
             description: The source provider returned a response that does not match the expected shape.
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/ErrorEnvelope'
+        UsageUnavailable:
+            description: Durable usage accounting is unavailable. Requests fail closed with error.code usage_unavailable and no dataset is returned.
+            headers:
+                Retry-After:
+                    schema:
+                        type: integer
+                        example: 30
             content:
                 application/json:
                     schema:

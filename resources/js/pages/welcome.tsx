@@ -10,9 +10,7 @@ import {
 import { endpointFamilies, plans } from '@/lib/ukapi-content';
 
 const example = [
-    'curl https://api.ukapi.co.uk/v1/postcodes/BL2',
-    '  -H "Authorization: Bearer uk_test_…"',
-    '  -H "Accept: application/json"',
+    'curl "https://api.ukapi.co.uk/v1/postcodes/BL2%206XX" -H "Authorization: Bearer YOUR_API_KEY" -H "Accept: application/json"',
     '',
     '{',
     '  "data": { "postcode": "BL2 6XX", "country": "England" },',
