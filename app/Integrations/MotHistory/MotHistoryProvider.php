@@ -7,6 +7,7 @@ use App\Support\Api\ApiException;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
 final class MotHistoryProvider implements MotHistoryProviderContract
@@ -58,9 +59,9 @@ final class MotHistoryProvider implements MotHistoryProviderContract
     private function request(): PendingRequest
     {
         $apiKey = trim((string) config('ukapi.mot_history.api_key'));
-        $accessToken = trim((string) config('ukapi.mot_history.access_token'));
+        $accessToken = $this->accessToken();
 
-        if ($apiKey === '' || $accessToken === '') {
+        if ($apiKey === '') {
             throw ApiException::providerNotConfigured();
         }
 
@@ -79,5 +80,64 @@ final class MotHistoryProvider implements MotHistoryProviderContract
         return is_string($caBundle) && $caBundle !== ''
             ? $request->withOptions(['verify' => $caBundle])
             : $request;
+    }
+
+    private function accessToken(): string
+    {
+        $configuredToken = trim((string) config('ukapi.mot_history.access_token'));
+
+        if ($configuredToken !== '') {
+            return $configuredToken;
+        }
+
+        $clientId = trim((string) config('ukapi.mot_history.client_id'));
+        $clientSecret = trim((string) config('ukapi.mot_history.client_secret'));
+        $tokenUrl = trim((string) config('ukapi.mot_history.token_url'));
+        $scope = trim((string) config('ukapi.mot_history.scope'));
+
+        if ($clientId === '' || $clientSecret === '' || $tokenUrl === '' || $scope === '') {
+            throw ApiException::providerNotConfigured();
+        }
+
+        $cacheKey = 'ukapi:provider:mot_history:access_token:'.hash('sha256', $clientId);
+        $cachedToken = Cache::get($cacheKey);
+
+        if (is_string($cachedToken) && $cachedToken !== '') {
+            return $cachedToken;
+        }
+
+        try {
+            $response = Http::asForm()
+                ->acceptJson()
+                ->connectTimeout((int) config('ukapi.mot_history.connect_timeout_seconds'))
+                ->timeout((int) config('ukapi.mot_history.timeout_seconds'))
+                ->post($tokenUrl, [
+                    'grant_type' => 'client_credentials',
+                    'client_id' => $clientId,
+                    'client_secret' => $clientSecret,
+                    'scope' => $scope,
+                ]);
+        } catch (ConnectionException) {
+            throw ApiException::providerUnavailable();
+        }
+
+        if (in_array($response->status(), [401, 403], true)) {
+            throw ApiException::providerAuthenticationFailed();
+        }
+
+        if ($response->status() === 429 || $response->serverError()) {
+            throw ApiException::providerUnavailable();
+        }
+
+        $token = $response->json('access_token');
+        $expiresIn = (int) $response->json('expires_in', 3600);
+
+        if (! $response->successful() || ! is_string($token) || $token === '') {
+            throw ApiException::providerInvalidResponse();
+        }
+
+        Cache::put($cacheKey, $token, now()->addSeconds(max(60, $expiresIn - 60)));
+
+        return $token;
     }
 }

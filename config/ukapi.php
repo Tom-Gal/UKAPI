@@ -216,6 +216,8 @@ return [
         'base_url' => env('MOT_HISTORY_BASE_URL', 'https://history.mot.api.gov.uk'),
         'client_id' => env('MOT_HISTORY_CLIENT_ID'),
         'client_secret' => env('MOT_HISTORY_CLIENT_SECRET'),
+        'scope' => env('MOT_HISTORY_SCOPE_URL', 'https://tapi.dvsa.gov.uk/.default'),
+        'token_url' => env('MOT_HISTORY_TOKEN_URL'),
         'api_key' => env('MOT_HISTORY_API_KEY'),
         'access_token' => env('MOT_HISTORY_ACCESS_TOKEN'),
         'connect_timeout_seconds' => (int) env('MOT_HISTORY_CONNECT_TIMEOUT', 2),
