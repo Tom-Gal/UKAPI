@@ -1,7 +1,7 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { Check } from 'lucide-react';
 import { PageHero } from '@/pages/public/api-catalogue';
-import { plans } from '@/lib/ukapi-content';
+import { enterprisePlan, plans } from '@/lib/ukapi-content';
 
 export default function Pricing() {
     const { auth } = usePage().props;
@@ -20,7 +20,7 @@ export default function Pricing() {
                 description="Every MVP endpoint counts as one request. Monthly quotas are hard, with no launch overages or surprise usage charges. Upgrade when your quota needs to grow."
             />
             <div className="atlas-shell pb-24">
-                <div className="grid border-t border-l border-slate-950 md:grid-cols-2 lg:grid-cols-4">
+                <div className="grid border-t border-l border-slate-950 md:grid-cols-2 lg:grid-cols-5">
                     {plans.map((plan) => (
                         <article
                             key={plan.name}
@@ -73,6 +73,35 @@ export default function Pricing() {
                             </Link>
                         </article>
                     ))}
+                    <article className="flex flex-col border-r border-b border-slate-950 bg-[#e4ece7] p-6">
+                        <h2 className="font-sans font-bold">{enterprisePlan.name}</h2>
+                        <p className="mt-5 text-4xl font-semibold tracking-tight">
+                            Contact
+                        </p>
+                        <p className="mt-1 text-xs text-slate-500">
+                            Custom terms for higher-volume use
+                        </p>
+                        <p className="mt-3 font-mono text-sm text-[#2563c7]">
+                            More than Scale
+                        </p>
+                        <p className="mt-4 min-h-10 text-sm leading-5 text-slate-600">
+                            {enterprisePlan.description}
+                        </p>
+                        <ul className="mt-6 space-y-3 border-t border-slate-300 pt-5 text-sm text-slate-700">
+                            {enterprisePlan.features.map((feature) => (
+                                <li key={feature} className="flex gap-2">
+                                    <Check className="size-4 shrink-0 text-[#2563c7]" />
+                                    {feature}
+                                </li>
+                            ))}
+                        </ul>
+                        <a
+                            href="mailto:support@ukapi.co.uk?subject=Enterprise%20API%20enquiry"
+                            className="mt-8 border border-slate-950 bg-transparent px-4 py-3 text-center text-sm font-bold transition hover:bg-white"
+                        >
+                            Contact us
+                        </a>
+                    </article>
                 </div>
                 <p className="mt-8 max-w-2xl text-sm leading-6 text-slate-500">
                     The Free plan is available when you create an account. Paid

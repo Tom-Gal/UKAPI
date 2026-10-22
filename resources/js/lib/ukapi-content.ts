@@ -976,3 +976,14 @@ export const plans = [
         emphasis: false,
     },
 ];
+
+export const enterprisePlan = {
+    name: 'Enterprise',
+    description:
+        'For teams that need more than Scale, with a plan shaped around your volume and requirements.',
+    features: [
+        'Higher request volumes',
+        'Dedicated support',
+        'Custom commercial terms',
+    ],
+};

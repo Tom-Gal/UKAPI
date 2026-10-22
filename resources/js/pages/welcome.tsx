@@ -7,7 +7,7 @@ import {
     Map,
     ShieldCheck,
 } from 'lucide-react';
-import { endpointFamilies, plans } from '@/lib/ukapi-content';
+import { endpointFamilies, enterprisePlan, plans } from '@/lib/ukapi-content';
 
 const example = [
     'curl "https://api.ukapi.co.uk/v1/postcodes/BL2%206XX" -H "Authorization: Bearer YOUR_API_KEY" -H "Accept: application/json"',
@@ -187,7 +187,7 @@ export default function Welcome() {
                             are hard at launch, with no overage billing.
                         </p>
                     </div>
-                    <div className="grid border-t border-l border-slate-950 sm:grid-cols-2">
+                    <div className="grid border-t border-l border-slate-950 sm:grid-cols-2 lg:grid-cols-5">
                         {plans.map((plan) => (
                             <div
                                 key={plan.name}
@@ -218,6 +218,26 @@ export default function Welcome() {
                                 </p>
                             </div>
                         ))}
+                        <div className="flex flex-col border-r border-b border-slate-950 bg-[#e4ece7] p-6 sm:col-span-2 lg:col-span-1">
+                            <p className="font-mono text-[11px] font-bold tracking-widest uppercase">
+                                {enterprisePlan.name}
+                            </p>
+                            <p className="mt-7 text-4xl font-semibold tracking-tight">
+                                Contact
+                            </p>
+                            <p className="mt-3 font-mono text-xs text-[#2563c7]">
+                                Built around your volume
+                            </p>
+                            <p className="mt-4 text-sm leading-6 text-slate-700">
+                                {enterprisePlan.description}
+                            </p>
+                            <a
+                                href="mailto:support@ukapi.co.uk?subject=Enterprise%20API%20enquiry"
+                                className="mt-6 inline-flex items-center justify-center border border-slate-950 bg-transparent px-4 py-3 text-sm font-bold transition hover:bg-white"
+                            >
+                                Contact us <ArrowRight className="ml-2 size-4" />
+                            </a>
+                        </div>
                     </div>
                 </div>
                 <div className="mt-8 flex justify-end">
