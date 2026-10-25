@@ -74,7 +74,9 @@ export default function Pricing() {
                         </article>
                     ))}
                     <article className="flex flex-col border-r border-b border-slate-950 bg-[#e4ece7] p-6">
-                        <h2 className="font-sans font-bold">{enterprisePlan.name}</h2>
+                        <h2 className="font-sans font-bold">
+                            {enterprisePlan.name}
+                        </h2>
                         <p className="mt-5 text-4xl font-semibold tracking-tight">
                             Contact
                         </p>

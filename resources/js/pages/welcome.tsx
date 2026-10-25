@@ -235,7 +235,8 @@ export default function Welcome() {
                                 href="mailto:contact@ukapi.co.uk?subject=Enterprise%20API%20enquiry"
                                 className="mt-6 inline-flex items-center justify-center border border-slate-950 bg-transparent px-4 py-3 text-sm font-bold transition hover:bg-white"
                             >
-                                Contact us <ArrowRight className="ml-2 size-4" />
+                                Contact us{' '}
+                                <ArrowRight className="ml-2 size-4" />
                             </a>
                         </div>
                     </div>

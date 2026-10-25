@@ -46,10 +46,9 @@ jobs:
           cp .env.example .env
           php artisan key:generate --force
 
-      - name: Run backend tests and static analysis
+      - name: Run backend quality gate
         run: |
-          php artisan test
-          vendor/bin/phpstan analyse
+          composer test
           composer audit --locked --no-interaction
 
       - name: Run frontend checks

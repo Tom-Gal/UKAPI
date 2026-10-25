@@ -113,8 +113,8 @@ export default function Dashboard({ summary }: Props) {
                         </div>
                         <p className="mt-5 text-sm text-slate-600">
                             Keys are shown once and stored as hashes. Test and
-                            live keys use the same API format; keep both on
-                            your server, never in browser code.
+                            live keys use the same API format; keep both on your
+                            server, never in browser code.
                         </p>
                     </section>
                 )}
