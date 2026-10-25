@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * @property string $service
  * @property string $status
+ * @property string|null $failure_reason
  * @property int $consecutive_failures
  * @property CarbonImmutable|null $last_attempt_at
  * @property CarbonImmutable|null $last_checked_at

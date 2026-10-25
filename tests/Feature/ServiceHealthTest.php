@@ -6,6 +6,7 @@ use App\Domain\Health\HealthAlert;
 use App\Domain\Health\HealthAlerts;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Models\ServiceHealthCheck;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Factory;
 use Illuminate\Http\Client\Request;
@@ -32,6 +33,12 @@ class ServiceHealthTest extends TestCase
             'health.crime_source_max_age_days' => 120,
             'health.sic_retrieval_max_age_days' => 90,
             'ukapi.companies_house.api_key' => 'test-secret-do-not-publish',
+            'ukapi.mot_history.api_key' => 'mot-api-key-do-not-publish',
+            'ukapi.mot_history.client_id' => 'mot-client-id',
+            'ukapi.mot_history.client_secret' => 'mot-client-secret-do-not-publish',
+            'ukapi.mot_history.access_token' => null,
+            'ukapi.mot_history.token_url' => 'https://login.example.test/oauth2/token',
+            'ukapi.mot_history.scope' => 'https://mot.example.test/.default',
             'ukapi.sic_reference.snapshot_path' => base_path('tests/Fixtures/CompaniesHouse/sic-reference.json'),
             'ukapi.sic_reference.seed_snapshot_path' => null,
         ]);
@@ -42,7 +49,7 @@ class ServiceHealthTest extends TestCase
     public function test_initial_status_is_unknown_without_probing_even_when_credentials_are_configured(): void
     {
         $response = $this->publicStatus()->assertOk();
-        foreach (range(0, 5) as $index) {
+        foreach (range(0, 6) as $index) {
             $response->assertJsonPath("props.services.{$index}.state", 'unknown')
                 ->assertJsonPath("props.services.{$index}.last_success_at", null);
         }
@@ -50,12 +57,26 @@ class ServiceHealthTest extends TestCase
         Http::assertNothingSent();
     }
 
+    public function test_admin_provider_register_includes_mot_configuration_and_observed_health(): void
+    {
+        $admin = User::factory()->admin()->withTwoFactor()->create();
+
+        $this->actingAs($admin)
+            ->withHeader('X-Inertia', 'true')
+            ->withHeader('X-Inertia-Version', app(HandleInertiaRequests::class)->version(request()))
+            ->get('/admin/providers')
+            ->assertOk()
+            ->assertJsonPath('props.providers.4.code', 'dvsa_mot_history')
+            ->assertJsonPath('props.providers.4.configuration', 'Credential set')
+            ->assertJsonPath('props.providers.4.health', 'unknown');
+    }
+
     public function test_checks_persist_validated_results_and_distinguish_source_and_retrieval_age(): void
     {
         config()->set('health.sic_retrieval_max_age_days', 20);
         $this->fakeProviders();
         $this->artisan('ukapi:health:check')->assertSuccessful();
-        $this->assertDatabaseCount('service_health_checks', 6);
+        $this->assertDatabaseCount('service_health_checks', 7);
         foreach (ServiceHealthCheck::all() as $check) {
             $this->assertSame('available', $check->status);
             $this->assertNotNull($check->last_attempt_at);
@@ -65,9 +86,10 @@ class ServiceHealthTest extends TestCase
         $this->publicStatus()->assertJsonPath('props.services.1.source_freshness', 'unknown')
             ->assertJsonPath('props.services.2.source_freshness', 'fresh')
             ->assertJsonPath('props.services.2.source_date', '2026-09')
-            ->assertJsonPath('props.services.5.source_freshness', 'unknown')
-            ->assertJsonPath('props.services.5.reference_freshness', 'stale');
-        Http::assertSentCount(5);
+            ->assertJsonPath('props.services.5.state', 'available')
+            ->assertJsonPath('props.services.6.source_freshness', 'unknown')
+            ->assertJsonPath('props.services.6.reference_freshness', 'stale');
+        Http::assertSentCount(7);
         Http::assertSent(fn (Request $request): bool => str_contains($request->url(), 'search/companies')
             && $request['items_per_page'] === 1
             && $request->hasHeader('Authorization', 'Basic '.base64_encode('test-secret-do-not-publish:')));
@@ -100,7 +122,7 @@ class ServiceHealthTest extends TestCase
         $this->publicStatus()->assertJsonPath('props.services.1.state', 'unknown');
         $this->travel(16)->minutes();
         $response = $this->publicStatus();
-        foreach (range(0, 5) as $index) {
+        foreach (range(0, 6) as $index) {
             $response->assertJsonPath("props.services.{$index}.state", 'stale');
         }
         $response->assertJsonPath('props.services.2.source_freshness', 'unknown');
@@ -137,7 +159,8 @@ class ServiceHealthTest extends TestCase
             ->assertJsonPath('props.services.2.state', 'unavailable')
             ->assertJsonPath('props.services.3.state', 'available')
             ->assertJsonPath('props.services.4.state', 'unavailable')
-            ->assertJsonPath('props.services.5.state', 'available');
+            ->assertJsonPath('props.services.5.state', 'available')
+            ->assertJsonPath('props.services.6.state', 'available');
         Http::assertNotSent(fn (Request $request): bool => str_contains($request->url(), 'search/companies'));
     }
 
@@ -149,6 +172,71 @@ class ServiceHealthTest extends TestCase
         RateLimiter::hit('ukapi:provider:companies_house:'.intdiv(now()->getTimestamp(), $window), $window);
         $this->artisan('ukapi:health:check')->assertFailed();
         Http::assertNotSent(fn (Request $request): bool => str_contains($request->url(), 'search/companies'));
+    }
+
+    public function test_mot_health_probe_uses_the_customer_provider_budget(): void
+    {
+        $this->fakeProviders();
+        config()->set('ukapi.mot_history.provider_request_limit', 1);
+        $window = (int) config('ukapi.mot_history.provider_limit_window_seconds');
+        RateLimiter::hit('ukapi:provider:mot_history:'.intdiv(now()->getTimestamp(), $window), $window);
+
+        $this->artisan('ukapi:health:check')->assertFailed();
+
+        $this->assertDatabaseHas('service_health_checks', [
+            'service' => 'mot',
+            'failure_reason' => 'probe_capacity',
+        ]);
+        Http::assertNotSent(fn (Request $request): bool => str_contains($request->url(), 'bulk-download'));
+    }
+
+    public function test_mot_probe_distinguishes_configuration_token_credentials_and_api_failures_safely(): void
+    {
+        config()->set('ukapi.mot_history.api_key', null);
+        $this->fakeProviders();
+        $this->artisan('ukapi:health:check')->assertFailed();
+        $this->assertDatabaseHas('service_health_checks', [
+            'service' => 'mot',
+            'failure_reason' => 'configuration_missing',
+        ]);
+
+        config()->set('ukapi.mot_history.api_key', 'mot-api-key-do-not-publish');
+        Cache::flush();
+        $this->fakeProviders(motToken: Http::response(['error' => 'invalid_client'], 401));
+        $this->artisan('ukapi:health:check')->assertFailed();
+        $this->assertDatabaseHas('service_health_checks', [
+            'service' => 'mot',
+            'failure_reason' => 'credentials_rejected',
+        ]);
+
+        Cache::flush();
+        $this->fakeProviders(motToken: Http::response(['error' => 'temporarily_unavailable'], 503));
+        $this->artisan('ukapi:health:check')->assertFailed();
+        $this->assertDatabaseHas('service_health_checks', [
+            'service' => 'mot',
+            'failure_reason' => 'token_unavailable',
+        ]);
+
+        Cache::flush();
+        $this->fakeProviders(motToken: Http::response(['expires_in' => 3600]));
+        $this->artisan('ukapi:health:check')->assertFailed();
+        $this->assertDatabaseHas('service_health_checks', [
+            'service' => 'mot',
+            'failure_reason' => 'token_failure',
+        ]);
+
+        Cache::flush();
+        $this->fakeProviders(motApi: Http::response(['private' => 'provider-body-secret'], 503));
+        $this->artisan('ukapi:health:check')->assertFailed();
+        $this->assertDatabaseHas('service_health_checks', [
+            'service' => 'mot',
+            'failure_reason' => 'api_unavailable',
+        ]);
+        $response = $this->publicStatus()
+            ->assertJsonPath('props.services.5.detail', 'Check failed: provider unavailable');
+        foreach (['mot-api-key-do-not-publish', 'mot-client-secret-do-not-publish', 'health-token-do-not-publish', 'provider-body-secret'] as $private) {
+            $this->assertStringNotContainsString($private, $response->getContent());
+        }
     }
 
     public function test_alerts_use_durable_threshold_dedup_reminders_and_recovery(): void
@@ -181,7 +269,7 @@ class ServiceHealthTest extends TestCase
         config()->set('health.alerts.failure_threshold', 1);
         $this->fakeProviders(postcodes: Http::response([], 503));
         $alerts = \Mockery::mock(HealthAlerts::class);
-        $alerts->shouldReceive('send')->times(6)->andReturnUsing(function (ServiceHealthCheck $check): void {
+        $alerts->shouldReceive('send')->times(7)->andReturnUsing(function (ServiceHealthCheck $check): void {
             if ($check->service === 'postcodes') {
                 throw new \RuntimeException('private SMTP detail');
             }
@@ -233,8 +321,13 @@ class ServiceHealthTest extends TestCase
         ]);
     }
 
-    private function fakeProviders(mixed $postcodes = null, mixed $source = null, mixed $crimeCategories = null): void
-    {
+    private function fakeProviders(
+        mixed $postcodes = null,
+        mixed $source = null,
+        mixed $crimeCategories = null,
+        mixed $motToken = null,
+        mixed $motApi = null,
+    ): void {
         Http::swap(new Factory);
         Http::preventStrayRequests();
         Http::fake([
@@ -243,6 +336,11 @@ class ServiceHealthTest extends TestCase
             '*crime-last-updated*' => $source ?? Http::response(['date' => '2026-09-01']),
             '*id/floods*' => Http::response(['items' => []]),
             '*search/companies*' => Http::response($this->fixture('CompaniesHouse/company-search.json')),
+            'https://login.example.test/oauth2/token' => $motToken ?? Http::response([
+                'access_token' => 'health-token-do-not-publish',
+                'expires_in' => 3600,
+            ]),
+            '*v1/trade/vehicles/bulk-download' => $motApi ?? Http::response(['bulk' => [], 'delta' => []]),
         ]);
     }
 

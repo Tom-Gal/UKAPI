@@ -7,6 +7,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Request as HttpClientRequest;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
@@ -49,6 +50,24 @@ class MotHistoryApiTest extends TestCase
         $this->getJson('/v1/mot/vin/INVALID', ['Authorization' => "Bearer {$token}"])
             ->assertUnprocessable()
             ->assertJsonPath('error.code', 'invalid_parameter');
+
+        Http::assertNothingSent();
+    }
+
+    public function test_customer_requests_honour_the_shared_mot_provider_budget(): void
+    {
+        $token = $this->createApiKey();
+        config()->set([
+            'ukapi.mot_history.provider_request_limit' => 1,
+            'ukapi.mot_history.provider_limit_window_seconds' => 60,
+        ]);
+        $window = (int) config('ukapi.mot_history.provider_limit_window_seconds');
+        RateLimiter::hit('ukapi:provider:mot_history:'.intdiv(now()->getTimestamp(), $window), $window);
+        Http::fake();
+
+        $this->getJson('/v1/mot/registration/AB12CDE', ['Authorization' => "Bearer {$token}"])
+            ->assertServiceUnavailable()
+            ->assertJsonPath('error.code', 'upstream_unavailable');
 
         Http::assertNothingSent();
     }

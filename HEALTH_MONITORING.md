@@ -1,9 +1,12 @@
 # Service health monitoring
 
 `php artisan ukapi:health:check` samples application dependencies and selected
-Postcodes.io, Police.uk, Environment Agency and Companies House operations. It
-also validates the local SIC reference. The scheduler runs it every five
-minutes with a distributed lock. Store the scheduler and lock cache on shared
+Postcodes.io, Police.uk, Environment Agency, Companies House and DVSA MOT
+History operations. It also validates the local SIC reference. The MOT check
+uses the normal cached OAuth client-credential token and samples the
+authenticated bulk-download manifest without downloading vehicle files. The
+scheduler runs it every five minutes with a distributed lock. Store the
+scheduler and lock cache on shared
 infrastructure when more than one application node is running.
 
 The public `/status` page starts as **unknown**, shows **unavailable** after a
@@ -24,6 +27,13 @@ scheduler heartbeat. In-process monitoring cannot notify anyone when the whole
 application, scheduler, database, cache, network or mail transport is down.
 Provider probes consume the same provider request budgets as customer traffic;
 keep their frequency within source terms and published limits.
+
+MOT failures are classified without retaining response bodies or secrets:
+incomplete configuration, rejected credentials, token-service failure, invalid
+token response, provider API failure, invalid API response, or exhausted local
+provider budget. The public status page and admin provider register show only
+these safe categories. Operator failure alerts include the same category so a
+bad or expired credential is visible before customer reports arrive.
 
 Before launch, verify:
 

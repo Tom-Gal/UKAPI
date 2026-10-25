@@ -1,7 +1,13 @@
 import { Head } from '@inertiajs/react';
 import { AdminNav } from '@/components/admin-nav';
 import { DashboardPageHeader } from '@/components/dashboard-page-header';
-type Provider = { code: string; scope: string; status: string };
+type Provider = {
+    code: string;
+    scope: string;
+    configuration: string;
+    health: 'available' | 'unavailable' | 'stale' | 'unknown';
+    health_detail: string;
+};
 export default function AdminProviders({
     providers,
 }: {
@@ -23,7 +29,8 @@ export default function AdminProviders({
                             <tr>
                                 <th className="px-5 py-3">Provider</th>
                                 <th className="px-5 py-3">Coverage</th>
-                                <th className="px-5 py-3">Health</th>
+                                <th className="px-5 py-3">Configuration</th>
+                                <th className="px-5 py-3">Observed health</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -40,9 +47,16 @@ export default function AdminProviders({
                                     </td>
                                     <td className="px-5 py-4">
                                         <span
-                                            className={`rounded-full px-2 py-1 text-xs font-semibold ${provider.status === 'Credential missing' || provider.status === 'Snapshot missing' ? 'bg-rose-50 text-rose-800' : 'bg-emerald-50 text-emerald-800'}`}
+                                            className={`rounded-full px-2 py-1 text-xs font-semibold ${provider.configuration === 'Credential missing' || provider.configuration === 'Snapshot missing' ? 'bg-rose-50 text-rose-800' : 'bg-emerald-50 text-emerald-800'}`}
                                         >
-                                            {provider.status}
+                                            {provider.configuration}
+                                        </span>
+                                    </td>
+                                    <td className="px-5 py-4">
+                                        <span
+                                            className={`font-semibold ${provider.health === 'available' ? 'text-emerald-800' : provider.health === 'unavailable' ? 'text-rose-800' : 'text-amber-800'}`}
+                                        >
+                                            {provider.health_detail}
                                         </span>
                                     </td>
                                 </tr>

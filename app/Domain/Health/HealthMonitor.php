@@ -20,14 +20,22 @@ final class HealthMonitor
                 $result = $this->probe->check($service);
                 $check->forceFill([
                     'status' => 'available',
+                    'failure_reason' => null,
                     'last_success_at' => now(),
                     'source_date' => $result->sourceDate,
                     'reference_retrieved_at' => $result->referenceRetrievedAt,
                     'consecutive_failures' => 0,
                 ]);
+            } catch (ProbeFailure $exception) {
+                $check->forceFill([
+                    'status' => 'unavailable',
+                    'failure_reason' => $exception->reason,
+                    'consecutive_failures' => min(4_294_967_295, $check->consecutive_failures + 1),
+                ]);
             } catch (\Throwable) {
                 $check->forceFill([
                     'status' => 'unavailable',
+                    'failure_reason' => 'probe_failed',
                     'consecutive_failures' => min(4_294_967_295, $check->consecutive_failures + 1),
                 ]);
             }

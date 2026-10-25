@@ -225,6 +225,10 @@ return [
         'access_token' => env('MOT_HISTORY_ACCESS_TOKEN'),
         'connect_timeout_seconds' => (int) env('MOT_HISTORY_CONNECT_TIMEOUT', 2),
         'timeout_seconds' => (int) env('MOT_HISTORY_TIMEOUT', 10),
+        // DVSA publishes a 10-request burst limit. Keep one shared local budget
+        // for customer traffic and scheduled health probes.
+        'provider_request_limit' => (int) env('MOT_HISTORY_PROVIDER_REQUEST_LIMIT', 10),
+        'provider_limit_window_seconds' => (int) env('MOT_HISTORY_PROVIDER_LIMIT_WINDOW_SECONDS', 1),
     ],
 
     /*

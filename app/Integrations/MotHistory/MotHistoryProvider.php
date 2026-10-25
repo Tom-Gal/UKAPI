@@ -6,9 +6,9 @@ use App\Integrations\Contracts\MotHistoryProvider as MotHistoryProviderContract;
 use App\Support\Api\ApiException;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
-use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\RateLimiter;
 
 final class MotHistoryProvider implements MotHistoryProviderContract
 {
@@ -25,6 +25,8 @@ final class MotHistoryProvider implements MotHistoryProviderContract
     /** @return array<string, mixed> */
     private function get(string $path): array
     {
+        $this->reserveProviderCapacity();
+
         try {
             $response = $this->request()->get($path);
         } catch (ConnectionException) {
@@ -54,6 +56,19 @@ final class MotHistoryProvider implements MotHistoryProviderContract
         }
 
         return $payload;
+    }
+
+    private function reserveProviderCapacity(): void
+    {
+        $window = max(1, (int) config('ukapi.mot_history.provider_limit_window_seconds'));
+        $limit = max(1, (int) config('ukapi.mot_history.provider_request_limit'));
+        $key = 'ukapi:provider:mot_history:'.intdiv(now()->getTimestamp(), $window);
+
+        if (RateLimiter::tooManyAttempts($key, $limit)) {
+            throw ApiException::providerUnavailable();
+        }
+
+        RateLimiter::hit($key, $window);
     }
 
     private function request(): PendingRequest

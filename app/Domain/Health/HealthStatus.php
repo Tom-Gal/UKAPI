@@ -13,6 +13,7 @@ final class HealthStatus
         'crime' => 'Crime provider',
         'flood' => 'Flood provider (England)',
         'companies' => 'Company provider',
+        'mot' => 'MOT history provider',
         'sic' => 'SIC reference data',
     ];
 
@@ -44,12 +45,13 @@ final class HealthStatus
                     ? 'stale' : 'fresh';
             }
             $services[] = [
+                'code' => $key,
                 'name' => $name,
                 'state' => $state,
-                'detail' => match ($state) {
-                    'available' => 'Check passed',
-                    'unavailable' => 'Check failed',
-                    'stale' => 'Measurement overdue',
+                'detail' => match (true) {
+                    $state === 'unavailable' => $this->failureDetail($check?->failure_reason),
+                    $state === 'available' => 'Check passed',
+                    $state === 'stale' => 'Measurement overdue',
                     default => 'Not yet measured or check incomplete',
                 },
                 'last_attempt_at' => $check?->last_attempt_at?->toIso8601String(),
@@ -66,6 +68,20 @@ final class HealthStatus
         }
 
         return $services;
+    }
+
+    private function failureDetail(?string $reason): string
+    {
+        return match ($reason) {
+            'configuration_missing' => 'Check failed: configuration incomplete',
+            'credentials_rejected' => 'Check failed: credentials rejected',
+            'token_unavailable' => 'Check failed: token service unavailable',
+            'token_failure' => 'Check failed: token response invalid',
+            'api_unavailable' => 'Check failed: provider unavailable',
+            'invalid_response' => 'Check failed: invalid provider response',
+            'probe_capacity' => 'Check deferred: provider budget exhausted',
+            default => 'Check failed',
+        };
     }
 
     private function state(?ServiceHealthCheck $check): string
