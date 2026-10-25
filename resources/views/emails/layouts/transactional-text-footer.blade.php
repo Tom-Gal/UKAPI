@@ -1,7 +1,8 @@
 
 —
-{{ config('legal.entity_name') }}, registered in England and Wales, company number {{ config('legal.company_number') }}.
-Registered office: {{ config('legal.registered_office') }}.
+{{ config('legal.entity_name') ?: 'UKAPI' }}@if(config('legal.company_number')), company number {{ config('legal.company_number') }}@endif.
+@if(config('legal.registered_office'))Registered office: {{ config('legal.registered_office') }}.
+@endif
 Contact: {{ config('legal.contact_email') }}
 This is a service message, not marketing.
 Terms: {{ url('/terms') }}

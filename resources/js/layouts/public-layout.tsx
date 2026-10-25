@@ -16,7 +16,7 @@ const defaultDescription =
 
 export default function PublicLayout({ children }: PropsWithChildren) {
     const page = usePage();
-    const { auth } = page.props;
+    const { auth, legal } = page.props;
     const currentPath = page.url.split('?')[0];
     const canonicalUrl = `${siteUrl}${currentPath === '/' ? '' : currentPath}`;
     const [menuOpen, setMenuOpen] = useState(false);
@@ -33,12 +33,18 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                 <meta property="og:url" content={canonicalUrl} />
                 <meta property="og:locale" content="en_GB" />
                 <meta property="og:description" content={defaultDescription} />
-                <meta property="og:image" content={`${siteUrl}/branding/ukapi-social-card.png`} />
+                <meta
+                    property="og:image"
+                    content={`${siteUrl}/branding/ukapi-social-card.png`}
+                />
                 <meta property="og:image:width" content="1200" />
                 <meta property="og:image:height" content="630" />
                 <meta name="twitter:card" content="summary_large_image" />
                 <meta name="twitter:description" content={defaultDescription} />
-                <meta name="twitter:image" content={`${siteUrl}/branding/ukapi-social-card.png`} />
+                <meta
+                    name="twitter:image"
+                    content={`${siteUrl}/branding/ukapi-social-card.png`}
+                />
             </Head>
             <a
                 href="#main-content"
@@ -152,6 +158,25 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                         <p className="mt-5 max-w-md text-sm leading-6 text-[#cbd2c7]">
                             Useful UK data through one predictable API. Built
                             for developers, with source limits left in view.
+                        </p>
+                        <p className="mt-4 max-w-md text-xs leading-5 text-[#aeb8af]">
+                            {legal.entityName ?? 'UKAPI'}
+                            {legal.companyNumber &&
+                                ` · Company ${legal.companyNumber}`}
+                            {legal.registeredOffice && (
+                                <>
+                                    <br />
+                                    {legal.registeredOffice}
+                                </>
+                            )}
+                            <br />
+                            <a
+                                className="hover:text-white hover:underline"
+                                href={`mailto:${legal.contactEmail}`}
+                            >
+                                {legal.contactEmail}
+                            </a>
+                            {legal.icoNumber && ` · ICO ${legal.icoNumber}`}
                         </p>
                     </div>
                     <FooterLinks

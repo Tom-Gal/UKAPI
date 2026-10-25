@@ -41,6 +41,14 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
+            'legal' => [
+                'entityName' => config('legal.entity_name'),
+                'companyNumber' => config('legal.company_number'),
+                'registeredOffice' => config('legal.registered_office'),
+                'contactEmail' => config('legal.contact_email'),
+                'icoNumber' => config('legal.ico_number'),
+                'lastUpdated' => config('legal.last_updated'),
+            ],
             'flash' => [
                 'api_key_created' => fn () => $request->session()->get('api_key_created'),
             ],

@@ -44,7 +44,34 @@ class NotificationTemplateTest extends TestCase
             $this->assertStringContainsString('UKApi.co.uk', $html);
             $this->assertStringContainsString('border-top:4px solid #2563c7', $html);
             $this->assertStringContainsString('Alex Smith', $html);
+            $this->assertStringNotContainsString('[COMPANY NUMBER]', $html);
+            $this->assertStringNotContainsString('[REGISTERED OFFICE ADDRESS]', $html);
             $this->assertStringNotContainsString('color-scheme" content="dark', $html);
+        }
+    }
+
+    public function test_transactional_footer_omits_non_applicable_registration_fields_without_placeholders(): void
+    {
+        config()->set([
+            'legal.entity_name' => 'Approved Operator Name',
+            'legal.company_number' => null,
+            'legal.registered_office' => '1 Example Street, London',
+            'legal.contact_email' => 'contact@ukapi.co.uk',
+        ]);
+
+        $html = view('emails.layouts.transactional', [
+            'title' => 'Test message',
+            'preheader' => 'Test preheader',
+            'slot' => 'Test content',
+        ])->render();
+        $text = view('emails.layouts.transactional-text-footer')->render();
+
+        foreach ([$html, $text] as $rendered) {
+            $this->assertStringContainsString('Approved Operator Name', $rendered);
+            $this->assertStringContainsString('1 Example Street, London', $rendered);
+            $this->assertStringNotContainsString('company number', $rendered);
+            $this->assertStringNotContainsString('[COMPANY NUMBER]', $rendered);
+            $this->assertStringNotContainsString('[REGISTERED OFFICE ADDRESS]', $rendered);
         }
     }
 }

@@ -63,10 +63,27 @@ const documents: Record<string, LegalDocument> = {
 };
 
 export default function Legal() {
+    const page = usePage();
     const key =
-        usePage().url.split('?')[0].split('/').filter(Boolean).at(-1) ??
-        'terms';
-    const document = documents[key] ?? documents.terms;
+        page.url.split('?')[0].split('/').filter(Boolean).at(-1) ?? 'terms';
+    const legal = page.props.legal;
+    const sourceDocument = documents[key] ?? documents.terms;
+    const replaceLegalDetails = (value: string) =>
+        value
+            .replaceAll('contact@ukapi.co.uk', legal.contactEmail)
+            .replaceAll(
+                'UKAPI, United Kingdom',
+                [legal.entityName ?? 'UKAPI', legal.registeredOffice]
+                    .filter(Boolean)
+                    .join(', '),
+            );
+    const document = {
+        ...sourceDocument,
+        sections: sourceDocument.sections.map((section) => ({
+            ...section,
+            paragraphs: section.paragraphs.map(replaceLegalDetails),
+        })),
+    };
 
     return (
         <>
@@ -75,7 +92,7 @@ export default function Legal() {
             </Head>
             <article className="atlas-shell max-w-4xl py-16 lg:py-24">
                 <p className="atlas-kicker">
-                    Legal · Last updated 18 October 2026
+                    Legal · Last updated {legal.lastUpdated}
                 </p>
                 <h1 className="mt-4 text-5xl font-semibold tracking-[-.045em]">
                     {document.title}
