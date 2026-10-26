@@ -19,7 +19,7 @@ The audit found a strong functional baseline:
 - 25 customer `/v1` routes are live.
 - All 25 runtime routes have exact path counterparts in `openapi/openapi.yaml`.
 - Planned endpoint definitions are retained internally but filtered from the public catalogue and documentation.
-- 205 PHP tests pass with 2,152 assertions.
+- 229 PHP tests pass with 2,152 assertions.
 - PHPStan passes with no errors.
 - TypeScript checking passes.
 - The production frontend build succeeds.
@@ -30,113 +30,24 @@ The local quality gates are green: Pint, PHPStan, PHPUnit, Vite Plus formatting
 and linting, TypeScript, the production frontend build, Composer audit, OpenAPI
 parsing, configuration caching, and route caching all pass.
 
-## P0: Restore a clean release baseline
+## Release baseline completed
 
-### P0.1 Fix current formatting failures
+The repository-owned P0 release-baseline work is complete and has been verified in
+the current branch:
 
-**Completed 25 October 2026.** Pint and Vite Plus were applied to the reported
-files, and the full backend and frontend quality gates pass.
+- formatting and frontend quality gates are clean;
+- CI runs the same Composer backend gate used locally;
+- environment, Valkey, MOT, and legal configuration checks agree with the runbook;
+- PHPUnit is configured to fail the build for risky or assertion-free tests;
+- independent public-page, entitlement, SIC-export, and notification cases use
+  named PHPUnit 12 data-provider datasets;
+- `AGENTS.md` and `ROADMAP.md` are committed repository guidance.
 
-**Why:** The local quality gate is red, and the frontend check in CI will fail even though runtime tests and builds pass.
-
-Backend files currently reported by Pint:
-
-- `routes/api.php`
-- `app/Http/Requests/Api/V1/MotRegistrationRequest.php`
-- `app/Http/Requests/Api/V1/MotVinRequest.php`
-- `app/Integrations/MotHistory/MotHistoryProvider.php`
-- `app/Providers/AppServiceProvider.php`
-
-Frontend files currently reported by Vite Plus:
-
-- `resources/js/layouts/public-layout.tsx`
-- `resources/js/pages/dashboard.tsx`
-- `resources/js/pages/public/pricing.tsx`
-- `resources/js/pages/welcome.tsx`
-
-**Acceptance criteria:** Pint, Vite Plus, PHPStan, TypeScript, PHPUnit, production build, and `git diff --check` all pass without unrelated semantic changes.
-
-### P0.2 Make CI run the same backend gate contributors run
-
-**Completed 25 October 2026.** CI now runs `composer test`, which includes Pint,
-PHPStan, and PHPUnit, without repeating those checks separately.
-
-**Why:** `.github/workflows/tests.yml` runs PHPUnit and PHPStan but not Pint. `composer test` currently catches failures that CI's backend step does not.
-
-Work:
-
-- Add `vendor/bin/pint --test` or use the established Composer quality script in CI.
-- Keep PHPUnit's risky-test detection enabled and make risky tests fail the build rather than merely appearing in output.
-- Keep PHPUnit, PHPStan, Composer audit, frontend check, type check, build, OpenAPI parsing, and route-cache validation.
-- Avoid running the same expensive check twice.
-
-**Acceptance criteria:** A deliberately misformatted PHP fixture/change fails CI, and the normal branch passes.
-
-### P0.3 Reconcile production environment documentation and checks
-
-**Completed 25 October 2026.** The repository now uses
-`LEGAL_CONTACT_EMAIL`, documents direct shared Valkey with
-`CACHE_STORE=redis`, supplies the safe MOT token URL, describes automatic token
-acquisition, and exposes the intentionally tunable provider settings.
-
-Several environment declarations currently disagree:
-
-- `config/legal.php` reads `LEGAL_CONTACT_EMAIL`; `.env.example` documents `LEGAL_SUPPORT_EMAIL`.
-- `.env.example` sets `CACHE_STORE=failover`; `ukapi:production:check` requires the default cache store to be exactly `redis` for Valkey.
-- `.env.example` defines `MOT_HISTORY_TOKEN_URL=` as an empty value, which can override the safe configured default with an unusable blank URL.
-- The MOT comment still implies an operator must rotate a configured access token even though the integration now obtains and caches tokens automatically.
-- Provider timeout/cache controls used by `config/ukapi.php` are only partially represented in `.env.example`.
-
-Work:
-
-- Choose one legal contact variable and migrate/document it consistently.
-- Decide whether production officially uses direct Valkey or the failover cache, then make `.env.example`, readiness checks, deployment guidance, and tests agree.
-- Remove the blank MOT token URL override or populate the documented default.
-- Rewrite MOT credential comments around automatic client-credential token acquisition.
-- Add the operator-tunable provider settings that are intentionally supported, without turning `.env.example` into an exhaustive Laravel reference.
-
-**Acceptance criteria:** A fresh environment copied from `.env.example` has internally consistent configuration, config caching succeeds, and the readiness command does not contradict the runbook.
-
-### P0.4 Close legal identity placeholders before treating production as complete
-
-**Code safeguards completed 25 October 2026; owner/legal input remains.**
-Bracketed defaults were removed, public and email footers omit inapplicable
-registration fields, legal contact details and update dates flow from one
-configuration source, and readiness rejects missing required identity/address
-values plus known placeholder patterns. Approved production identity, postal
-address, company/ICO applicability, retention wording, and owner/legal approval
-must still be supplied outside the repository before this item is complete.
-
-The tracked defaults still contain placeholders for legal name, company number, registered office, and ICO registration. Production may override them, but the repository cannot currently prove that.
-
-Work:
-
-- Confirm approved production values with the owner/legal adviser.
-- Keep sensitive or environment-specific values in Laravel Cloud variables where appropriate.
-- Add non-secret readiness validation that rejects known placeholder patterns.
-- Verify the website footer, policies, transactional email footer, contact addresses, and `LEGAL_LAST_UPDATED` are aligned.
-- Review the published retention wording against actual deletion, backup, billing, support, and security-log behaviour. Do not invent legal conclusions in code.
-
-**Acceptance criteria:** No production page or email can render bracketed legal placeholders, contact addresses agree, and the result has owner/legal approval.
-
-### P0.5 Commit the repository guidance
-
-`AGENTS.md`, `ROADMAP.md`, and the `.gitignore` exception are currently working-tree changes. They need a deliberate review and commit before other contributors can rely on them. Pushing remains a separate, explicit deployment-sensitive action.
-
-### P0.6 Split independent looped test cases into named datasets
-
-The suite already uses PHPUnit 12 `#[DataProvider]` attributes with named datasets in several places and currently contains no `assertEquals()` calls. A few tests still combine independent scenarios in one loop, which makes the first failure hide later cases.
-
-Initial refactor candidates:
-
-- `PublicPagesTest::test_public_product_pages_can_be_rendered`;
-- `PlanEntitlementsTest::test_the_feature_middleware_allows_only_the_plans_that_have_a_feature`;
-- `SicExportTest::test_only_scale_can_export_the_full_sic_reference`;
-- `NotificationTemplateTest::test_transactional_notifications_render_the_branded_ui_template`.
-
-Keep loops that construct one aggregate fixture, coordinate concurrency workers, parse one export, or assert invariants across one returned collection. Add useful assertion context when a collection member could otherwise be difficult to identify.
-
-**Acceptance criteria:** Each independent route, plan, and notification case appears as a named PHPUnit dataset in failure output, strict assertions remain the default, and the suite passes with risky tests configured as failures.
+The remaining legal launch prerequisite is not code-owned: approved legal entity,
+postal address, company-number applicability, ICO applicability, retention wording,
+and owner/legal sign-off must be supplied through the deployment environment and
+approval process. The readiness command intentionally keeps rejecting missing or
+placeholder values; no invented identity has been added to the repository.
 
 ## P1: Production operations and resilience
 
@@ -481,20 +392,13 @@ Continue to avoid microservices, Kafka, Kubernetes, Elasticsearch/OpenSearch, Gr
 
 ## Suggested execution order
 
-1. Restore formatting and CI parity.
-2. Reconcile environment/legal configuration and strengthen readiness checks.
-3. Add MOT health/status coverage.
-4. Queue notifications and verify Laravel Cloud worker/scheduler operation.
-5. Establish external uptime monitoring and complete a restore drill.
-6. Add MySQL CI and contract-parity tests.
-7. Remove duplicated plan/pricing truth.
-8. Add low-risk outcode, council, bank-holiday, working-day, and tax-year endpoints.
-9. Implement food hygiene.
-10. Expand observability, resilience, snapshots, and customer usage insight based on production data.
-11. Approach planning, broader exports, teams, SDKs, and new datasets only after licensing review and demand validation.
-
-
-## Additional Possible TODOs
-1. Create detailed admin panel for managing site details, pricing via stripe api if possible, seeing user limits
-2. In addition to the above, a marketing dashboard where marketing emails can be sent out, and effective ness viewed etc
-3. Reconcile environment/legal configuration and strengthen readiness checks.
+1. Supply and approve the production legal identity and retention values.
+2. Queue notifications and verify Laravel Cloud worker/scheduler operation.
+3. Establish external uptime monitoring and complete a restore drill.
+4. Add MySQL CI and contract-parity tests.
+5. Remove duplicated plan/pricing truth.
+6. Add low-risk outcode, council, bank-holiday, working-day, and tax-year endpoints.
+7. Implement food hygiene.
+8. Expand observability, resilience, snapshots, and customer usage insight based on production data.
+9. Improve admin operations and add a privacy-conscious marketing workflow only after the operational and legal foundations are approved.
+10. Approach planning, broader exports, teams, SDKs, and new datasets only after licensing review and demand validation.

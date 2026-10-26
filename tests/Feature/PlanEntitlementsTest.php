@@ -10,6 +10,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class PlanEntitlementsTest extends TestCase
@@ -35,8 +36,12 @@ class PlanEntitlementsTest extends TestCase
         $this->assertSame(100, $catalog->checkoutable('scale')['max_page_size']);
     }
 
-    public function test_the_feature_middleware_allows_only_the_plans_that_have_a_feature(): void
-    {
+    #[DataProvider('featurePlans')]
+    public function test_the_feature_middleware_allows_only_the_plans_that_have_a_feature(
+        string $plan,
+        ?string $stripePrice,
+        bool $allowed,
+    ): void {
         Route::middleware([
             AuthenticateApiKey::class,
             'ukapi.feature:historical_data',
@@ -47,33 +52,35 @@ class PlanEntitlementsTest extends TestCase
         config()->set('ukapi.paid_plans.pro.stripe_price', 'price_pro_matrix');
         config()->set('ukapi.paid_plans.scale.stripe_price', 'price_scale_matrix');
 
-        foreach ([
-            'free' => null,
-            'hobby' => 'price_hobby_matrix',
-            'pro' => 'price_pro_matrix',
-            'scale' => 'price_scale_matrix',
-        ] as $plan => $stripePrice) {
-            $user = User::factory()->create();
-            if ($stripePrice !== null) {
-                $user->subscriptions()->create([
-                    'type' => 'default',
-                    'stripe_id' => 'sub_'.$plan.'_matrix',
-                    'stripe_status' => 'active',
-                    'stripe_price' => $stripePrice,
-                ]);
-            }
-
-            [, $token] = $this->createApiKey($user);
-            $response = $this->getJson('/v1/test-plan-feature', [
-                'Authorization' => "Bearer {$token}",
+        $user = User::factory()->create();
+        if ($stripePrice !== null) {
+            $user->subscriptions()->create([
+                'type' => 'default',
+                'stripe_id' => 'sub_'.$plan.'_matrix',
+                'stripe_status' => 'active',
+                'stripe_price' => $stripePrice,
             ]);
-
-            $response->assertStatus($plan === 'free' || $plan === 'hobby' ? 403 : 200);
-            if ($plan === 'free' || $plan === 'hobby') {
-                $response->assertJsonPath('error.code', 'feature_not_available');
-                $response->assertJsonPath('error.details.feature', 'historical_data');
-            }
         }
+
+        [, $token] = $this->createApiKey($user);
+        $response = $this->getJson('/v1/test-plan-feature', [
+            'Authorization' => "Bearer {$token}",
+        ]);
+
+        $response->assertStatus($allowed ? 200 : 403);
+        if (! $allowed) {
+            $response->assertJsonPath('error.code', 'feature_not_available');
+            $response->assertJsonPath('error.details.feature', 'historical_data');
+        }
+    }
+
+    /** @return iterable<string, array{string, ?string, bool}> */
+    public static function featurePlans(): iterable
+    {
+        yield 'free plan is denied' => ['free', null, false];
+        yield 'hobby plan is denied' => ['hobby', 'price_hobby_matrix', false];
+        yield 'pro plan is allowed' => ['pro', 'price_pro_matrix', true];
+        yield 'scale plan is allowed' => ['scale', 'price_scale_matrix', true];
     }
 
     public function test_annual_prices_are_supported_without_changing_stable_plan_keys(): void

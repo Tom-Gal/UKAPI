@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class SicExportTest extends TestCase
@@ -44,20 +45,30 @@ class SicExportTest extends TestCase
         $this->get('/v1/sic/export')->assertUnauthorized()->assertJsonPath('error.code', 'invalid_api_key');
     }
 
-    public function test_only_scale_can_export_the_full_sic_reference(): void
+    #[DataProvider('exportPlans')]
+    public function test_only_scale_can_export_the_full_sic_reference(string $plan, bool $allowed): void
     {
-        foreach (['free', 'hobby', 'pro', 'scale'] as $plan) {
-            $response = $this->get('/v1/sic/export', $this->headersFor($plan));
+        $response = $this->get('/v1/sic/export', $this->headersFor($plan));
 
-            if ($plan === 'scale') {
-                $response->assertOk()->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
-                $this->assertCount(3, $this->parseCsv($response->getContent()));
-            } else {
-                $response->assertForbidden()
-                    ->assertJsonPath('error.code', 'feature_not_available')
-                    ->assertJsonPath('error.details.feature', 'bulk_export');
-            }
+        if ($allowed) {
+            $response->assertOk()->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
+            $this->assertCount(3, $this->parseCsv($response->getContent()));
+
+            return;
         }
+
+        $response->assertForbidden()
+            ->assertJsonPath('error.code', 'feature_not_available')
+            ->assertJsonPath('error.details.feature', 'bulk_export');
+    }
+
+    /** @return iterable<string, array{string, bool}> */
+    public static function exportPlans(): iterable
+    {
+        yield 'free plan is denied' => ['free', false];
+        yield 'hobby plan is denied' => ['hobby', false];
+        yield 'pro plan is denied' => ['pro', false];
+        yield 'scale plan is allowed' => ['scale', true];
     }
 
     public function test_csv_is_deterministic_and_identifies_its_immutable_payload_and_source(): void

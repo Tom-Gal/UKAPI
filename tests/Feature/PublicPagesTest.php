@@ -3,27 +3,31 @@
 namespace Tests\Feature;
 
 use App\Http\Middleware\HandleInertiaRequests;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class PublicPagesTest extends TestCase
 {
-    public function test_public_product_pages_can_be_rendered(): void
+    #[DataProvider('publicProductPages')]
+    public function test_public_product_page_can_be_rendered(string $routeName, array $parameters = []): void
     {
-        foreach ([
-            route('home'),
-            route('api-catalogue'),
-            route('pricing'),
-            route('docs'),
-            route('docs', ['section' => 'getting-started']),
-            route('status'),
-            route('terms'),
-            route('paid-plan-terms'),
-            route('privacy'),
-            route('acceptable-use'),
-            route('data-sources'),
-        ] as $url) {
-            $this->get($url)->assertOk();
-        }
+        $this->get(route($routeName, $parameters))->assertOk();
+    }
+
+    /** @return iterable<string, array{string, array<string, string>}> */
+    public static function publicProductPages(): iterable
+    {
+        yield 'home' => ['home', []];
+        yield 'api catalogue' => ['api-catalogue', []];
+        yield 'pricing' => ['pricing', []];
+        yield 'documentation' => ['docs', []];
+        yield 'documentation section' => ['docs', ['section' => 'getting-started']];
+        yield 'status' => ['status', []];
+        yield 'terms' => ['terms', []];
+        yield 'paid plan terms' => ['paid-plan-terms', []];
+        yield 'privacy' => ['privacy', []];
+        yield 'acceptable use' => ['acceptable-use', []];
+        yield 'data sources' => ['data-sources', []];
     }
 
     public function test_documentation_section_is_passed_to_the_inertia_page(): void

@@ -11,13 +11,15 @@ use App\Notifications\SubscriptionNotification;
 use App\Notifications\UsageLimitNotification;
 use App\Notifications\VerifyEmailNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class NotificationTemplateTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_transactional_notifications_render_the_branded_ui_template(): void
+    #[DataProvider('transactionalNotifications')]
+    public function test_transactional_notification_renders_the_branded_ui_template(string $notificationType): void
     {
         $user = User::factory()->create(['name' => 'Alex Smith']);
         $key = $user->apiKeys()->create([
@@ -26,28 +28,40 @@ class NotificationTemplateTest extends TestCase
             'name' => 'Local development',
             'environment' => 'test',
         ]);
-        $notifications = [
-            new VerifyEmailNotification,
-            new ResetPasswordNotification('test-reset-token'),
-            SecurityAlertNotification::twoFactorEnabled(),
-            SecurityAlertNotification::signedIn('203.0.113.42', 'Example Browser'),
-            new UsageLimitNotification(used: 4_000, limit: 5_000, percentage: 80, resetsAt: now()->addMonth()->timestamp),
-            ApiKeyActivityNotification::created($key),
-            ApiKeyActivityNotification::revoked($key),
-            new ApiKeyRotationReminderNotification([['name' => $key->name, 'environment' => 'Test', 'ageDays' => 90]]),
-            SubscriptionNotification::confirmed('Pro'),
-        ];
+        $notification = match ($notificationType) {
+            'verify email' => new VerifyEmailNotification,
+            'reset password' => new ResetPasswordNotification('test-reset-token'),
+            'two-factor enabled' => SecurityAlertNotification::twoFactorEnabled(),
+            'signed in' => SecurityAlertNotification::signedIn('203.0.113.42', 'Example Browser'),
+            'usage limit' => new UsageLimitNotification(used: 4_000, limit: 5_000, percentage: 80, resetsAt: now()->addMonth()->timestamp),
+            'API key created' => ApiKeyActivityNotification::created($key),
+            'API key revoked' => ApiKeyActivityNotification::revoked($key),
+            'API key rotation reminder' => new ApiKeyRotationReminderNotification([['name' => $key->name, 'environment' => 'Test', 'ageDays' => 90]]),
+            'subscription confirmed' => SubscriptionNotification::confirmed('Pro'),
+        };
 
-        foreach ($notifications as $notification) {
-            $html = $notification->toMail($user)->render();
+        $html = $notification->toMail($user)->render();
 
-            $this->assertStringContainsString('UKApi.co.uk', $html);
-            $this->assertStringContainsString('border-top:4px solid #2563c7', $html);
-            $this->assertStringContainsString('Alex Smith', $html);
-            $this->assertStringNotContainsString('[COMPANY NUMBER]', $html);
-            $this->assertStringNotContainsString('[REGISTERED OFFICE ADDRESS]', $html);
-            $this->assertStringNotContainsString('color-scheme" content="dark', $html);
-        }
+        $this->assertStringContainsString('UKApi.co.uk', $html);
+        $this->assertStringContainsString('border-top:4px solid #2563c7', $html);
+        $this->assertStringContainsString('Alex Smith', $html);
+        $this->assertStringNotContainsString('[COMPANY NUMBER]', $html);
+        $this->assertStringNotContainsString('[REGISTERED OFFICE ADDRESS]', $html);
+        $this->assertStringNotContainsString('color-scheme" content="dark', $html);
+    }
+
+    /** @return iterable<string, array{string}> */
+    public static function transactionalNotifications(): iterable
+    {
+        yield 'verify email' => ['verify email'];
+        yield 'reset password' => ['reset password'];
+        yield 'two-factor enabled' => ['two-factor enabled'];
+        yield 'signed in' => ['signed in'];
+        yield 'usage limit' => ['usage limit'];
+        yield 'API key created' => ['API key created'];
+        yield 'API key revoked' => ['API key revoked'];
+        yield 'API key rotation reminder' => ['API key rotation reminder'];
+        yield 'subscription confirmed' => ['subscription confirmed'];
     }
 
     public function test_transactional_footer_omits_non_applicable_registration_fields_without_placeholders(): void
