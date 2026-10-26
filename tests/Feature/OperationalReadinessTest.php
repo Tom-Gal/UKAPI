@@ -96,6 +96,65 @@ class OperationalReadinessTest extends TestCase
         }
     }
 
+    public function test_production_check_rejects_untracked_release_and_operational_configuration(): void
+    {
+        $mysql = config('database.connections.mysql');
+
+        try {
+            $this->configureProduction();
+            config()->set([
+                'app.version' => 'dev',
+                'cors.allowed_origins' => ['https://api.ukapi.co.uk'],
+                'health.enabled' => false,
+                'health.waived' => false,
+                'health.alerts.enabled' => false,
+                'health.alerts.waived' => false,
+                'ukapi.sic_reference.refresh_enabled' => true,
+                'ukapi.sic_reference.snapshot_path' => base_path('tests/Fixtures/missing-sic-directory/sic.json'),
+                'ukapi.operations.scheduler_enabled' => false,
+                'ukapi.operations.queue_worker_enabled' => false,
+                'queue.default' => 'database',
+            ]);
+
+            $this->artisan('ukapi:production:check')
+                ->expectsOutput('[missing] APP_VERSION: Set APP_VERSION to a deployed commit SHA or release identifier, not dev.')
+                ->expectsOutput('[missing] CORS and API hosts: Set UKAPI_API_URL and CORS_ALLOWED_ORIGINS to the HTTPS public web/API origins.')
+                ->expectsOutput('[missing] Health monitoring: Enable HEALTH_MONITORING_ENABLED or explicitly set HEALTH_MONITORING_WAIVED=true.')
+                ->expectsOutput('[missing] Operator alerts: Enable alerts with HEALTH_ALERT_EMAIL or explicitly set HEALTH_ALERTS_WAIVED=true.')
+                ->expectsOutput('[missing] SIC snapshot storage: Set SIC_REFERENCE_SNAPSHOT_PATH to an existing writable directory when refresh is enabled.')
+                ->expectsOutput('[missing] Laravel scheduler: Set UKAPI_SCHEDULER_ENABLED=true for the Laravel Cloud scheduler.')
+                ->expectsOutput('[missing] Queue worker expectation: Set UKAPI_QUEUE_WORKER_ENABLED to match QUEUE_CONNECTION and the Laravel Cloud worker.')
+                ->assertFailed();
+        } finally {
+            $this->restoreTestingConfiguration($mysql);
+        }
+    }
+
+    public function test_production_check_accepts_explicit_monitoring_alert_and_sync_queue_waivers(): void
+    {
+        $mysql = config('database.connections.mysql');
+
+        try {
+            $this->configureProduction();
+            config()->set([
+                'health.enabled' => false,
+                'health.waived' => true,
+                'health.alerts.enabled' => false,
+                'health.alerts.waived' => true,
+                'queue.default' => 'sync',
+                'ukapi.operations.queue_worker_enabled' => false,
+            ]);
+
+            $this->artisan('ukapi:production:check')
+                ->expectsOutput('[ok] Health monitoring')
+                ->expectsOutput('[ok] Operator alerts')
+                ->expectsOutput('[ok] Queue worker expectation')
+                ->assertSuccessful();
+        } finally {
+            $this->restoreTestingConfiguration($mysql);
+        }
+    }
+
     private function configureProduction(): void
     {
         $this->app['env'] = 'production';
@@ -103,6 +162,7 @@ class OperationalReadinessTest extends TestCase
             'app.debug' => false,
             'app.key' => 'base64:test-application-key',
             'app.url' => 'https://ukapi.co.uk',
+            'app.version' => 'release-2026-10-26',
             'session.secure' => true,
             'database.default' => 'mysql',
             // Exercise the production connection name without reaching a live
@@ -110,6 +170,17 @@ class OperationalReadinessTest extends TestCase
             'database.connections.mysql' => config('database.connections.sqlite'),
             'cache.default' => 'redis',
             'mail.default' => 'smtp',
+            'cors.allowed_origins' => ['https://ukapi.co.uk'],
+            'ukapi.api_url' => 'https://api.ukapi.co.uk',
+            'health.enabled' => true,
+            'health.waived' => false,
+            'health.alerts.enabled' => true,
+            'health.alerts.waived' => false,
+            'health.alerts.email' => 'alerts@ukapi.co.uk',
+            'ukapi.sic_reference.refresh_enabled' => false,
+            'ukapi.operations.scheduler_enabled' => true,
+            'ukapi.operations.queue_worker_enabled' => true,
+            'queue.default' => 'database',
             'legal.entity_name' => 'Approved Operator Name',
             'legal.registered_office' => '1 Example Street, London, SW1A 1AA',
             'legal.contact_email' => 'contact@ukapi.co.uk',

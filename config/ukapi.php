@@ -4,6 +4,21 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Public and operational hosts
+    |--------------------------------------------------------------------------
+    */
+
+    'api_url' => env('UKAPI_API_URL', 'https://api.ukapi.co.uk'),
+
+    'operations' => [
+        // These values make Laravel Cloud's scheduler and worker expectations
+        // explicit without trying to introspect host-level deployment state.
+        'scheduler_enabled' => (bool) env('UKAPI_SCHEDULER_ENABLED', false),
+        'queue_worker_enabled' => (bool) env('UKAPI_QUEUE_WORKER_ENABLED', false),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Outbound HTTP TLS
     |--------------------------------------------------------------------------
     |
@@ -294,6 +309,7 @@ return [
         'source_url' => env('SIC_REFERENCE_SOURCE_URL', 'https://resources.companieshouse.gov.uk/sic/'),
         'snapshot_path' => env('SIC_REFERENCE_SNAPSHOT_PATH', storage_path('app/reference/sic-2007.json')),
         'seed_snapshot_path' => resource_path('reference/sic-2007.json'),
+        'refresh_enabled' => (bool) env('SIC_REFERENCE_REFRESH_ENABLED', false),
         'cache_ttl_hours' => (int) env('SIC_REFERENCE_CACHE_TTL_HOURS', 24),
     ],
 

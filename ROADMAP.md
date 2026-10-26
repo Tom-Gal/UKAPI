@@ -72,25 +72,12 @@ Work:
 
 ### P1.2 Expand the production-readiness command
 
-Companies House credentials, MOT client credentials/API key/scope/token URL,
-and legal identity placeholder checks were added on 25 October 2026. The
-remaining release-identifier, CORS, monitoring/alert-waiver, SIC-storage, and
-scheduler/worker checks below are still open.
-
-Current checks cover core app, database/cache, mail, and Stripe configuration, but not all launch-critical product settings.
-
-Add safe checks for:
-
-- Companies House credentials present;
-- MOT client ID, client secret, and API key present;
-- legal placeholders resolved;
-- `APP_VERSION` set to a deploy identifier rather than `dev`;
-- CORS origins consistent with the public web/API hosts;
-- health monitoring and operator-alert configuration intentionally enabled or explicitly waived;
-- writable SIC snapshot storage when runtime refresh is enabled;
-- scheduler/worker expectations documented in a machine-checkable way where Laravel Cloud exposes them.
-
-Do not print secrets or make destructive/live provider calls unless `--probe` explicitly requests bounded probes.
+**Completed 26 October 2026.** The command now checks the existing provider,
+legal, database, cache, mail, and Stripe settings plus the release identifier,
+HTTPS web/API host and CORS alignment, health-monitoring and operator-alert
+enablement or explicit waivers, writable SIC refresh storage, and explicit
+Laravel Cloud scheduler/queue-worker expectations. It never prints credential
+values. `--probe` remains limited to bounded MySQL and Valkey connectivity checks.
 
 ### P1.3 Move non-critical notifications off web/API requests
 

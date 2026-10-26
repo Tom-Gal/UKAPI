@@ -16,9 +16,12 @@ reported data month and the local SIC retrieval age are displayed separately;
 other providers remain `unknown` for source freshness because their sampled
 responses do not expose a reliable publication date.
 
-Configure thresholds with the `HEALTH_*` variables in `.env.example`. To email
-an operator, set `HEALTH_ALERTS_ENABLED=true` and a valid
-`HEALTH_ALERT_EMAIL`. The default sends after two consecutive failures, repeats
+Configure thresholds with the `HEALTH_*` variables in `.env.example`. In
+production, set `HEALTH_MONITORING_ENABLED=true` or explicitly record a waiver
+with `HEALTH_MONITORING_WAIVED=true`. To email an operator, set
+`HEALTH_ALERTS_ENABLED=true` and a valid `HEALTH_ALERT_EMAIL`; otherwise set
+`HEALTH_ALERTS_WAIVED=true` and document the external alert owner. The default
+sends after two consecutive failures, repeats
 after six hours, and sends one recovery message. Alert state is durable in
 MySQL, so clearing cache does not duplicate an incident notification.
 

@@ -12,6 +12,7 @@ never in Git:
 
 - `APP_ENV=production`, `APP_DEBUG=false`, and `APP_URL` set to the final HTTPS origin.
 - A unique `APP_KEY`, plus a release identifier in `APP_VERSION` (normally the commit SHA).
+- Set `UKAPI_API_URL=https://api.ukapi.co.uk` and include the public web origin in `CORS_ALLOWED_ORIGINS`; both origins must be HTTPS in production.
 - Attach the Laravel Cloud MySQL resource. Cloud injects its connection credentials; the application default is `DB_CONNECTION=mysql`. Do not copy database passwords into Git or duplicate Cloud-managed credentials.
 - Valkey settings with `CACHE_STORE=redis`, a unique `CACHE_PREFIX`, and either `VALKEY_URL` or host/credential values. Laravel's Redis-compatible driver talks to Valkey through Predis. Production deliberately uses the shared store directly so rate limits and scheduler locks cannot fall back to process-local state. Monthly quotas use MySQL separately and never fall back to cache.
 - Mailtrap SMTP values: `MAIL_MAILER=smtp`, `MAIL_HOST=live.smtp.mailtrap.io`, `MAIL_PORT=587`, `MAIL_USERNAME=api`, and a `MAIL_PASSWORD` token in the Cloud secret manager. Set `MAIL_FROM_ADDRESS` to an address on a domain verified in Mailtrap; the local `log` mailer does not deliver verification or password-reset messages.
@@ -21,12 +22,14 @@ never in Git:
 - `COMPANIES_HOUSE_API_KEY` from the secret manager. The previously exposed credential must not be reused.
 - DVSA MOT History `MOT_HISTORY_CLIENT_ID`, `MOT_HISTORY_CLIENT_SECRET`, `MOT_HISTORY_API_KEY`, and the issued scope/token URLs. The application obtains and caches access tokens automatically; do not maintain a long-lived `MOT_HISTORY_ACCESS_TOKEN`.
 - Approved `LEGAL_ENTITY_NAME`, `LEGAL_REGISTERED_OFFICE`, and `LEGAL_CONTACT_EMAIL` values. Set `LEGAL_COMPANY_NUMBER` and `LEGAL_ICO_NUMBER` when applicable; otherwise leave them empty. The readiness command rejects blanks or known placeholders for the required identity fields.
+- Set `UKAPI_SCHEDULER_ENABLED=true` when Laravel Cloud's scheduler is enabled. Set `UKAPI_QUEUE_WORKER_ENABLED=true` when `QUEUE_CONNECTION` is `database` or `redis` and a Laravel Cloud queue worker is running; the readiness command permits `QUEUE_CONNECTION=sync` only when the worker flag is false and that choice is intentional.
 - Stripe secret-manager values: `STRIPE_KEY`, `STRIPE_SECRET`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_HOBBY`, `STRIPE_PRICE_PRO`, `STRIPE_PRICE_SCALE`, `STRIPE_PRICE_HOBBY_ANNUAL`, `STRIPE_PRICE_PRO_ANNUAL`, and `STRIPE_PRICE_SCALE_ANNUAL`. Use live-mode `pk_live_`, `sk_live_`, and `price_` values in production. Run `php artisan stripe:provision-plans` against the applicable Stripe mode to create the documented GBP monthly and annual prices. The command also synchronizes the durable local plan-price catalog, while existing Stripe price IDs remain valid for current subscriptions.
 - Create a Stripe webhook for `https://<your-domain>/stripe/webhook`. Subscribe it to Cashier's customer/subscription and invoice events, or run `php artisan cashier:webhook --url=https://<your-domain>/stripe/webhook` to create the complete Cashier event set. Store its signing secret as `STRIPE_WEBHOOK_SECRET`. The release readiness command rejects a production configuration without it.
 
-Keep `SIC_REFERENCE_SNAPSHOT_PATH` on writable persistent storage if the refresh
-command will run at runtime. A versioned SIC reference is bundled so first boot
-does not depend on an outbound request.
+Keep `SIC_REFERENCE_SNAPSHOT_PATH` on writable persistent storage and set
+`SIC_REFERENCE_REFRESH_ENABLED=true` if the refresh command will run at runtime.
+A versioned SIC reference is bundled so first boot does not depend on an
+outbound request.
 
 ## Release sequence
 
@@ -45,11 +48,14 @@ Restart any PHP workers after deploy. Create a Laravel Cloud queue worker when
 moving queued work off the request path, then include `php artisan queue:restart`
 as part of the release.
 
-Enable Laravel Cloud's Scheduler for the production environment. It runs the
+Enable Laravel Cloud's Scheduler for the production environment and set
+`UKAPI_SCHEDULER_ENABLED=true`. It runs the
 daily API-key rotation reminder, which sends customers a grouped reminder when
 an active key reaches 90 days and again no sooner than every 90 days.
 It also runs sampled service checks every five minutes and snapshot pruning
-daily. See `HEALTH_MONITORING.md` before enabling operator alerts.
+daily. See `HEALTH_MONITORING.md` before enabling operator alerts. If alerts are
+not enabled, set `HEALTH_ALERTS_WAIVED=true` and document the external alert
+owner.
 
 ## Operational checks
 
