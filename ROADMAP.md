@@ -492,3 +492,9 @@ Continue to avoid microservices, Kafka, Kubernetes, Elasticsearch/OpenSearch, Gr
 9. Implement food hygiene.
 10. Expand observability, resilience, snapshots, and customer usage insight based on production data.
 11. Approach planning, broader exports, teams, SDKs, and new datasets only after licensing review and demand validation.
+
+
+## Additional Possible TODOs
+1. Create detailed admin panel for managing site details, pricing via stripe api if possible, seeing user limits
+2. In addition to the above, a marketing dashboard where marketing emails can be sent out, and effective ness viewed etc
+3. Reconcile environment/legal configuration and strengthen readiness checks.
