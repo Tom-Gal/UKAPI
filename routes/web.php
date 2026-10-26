@@ -2,11 +2,13 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ApiKeyController;
+use App\Http\Controllers\ApiKeySecurityExportController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DashboardPageController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\PublicStatusController;
+use App\Http\Controllers\UsageExportController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -28,8 +30,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', DashboardController::class)->name('dashboard');
     Route::get('api-keys', [ApiKeyController::class, 'index'])->name('api-keys.index');
     Route::post('api-keys', [ApiKeyController::class, 'store'])->name('api-keys.store');
+    Route::get('api-keys/security-export.csv', ApiKeySecurityExportController::class)->name('api-keys.security-export');
+    Route::patch('api-keys/{apiKey}', [ApiKeyController::class, 'update'])->name('api-keys.update');
+    Route::post('api-keys/{apiKey}/rotate', [ApiKeyController::class, 'rotate'])->name('api-keys.rotate');
     Route::delete('api-keys/{apiKey}', [ApiKeyController::class, 'destroy'])->name('api-keys.destroy');
     Route::get('usage', [DashboardPageController::class, 'usage'])->name('usage');
+    Route::get('usage/export.csv', UsageExportController::class)->name('usage.export');
     Route::get('billing', [DashboardPageController::class, 'billing'])->name('billing');
     Route::post('billing/checkout', [BillingController::class, 'checkout'])->name('billing.checkout');
     Route::post('billing/portal', [BillingController::class, 'portal'])->name('billing.portal');

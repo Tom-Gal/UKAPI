@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Domain\Usage\Entitlements;
+use App\Domain\Usage\UsageMeter;
 use App\Models\ApiKey;
 use App\Support\Api\ApiException;
 use Closure;
@@ -12,7 +13,10 @@ use Symfony\Component\HttpFoundation\Response;
 
 class EnforceApiRateLimit
 {
-    public function __construct(private readonly Entitlements $entitlements) {}
+    public function __construct(
+        private readonly Entitlements $entitlements,
+        private readonly UsageMeter $usageMeter,
+    ) {}
 
     /**
      * @param  Closure(Request): Response  $next
@@ -32,6 +36,12 @@ class EnforceApiRateLimit
         $rateLimitKey = sprintf('ukapi:rate:%d:%s', $apiKey->id, now()->format('YmdHis'));
 
         if (RateLimiter::tooManyAttempts($rateLimitKey, $limit)) {
+            try {
+                $this->usageMeter->recordRejection($apiKey->user_id, 'rate_limit');
+            } catch (\Throwable $exception) {
+                report($exception);
+            }
+
             throw ApiException::rateLimitExceeded(
                 retryAfter: max(1, RateLimiter::availableIn($rateLimitKey)),
                 limit: $limit,

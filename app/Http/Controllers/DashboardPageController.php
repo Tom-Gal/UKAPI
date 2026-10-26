@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Domain\Billing\PlanCatalog;
 use App\Domain\Billing\StripeSubscriptionSynchronizer;
 use App\Domain\Usage\Entitlements;
+use App\Domain\Usage\UsageInsights;
 use App\Domain\Usage\UsageMeter;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -19,6 +20,7 @@ class DashboardPageController extends Controller
         Request $request,
         Entitlements $entitlements,
         UsageMeter $usageMeter,
+        UsageInsights $usageInsights,
     ): Response {
         $user = $request->user();
         $subscription = $user->subscription('default');
@@ -29,6 +31,11 @@ class DashboardPageController extends Controller
             'monthlyQuota' => $plan['monthly_request_quota'],
             'breakdown' => $usageMeter->currentMonthlyBreakdownForUser($user->id),
             'plan' => $plan,
+            'insights' => $usageInsights->forUser(
+                userId: $user->id,
+                quota: $plan['monthly_request_quota'],
+                planKey: $plan['key'],
+            ),
             'cancelledPlanEndsAt' => $subscription?->onGracePeriod()
                 ? $subscription->ends_at?->format('j M Y')
                 : null,

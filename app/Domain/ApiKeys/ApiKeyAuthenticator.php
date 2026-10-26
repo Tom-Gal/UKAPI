@@ -21,15 +21,13 @@ final class ApiKeyAuthenticator
             throw ApiException::invalidApiKey();
         }
 
-        if ($apiKey->status === 'revoked') {
+        if ($apiKey->status === 'revoked' || $apiKey->expires_at?->isPast()) {
             throw ApiException::revokedApiKey();
         }
 
         if ($apiKey->status !== 'active') {
             throw ApiException::invalidApiKey();
         }
-
-        $apiKey->forceFill(['last_used_at' => now()])->saveQuietly();
 
         return $apiKey;
     }

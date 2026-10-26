@@ -38,6 +38,25 @@ final class ApiException extends RuntimeException
         );
     }
 
+    public static function apiKeyScopeForbidden(string $family): self
+    {
+        return new self(
+            apiCode: 'api_key_scope_forbidden',
+            message: 'This API key is not authorised for the requested endpoint family.',
+            status: 403,
+            details: ['endpoint_family' => $family],
+        );
+    }
+
+    public static function apiKeyIpNotAllowed(): self
+    {
+        return new self(
+            apiCode: 'api_key_ip_not_allowed',
+            message: 'This API key cannot be used from the current network address.',
+            status: 403,
+        );
+    }
+
     public static function rateLimitExceeded(int $retryAfter, int $limit): self
     {
         return new self(

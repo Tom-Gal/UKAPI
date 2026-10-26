@@ -81,7 +81,7 @@ return [
             'monthly_request_quota' => 250_000,
             'burst_requests_per_second' => 25,
             'max_page_size' => 100,
-            'features' => ['current_data', 'historical_data', 'change_feeds', 'commercial_use'],
+            'features' => ['current_data', 'historical_data', 'change_feeds', 'commercial_use', 'ip_allow_lists'],
             'commercial_use' => true,
         ],
         'scale' => [
@@ -94,7 +94,7 @@ return [
             'monthly_request_quota' => 1_000_000,
             'burst_requests_per_second' => 50,
             'max_page_size' => 100,
-            'features' => ['current_data', 'historical_data', 'change_feeds', 'commercial_use', 'bulk_export'],
+            'features' => ['current_data', 'historical_data', 'change_feeds', 'commercial_use', 'bulk_export', 'ip_allow_lists'],
             'commercial_use' => true,
         ],
     ],
@@ -161,12 +161,34 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | API key endpoint-family scopes
+    |--------------------------------------------------------------------------
+    |
+    | Scopes use stable endpoint codes only. A null key scope means all current
+    | and future endpoint families, which preserves existing-key behaviour.
+    |
+    */
+
+    'api_endpoint_families' => [
+        'vat' => ['label' => 'VAT utilities', 'endpoint_prefixes' => ['vat.']],
+        'mot' => ['label' => 'MOT history', 'endpoint_prefixes' => ['mot.']],
+        'companies' => ['label' => 'Companies House', 'endpoint_prefixes' => ['companies.']],
+        'sic' => ['label' => 'SIC reference', 'endpoint_prefixes' => ['sic.']],
+        'crime' => ['label' => 'Police and crime', 'endpoint_prefixes' => ['crime.']],
+        'flood' => ['label' => 'Flood monitoring', 'endpoint_prefixes' => ['flood.']],
+        'geography' => ['label' => 'Postcodes and coordinates', 'endpoint_prefixes' => ['postcodes.', 'coordinates.']],
+    ],
+
+    'api_key_rotation_max_overlap_hours' => 24,
+
+    /*
+    |--------------------------------------------------------------------------
     | Usage notification thresholds
     |--------------------------------------------------------------------------
     |
     | A single alert is sent for each configured percentage in a calendar
-    | month. The notification is deduplicated in Valkey alongside the usage
-    | counters, so multiple API keys cannot produce duplicate account mail.
+    | month. The notification claim is stored durably in the primary database,
+    | so multiple API keys cannot produce duplicate account mail.
     |
     */
 

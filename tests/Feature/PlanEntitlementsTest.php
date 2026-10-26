@@ -24,8 +24,8 @@ class PlanEntitlementsTest extends TestCase
         $this->assertSame([
             'free' => ['current_data'],
             'hobby' => ['current_data'],
-            'pro' => ['current_data', 'historical_data', 'change_feeds', 'commercial_use'],
-            'scale' => ['current_data', 'historical_data', 'change_feeds', 'commercial_use', 'bulk_export'],
+            'pro' => ['current_data', 'historical_data', 'change_feeds', 'commercial_use', 'ip_allow_lists'],
+            'scale' => ['current_data', 'historical_data', 'change_feeds', 'commercial_use', 'bulk_export', 'ip_allow_lists'],
         ], collect([$catalog->free(), ...$catalog->paid()])
             ->mapWithKeys(fn (array $plan): array => [$plan['key'] => $plan['features']])
             ->all());

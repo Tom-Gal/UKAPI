@@ -16,7 +16,9 @@ class DashboardController extends Controller
         UsageMeter $usageMeter,
     ): Response {
         $user = $request->user();
-        $activeKeys = $user->apiKeys()->where('status', 'active')->count();
+        $activeKeys = $user->apiKeys()->where('status', 'active')
+            ->where(fn ($query) => $query->whereNull('expires_at')->orWhere('expires_at', '>', now()))
+            ->count();
         $plan = $entitlements->forUser($user);
 
         return Inertia::render('dashboard', [

@@ -11,7 +11,13 @@ class ApiKeyAuditEvent extends Model
         'actor_user_id',
         'action',
         'request_id',
+        'details',
     ];
+
+    protected function casts(): array
+    {
+        return ['details' => 'array'];
+    }
 
     /** @return BelongsTo<ApiKey, $this> */
     public function apiKey(): BelongsTo

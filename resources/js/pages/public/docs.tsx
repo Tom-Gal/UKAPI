@@ -138,9 +138,10 @@ Accept: application/json`}
                                 />
                                 <div className="grid gap-8 border-t border-slate-300 pt-6 sm:grid-cols-2">
                                     <Info title="Test keys">
-                                        Use while developing and testing. Keep
-                                        them in an environment variable or
-                                        secret manager.
+                                        An operational label for development
+                                        deployments. Test keys currently use the
+                                        same data, limits and billing as live
+                                        keys; they are not a sandbox.
                                     </Info>
                                     <Info title="Live keys">
                                         Use only in production. Create a
@@ -152,6 +153,14 @@ Accept: application/json`}
                                     Test and live keys share the same account
                                     quota. Creating or rotating a key does not
                                     create a separate allowance.
+                                </p>
+                                <p className="mt-6 leading-7 text-slate-600">
+                                    You can restrict a key to selected endpoint
+                                    families. Pro and Scale plans can also set
+                                    IPv4, IPv6 or CIDR allow lists. Rotation
+                                    creates a replacement secret and can keep
+                                    the old key valid for a controlled overlap
+                                    of up to 24 hours.
                                 </p>
                                 <p className="mt-6 leading-7 text-slate-600">
                                     A missing, revoked or malformed key returns{' '}
@@ -235,6 +244,16 @@ Accept: application/json`}
                                                 status="401"
                                                 code="invalid_api_key"
                                                 action="Check that the key is active and sent as a Bearer token."
+                                            />
+                                            <ErrorRow
+                                                status="403"
+                                                code="api_key_scope_forbidden"
+                                                action="Use a key authorised for this endpoint family or update its policy."
+                                            />
+                                            <ErrorRow
+                                                status="403"
+                                                code="api_key_ip_not_allowed"
+                                                action="Send the request from an allowed network or update the key policy."
                                             />
                                             <ErrorRow
                                                 status="404"

@@ -52,6 +52,12 @@ class EnforceMonthlyQuota
         }
 
         if ($usage === null) {
+            try {
+                $this->usageMeter->recordRejection($apiKey->user_id, 'quota', $admittedAt);
+            } catch (\Throwable $exception) {
+                report($exception);
+            }
+
             throw ApiException::quotaExceeded($quota, $resetAt);
         }
 

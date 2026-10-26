@@ -9,6 +9,10 @@ info:
         is a correlation identifier; it does not deduplicate requests or usage accounting.
         Monthly request quotas are hard limits shared by all API keys on an account,
         measured in UTC calendar months and reset at 00:00 UTC on the first day of each month.
+        API keys may be restricted to endpoint families or allowed IP/CIDR ranges. A valid
+        key that does not permit a request receives HTTP 403 with error.code
+        api_key_scope_forbidden or api_key_ip_not_allowed. Test and live prefixes are
+        operational labels and currently use the same data, limits, and billing.
         When durable usage accounting is unavailable, requests fail closed with HTTP 503
         and error.code usage_unavailable; no dataset is returned. Error responses use JSON,
         including for CSV downloads.
@@ -50,6 +54,8 @@ paths:
                                 $ref: '#/components/schemas/SuccessEnvelope'
                 '401':
                     $ref: '#/components/responses/InvalidApiKey'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/NotFound'
                 '422':
@@ -74,6 +80,8 @@ paths:
                                 $ref: '#/components/schemas/SuccessEnvelope'
                 '401':
                     $ref: '#/components/responses/InvalidApiKey'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/NotFound'
                 '422':
@@ -99,6 +107,8 @@ paths:
                                 $ref: '#/components/schemas/SuccessEnvelope'
                 '401':
                     $ref: '#/components/responses/InvalidApiKey'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '422':
                     $ref: '#/components/responses/InvalidParameter'
                 '429':
@@ -120,6 +130,8 @@ paths:
                                 $ref: '#/components/schemas/SuccessEnvelope'
                 '401':
                     $ref: '#/components/responses/InvalidApiKey'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '422':
                     $ref: '#/components/responses/InvalidParameter'
                 '429':
@@ -140,6 +152,8 @@ paths:
                                 $ref: '#/components/schemas/PostcodeEnvelope'
                 '401':
                     $ref: '#/components/responses/InvalidApiKey'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/NotFound'
                 '422':
@@ -164,6 +178,8 @@ paths:
                                 $ref: '#/components/schemas/PostcodeValidationEnvelope'
                 '401':
                     $ref: '#/components/responses/InvalidApiKey'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '422':
                     $ref: '#/components/responses/InvalidParameter'
                 '429':
@@ -188,6 +204,8 @@ paths:
                                 $ref: '#/components/schemas/NearbyPostcodesEnvelope'
                 '401':
                     $ref: '#/components/responses/InvalidApiKey'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/NotFound'
                 '422':
@@ -213,6 +231,8 @@ paths:
                                 $ref: '#/components/schemas/PostcodeEnvelope'
                 '401':
                     $ref: '#/components/responses/InvalidApiKey'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/NotFound'
                 '422':
@@ -237,6 +257,8 @@ paths:
                                 $ref: '#/components/schemas/CompanyProfileEnvelope'
                 '401':
                     $ref: '#/components/responses/InvalidApiKey'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/NotFound'
                 '422':
@@ -265,6 +287,8 @@ paths:
                                 $ref: '#/components/schemas/CompanySearchEnvelope'
                 '401':
                     $ref: '#/components/responses/InvalidApiKey'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '422':
                     $ref: '#/components/responses/InvalidParameter'
                 '429':
@@ -291,6 +315,8 @@ paths:
                                 $ref: '#/components/schemas/CompanyOfficersEnvelope'
                 '401':
                     $ref: '#/components/responses/InvalidApiKey'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/NotFound'
                 '422':
@@ -320,6 +346,8 @@ paths:
                                 $ref: '#/components/schemas/CompanyFilingsEnvelope'
                 '401':
                     $ref: '#/components/responses/InvalidApiKey'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/NotFound'
                 '422':
@@ -348,6 +376,8 @@ paths:
                                 $ref: '#/components/schemas/SicSearchEnvelope'
                 '401':
                     $ref: '#/components/responses/InvalidApiKey'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '422':
                     $ref: '#/components/responses/InvalidParameter'
                 '429':
@@ -370,6 +400,8 @@ paths:
                                 $ref: '#/components/schemas/SicEnvelope'
                 '401':
                     $ref: '#/components/responses/InvalidApiKey'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/NotFound'
                 '422':
@@ -397,7 +429,7 @@ paths:
                 '401':
                     $ref: '#/components/responses/InvalidApiKey'
                 '403':
-                    $ref: '#/components/responses/FeatureUnavailable'
+                    $ref: '#/components/responses/Forbidden'
                 '422':
                     $ref: '#/components/responses/InvalidParameter'
                 '429':
@@ -457,7 +489,7 @@ paths:
                 '401':
                     $ref: '#/components/responses/InvalidApiKey'
                 '403':
-                    $ref: '#/components/responses/FeatureUnavailable'
+                    $ref: '#/components/responses/Forbidden'
                 '422':
                     $ref: '#/components/responses/InvalidParameter'
                 '429':
@@ -495,6 +527,8 @@ paths:
                                 $ref: '#/components/schemas/CrimeNearbyEnvelope'
                 '401':
                     $ref: '#/components/responses/InvalidApiKey'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/NotFound'
                 '422':
@@ -523,6 +557,8 @@ paths:
                                 $ref: '#/components/schemas/CrimeSummaryEnvelope'
                 '401':
                     $ref: '#/components/responses/InvalidApiKey'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/NotFound'
                 '422':
@@ -549,6 +585,8 @@ paths:
                                 $ref: '#/components/schemas/CrimeCategoriesEnvelope'
                 '401':
                     $ref: '#/components/responses/InvalidApiKey'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '422':
                     $ref: '#/components/responses/InvalidParameter'
                 '429':
@@ -580,7 +618,7 @@ paths:
                 '401':
                     $ref: '#/components/responses/InvalidApiKey'
                 '403':
-                    $ref: '#/components/responses/FeatureUnavailable'
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/NotFound'
                 '422':
@@ -606,6 +644,8 @@ paths:
                                 $ref: '#/components/schemas/FloodWarningsEnvelope'
                 '401':
                     $ref: '#/components/responses/InvalidApiKey'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '429':
                     $ref: '#/components/responses/RateLimited'
                 '502':
@@ -629,6 +669,8 @@ paths:
                                 $ref: '#/components/schemas/FloodNearbyEnvelope'
                 '401':
                     $ref: '#/components/responses/InvalidApiKey'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/NotFound'
                 '422':
@@ -656,6 +698,8 @@ paths:
                                 $ref: '#/components/schemas/FloodStationsEnvelope'
                 '401':
                     $ref: '#/components/responses/InvalidApiKey'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/NotFound'
                 '422':
@@ -682,6 +726,8 @@ paths:
                                 $ref: '#/components/schemas/FloodReadingsEnvelope'
                 '401':
                     $ref: '#/components/responses/InvalidApiKey'
+                '403':
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/NotFound'
                 '422':
@@ -712,7 +758,7 @@ paths:
                 '401':
                     $ref: '#/components/responses/InvalidApiKey'
                 '403':
-                    $ref: '#/components/responses/FeatureUnavailable'
+                    $ref: '#/components/responses/Forbidden'
                 '404':
                     $ref: '#/components/responses/NotFound'
                 '422':
@@ -943,8 +989,8 @@ components:
                 application/json:
                     schema:
                         $ref: '#/components/schemas/ErrorEnvelope'
-        FeatureUnavailable:
-            description: The requested feature is not included in the current plan.
+        Forbidden:
+            description: The requested feature is not included in the current plan, or the API key scope/IP policy does not permit the request.
             content:
                 application/json:
                     schema:

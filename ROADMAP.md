@@ -51,33 +51,6 @@ placeholder values; no invented identity has been added to the repository.
 
 ## P1: Production operations and resilience
 
-### P1.1 Add MOT to health, status, and admin provider visibility
-
-**Completed 25 October 2026.** The scheduled monitor now performs a bounded
-OAuth and authenticated DVSA sample, shares the customer provider budget,
-persists safe failure categories, and feeds public status, admin visibility,
-operator alerts, and focused fixture-backed tests without retaining secrets or
-provider bodies.
-
-**Why:** MOT endpoints are live, but `HealthStatus::SERVICES`, `HealthProbe`, and the admin provider list cover Postcodes.io, Police.uk, Environment Agency, Companies House, and SIC only.
-
-Work:
-
-- Add a bounded DVSA configuration/token/API probe that does not expose or persist token bodies.
-- Share the provider budget and avoid using customer quota.
-- Distinguish missing configuration, rejected credentials, token failure, API failure, and stale measurement safely.
-- Add MOT to `/status`, admin provider visibility, operator alerts, fixtures/fakes, and health tests.
-
-**Acceptance criteria:** A bad MOT credential is visible as a controlled provider failure before customers discover it, with no secret leakage.
-
-### P1.2 Expand the production-readiness command
-
-**Completed 26 October 2026.** The command now checks the existing provider,
-legal, database, cache, mail, and Stripe settings plus the release identifier,
-HTTPS web/API host and CORS alignment, health-monitoring and operator-alert
-enablement or explicit waivers, writable SIC refresh storage, and explicit
-Laravel Cloud scheduler/queue-worker expectations. It never prints credential
-values. `--probe` remains limited to bounded MySQL and Valkey connectivity checks.
 
 ### P1.3 Move non-critical notifications off web/API requests
 
@@ -278,32 +251,6 @@ SIC CSV export is the existing pattern. Before adding other exports:
 - consider queued generation and expiring signed downloads for genuinely large data.
 
 ## P2: Customer and operator experience
-
-### P2.6 Improve usage insight without request logging
-
-The usage page currently shows monthly total and per-endpoint aggregate counts. Useful additions that preserve the privacy model:
-
-- daily usage trend;
-- plan/quota projection;
-- rate-limit and quota rejection counts;
-- previous-month comparison;
-- downloadable aggregate CSV;
-- clearer upgrade prompts at notification thresholds.
-
-Do not add raw request payload, bearer-key, arbitrary query, or sensitive response logging.
-
-### P2.7 Mature API-key management
-
-Potential improvements:
-
-- user-initiated key rotation that creates a replacement and supports a short controlled overlap;
-- optional endpoint-family scopes;
-- last-used endpoint family and approximate timestamp, without payload logging;
-- optional IP allow lists for advanced plans;
-- clearer test/live key semantics if the environments gain behavioural differences;
-- audit-event display and security export.
-
-Each feature needs a migration path for existing keys and must preserve one-time secret display.
 
 ### P2.8 Improve admin operations
 
