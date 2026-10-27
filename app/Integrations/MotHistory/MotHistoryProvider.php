@@ -2,6 +2,7 @@
 
 namespace App\Integrations\MotHistory;
 
+use App\Domain\Mot\MotVehicleData;
 use App\Integrations\Contracts\MotHistoryProvider as MotHistoryProviderContract;
 use App\Support\Api\ApiException;
 use Illuminate\Http\Client\ConnectionException;
@@ -12,18 +13,17 @@ use Illuminate\Support\Facades\RateLimiter;
 
 final class MotHistoryProvider implements MotHistoryProviderContract
 {
-    public function byRegistration(string $registration): array
+    public function byRegistration(string $registration): MotVehicleData
     {
         return $this->get('v1/trade/vehicles/registration/'.rawurlencode($registration));
     }
 
-    public function byVin(string $vin): array
+    public function byVin(string $vin): MotVehicleData
     {
         return $this->get('v1/trade/vehicles/vin/'.rawurlencode($vin));
     }
 
-    /** @return array<string, mixed> */
-    private function get(string $path): array
+    private function get(string $path): MotVehicleData
     {
         $this->reserveProviderCapacity();
 
@@ -55,7 +55,11 @@ final class MotHistoryProvider implements MotHistoryProviderContract
             throw ApiException::providerInvalidResponse();
         }
 
-        return $payload;
+        try {
+            return MotVehicleData::fromArray($payload);
+        } catch (\InvalidArgumentException) {
+            throw ApiException::providerInvalidResponse();
+        }
     }
 
     private function reserveProviderCapacity(): void

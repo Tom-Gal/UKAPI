@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AdminIncidentController;
+use App\Http\Controllers\AdminSupportActionController;
 use App\Http\Controllers\ApiKeyController;
 use App\Http\Controllers\ApiKeySecurityExportController;
 use App\Http\Controllers\BillingController;
@@ -45,6 +47,12 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     Route::get('/', [AdminController::class, 'overview'])->name('overview');
     Route::get('/users', [AdminController::class, 'users'])->name('users');
     Route::get('/providers', [AdminController::class, 'providers'])->name('providers');
+    Route::get('/operations', [AdminController::class, 'operations'])->name('operations');
+    Route::post('/incidents/{incident}/acknowledge', [AdminIncidentController::class, 'acknowledge'])
+        ->name('incidents.acknowledge');
+    Route::post('/api-keys/{apiKey}/revoke', [AdminSupportActionController::class, 'revokeApiKey'])
+        ->middleware('password.confirm')
+        ->name('api-keys.revoke');
 });
 
 require __DIR__.'/settings.php';

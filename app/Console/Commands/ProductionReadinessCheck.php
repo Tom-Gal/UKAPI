@@ -43,6 +43,7 @@ final class ProductionReadinessCheck extends Command
             ['SIC snapshot storage', $this->sicSnapshotStorageIsReady(), 'Set SIC_REFERENCE_SNAPSHOT_PATH to an existing writable directory when refresh is enabled.'],
             ['Laravel scheduler', (bool) config('ukapi.operations.scheduler_enabled'), 'Set UKAPI_SCHEDULER_ENABLED=true for the Laravel Cloud scheduler.'],
             ['Queue worker expectation', $this->queueWorkerExpectationIsConsistent(), 'Set UKAPI_QUEUE_WORKER_ENABLED to match QUEUE_CONNECTION and the Laravel Cloud worker.'],
+            ['Queue failure monitoring', $this->queueMonitorIsConfigured(), 'Enable UKAPI_QUEUE_MONITOR_ENABLED with HEALTH_ALERT_EMAIL, or explicitly waive it.'],
             ['Stripe secret key', filled(config('cashier.secret')), 'Set STRIPE_SECRET in the secret manager.'],
             ['Stripe publishable key', filled(config('cashier.key')), 'Set STRIPE_KEY in the secret manager.'],
             ['Stripe webhook secret', filled(config('cashier.webhook.secret')), 'Create the Stripe webhook and set STRIPE_WEBHOOK_SECRET.'],
@@ -179,6 +180,18 @@ final class ProductionReadinessCheck extends Command
         }
 
         return $workerEnabled && in_array($connection, ['database', 'redis'], true);
+    }
+
+    private function queueMonitorIsConfigured(): bool
+    {
+        if ((bool) config('ukapi.operations.queue_monitor.enabled')) {
+            return config('queue.default') === 'database'
+                && filter_var(config('health.alerts.email'), FILTER_VALIDATE_EMAIL) !== false
+                && (int) config('ukapi.operations.queue_monitor.max_pending') >= 0
+                && (int) config('ukapi.operations.queue_monitor.max_oldest_seconds') > 0;
+        }
+
+        return (bool) config('ukapi.operations.queue_monitor.waived');
     }
 
     private function probeDependencies(Repository $cache): bool

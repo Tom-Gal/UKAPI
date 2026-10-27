@@ -3,13 +3,14 @@
 namespace App\Notifications;
 
 use App\Models\User;
-use Illuminate\Bus\Queueable;
+use App\Notifications\Concerns\QueuesMail;
+use Illuminate\Contracts\Queue\ShouldQueueAfterCommit;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-final class ApiKeyRotationReminderNotification extends Notification
+final class ApiKeyRotationReminderNotification extends Notification implements ShouldQueueAfterCommit
 {
-    use Queueable;
+    use QueuesMail;
 
     /** @param list<array{name: string, environment: string, ageDays: int}> $keys */
     public function __construct(private readonly array $keys) {}

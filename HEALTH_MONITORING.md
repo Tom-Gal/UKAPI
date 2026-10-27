@@ -25,11 +25,72 @@ sends after two consecutive failures, repeats
 after six hours, and sends one recovery message. Alert state is durable in
 MySQL, so clearing cache does not duplicate an incident notification.
 
-Use an independent external monitor for `/up`, `/ready`, `/status`, and the
-scheduler heartbeat. In-process monitoring cannot notify anyone when the whole
-application, scheduler, database, cache, network or mail transport is down.
+## Independent synthetic monitoring
+
+`.github/workflows/production-monitor.yml` runs outside Laravel Cloud every five
+minutes. It checks the public website, `/up`, `/ready`, OpenAPI, `/login`,
+`/register`, and one authenticated postcode request. Each target must fail or
+exceed its latency threshold repeatedly before the workflow fails. A sustained
+failure opens one GitHub incident issue; a later successful run closes it.
+
+Configure these repository settings before enabling the workflow:
+
+- secret `SYNTHETIC_API_KEY`: a dedicated Free-account test key scoped only to
+  the `geography` endpoint family. Never reuse a customer or operator key and do
+  not place the value in repository variables, workflow output or issue text;
+- optional variables `SYNTHETIC_WEB_BASE_URL` and `SYNTHETIC_API_BASE_URL` when
+  testing a non-production environment;
+- optional latency variables `SYNTHETIC_PUBLIC_MAX_MS`,
+  `SYNTHETIC_DEPENDENCY_MAX_MS` and `SYNTHETIC_API_MAX_MS` when production
+  evidence justifies thresholds different from 2500, 3500 and 6000 ms;
+- GitHub Actions failure notifications for the on-call repository owners. The
+  repository must have Issues enabled so the workflow can maintain its single
+  incident issue.
+
+The synthetic account must have no billing role, no administrator privileges,
+one active test key, and no other credentials. Its quota is intentionally small.
+Rotate the key through the normal API-key screen and update only the encrypted
+GitHub secret. GitHub-hosted runner addresses are not stable, so do not add an IP
+allow list unless the monitor is moved to a runner with a controlled egress IP.
+
+This monitor is independent of the application and Laravel Cloud scheduler, but
+GitHub Actions is not an SLA monitoring vendor. If contractual paging or
+multi-channel escalation is required, reproduce the same checks in the chosen
+external uptime service and keep this workflow as a second path.
+
 Provider probes consume the same provider request budgets as customer traffic;
 keep their frequency within source terms and published limits.
+
+## Queue and failed-job monitoring
+
+`ukapi:queue:monitor` runs every five minutes and watches the database-backed
+mail queue. It reports a degraded queue when any failed job exists, more than
+`UKAPI_QUEUE_MONITOR_MAX_PENDING` jobs are waiting, or the oldest job exceeds
+`UKAPI_QUEUE_MONITOR_MAX_OLDEST_SECONDS`. Repeated alerts are limited by
+`UKAPI_QUEUE_MONITOR_REPEAT_AFTER_MINUTES`, and one recovery alert is sent.
+
+The queue alarm is the only synchronous application email. It runs from the
+scheduler, never a web or API request, and deliberately bypasses the unhealthy
+queue. Laravel Cloud worker logs and the admin Operations page provide the job
+details. Do not include serialized job payloads in incident tickets because they
+can contain mail content and customer identifiers.
+
+## Incident ownership and response
+
+- Primary application/provider and queue contact: the approved address in
+  `HEALTH_ALERT_EMAIL`.
+- Infrastructure contact: the production environment owners in the Laravel
+  Cloud organisation. Enable Cloud email or Slack notifications for resource,
+  cluster, failed deployment and failed command events.
+- Independent monitor record: the open GitHub issue named
+  `[monitor] Production synthetic checks failing` and its linked workflow run.
+- Recovery procedure and database escalation: `RECOVERY.md`.
+
+For an incident, acknowledge it in the admin Operations page, inspect the
+independent monitor and Laravel Cloud logs/metrics, decide whether the failure is
+application, queue, MySQL, Valkey, mail or upstream-provider owned, and record a
+safe note. Never paste secrets, authorization headers, provider bodies, queue
+payloads or personal data into GitHub issues or acknowledgement notes.
 
 MOT failures are classified without retaining response bodies or secrets:
 incomplete configuration, rejected credentials, token-service failure, invalid
@@ -45,4 +106,8 @@ Before launch, verify:
    the scheduler is stopped for longer than `HEALTH_STALE_AFTER_SECONDS`.
 3. A test failure reaches the operator after the configured threshold and a
    later successful check sends recovery.
-4. The external monitor alerts independently when the app or scheduler stops.
+4. The production synthetic workflow fails only after repeated errors or latency
+   breaches, opens one issue, and closes it after recovery.
+5. A deliberately stopped Laravel Cloud worker causes the queue monitor to alert
+   once the oldest-job threshold is crossed; restarting it sends recovery after
+   the backlog drains.

@@ -2,11 +2,15 @@
 
 namespace App\Notifications;
 
+use App\Notifications\Concerns\QueuesMail;
 use Illuminate\Auth\Notifications\VerifyEmail;
+use Illuminate\Contracts\Queue\ShouldQueueAfterCommit;
 use Illuminate\Notifications\Messages\MailMessage;
 
-final class VerifyEmailNotification extends VerifyEmail
+final class VerifyEmailNotification extends VerifyEmail implements ShouldQueueAfterCommit
 {
+    use QueuesMail;
+
     public function toMail($notifiable): MailMessage
     {
         return (new MailMessage)
@@ -19,5 +23,10 @@ final class VerifyEmailNotification extends VerifyEmail
                 'verificationUrl' => $this->verificationUrl($notifiable),
                 'expiresInMinutes' => (int) config('auth.verification.expire', 60),
             ]);
+    }
+
+    protected function mailQueueName(): string
+    {
+        return (string) config('ukapi.notifications.critical_queue', 'mail-critical');
     }
 }

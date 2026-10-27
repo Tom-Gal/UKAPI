@@ -20,16 +20,61 @@ never in Git:
 - `TRUSTED_PROXIES` only when the host terminates TLS through a proxy you trust. Use the host's documented proxy addresses, or `*` only when the application is reachable exclusively through that trusted ingress.
 - Ensure the HTTPS edge preserves `X-Forwarded-Proto` for trusted proxies and serves the `Strict-Transport-Security` response header on both `ukapi.co.uk` and `api.ukapi.co.uk`. The application emits HSTS for requests it recognises as secure.
 - `COMPANIES_HOUSE_API_KEY` from the secret manager. The previously exposed credential must not be reused.
-- DVSA MOT History `MOT_HISTORY_CLIENT_ID`, `MOT_HISTORY_CLIENT_SECRET`, `MOT_HISTORY_API_KEY`, and the issued scope/token URLs. The application obtains and caches access tokens automatically; do not maintain a long-lived `MOT_HISTORY_ACCESS_TOKEN`.
+- DVSA MOT History `MOT_HISTORY_CLIENT_ID`, `MOT_HISTORY_CLIENT_SECRET`, `MOT_HISTORY_API_KEY`, and the issued scope/token URLs. The application obtains and caches access tokens automatically; do not maintain a long-lived `MOT_HISTORY_ACCESS_TOKEN`. Vehicle responses use a 15-minute positive cache and 10-minute not-found cache by default; tune `MOT_HISTORY_CACHE_TTL_MINUTES` and `MOT_HISTORY_NEGATIVE_CACHE_TTL_MINUTES` only with a documented operational reason.
 - Approved `LEGAL_ENTITY_NAME`, `LEGAL_REGISTERED_OFFICE`, and `LEGAL_CONTACT_EMAIL` values. Set `LEGAL_COMPANY_NUMBER` and `LEGAL_ICO_NUMBER` when applicable; otherwise leave them empty. The readiness command rejects blanks or known placeholders for the required identity fields.
-- Set `UKAPI_SCHEDULER_ENABLED=true` when Laravel Cloud's scheduler is enabled. Set `UKAPI_QUEUE_WORKER_ENABLED=true` when `QUEUE_CONNECTION` is `database` or `redis` and a Laravel Cloud queue worker is running; the readiness command permits `QUEUE_CONNECTION=sync` only when the worker flag is false and that choice is intentional.
+- Set `UKAPI_SCHEDULER_ENABLED=true` when Laravel Cloud's scheduler is enabled. Production uses `QUEUE_CONNECTION=database`, `UKAPI_QUEUE_WORKER_ENABLED=true`, and `UKAPI_QUEUE_MONITOR_ENABLED=true`. Keep `HEALTH_ALERT_EMAIL` valid because the queue monitor sends its own out-of-band operator alert when the queue is stalled.
 - Stripe secret-manager values: `STRIPE_KEY`, `STRIPE_SECRET`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_HOBBY`, `STRIPE_PRICE_PRO`, `STRIPE_PRICE_SCALE`, `STRIPE_PRICE_HOBBY_ANNUAL`, `STRIPE_PRICE_PRO_ANNUAL`, and `STRIPE_PRICE_SCALE_ANNUAL`. Use live-mode `pk_live_`, `sk_live_`, and `price_` values in production. Run `php artisan stripe:provision-plans` against the applicable Stripe mode to create the documented GBP monthly and annual prices. The command also synchronizes the durable local plan-price catalog, while existing Stripe price IDs remain valid for current subscriptions.
 - Create a Stripe webhook for `https://<your-domain>/stripe/webhook`. Subscribe it to Cashier's customer/subscription and invoice events, or run `php artisan cashier:webhook --url=https://<your-domain>/stripe/webhook` to create the complete Cashier event set. Store its signing secret as `STRIPE_WEBHOOK_SECRET`. The release readiness command rejects a production configuration without it.
 
-Keep `SIC_REFERENCE_SNAPSHOT_PATH` on writable persistent storage and set
-`SIC_REFERENCE_REFRESH_ENABLED=true` if the refresh command will run at runtime.
-A versioned SIC reference is bundled so first boot does not depend on an
-outbound request.
+The active SIC reference is stored durably in MySQL's immutable dataset
+snapshot tables. `SIC_REFERENCE_SNAPSHOT_PATH` is only the refresh command's
+local staging copy on Laravel Cloud's ephemeral application filesystem. The
+application reads the active MySQL snapshot first and falls back to the bundled
+versioned reference on first boot, so the staging file is not a recovery
+dependency. Set `SIC_REFERENCE_REFRESH_ENABLED=true` only when operators intend
+to run the explicit refresh command.
+
+## Laravel Cloud queue worker
+
+Customer, security, authentication, subscription, usage, rotation and provider
+health mail is queued after database commit. `mail-critical` contains password,
+verification, security, API-key and provider-health alerts; `mail` contains
+subscription, usage and routine rotation mail. Every job has four attempts, a
+45-second timeout and 60, 300 and 900-second backoff intervals.
+Until `UKAPI_QUEUE_WORKER_ENABLED=true` is explicitly present, notifications use
+the synchronous connection as a safe rollout fallback rather than accumulating
+undeliverable database jobs. Enable the flag only with the worker running.
+
+Configure the production environment from Laravel Cloud's infrastructure
+canvas:
+
+1. Add a dedicated **Worker cluster** in the same region as the App and Laravel
+   MySQL resources. Do not put the production queue process on the App cluster,
+   where mail processing would compete with web/API traffic.
+2. Add one Laravel queue-worker background process with one process initially.
+   Use the database connection and priority order:
+
+    ```sh
+    php artisan queue:work database --queue=mail-critical,mail --sleep=3 --tries=4 --timeout=60 --max-time=3600
+    ```
+
+3. Set `QUEUE_CONNECTION=database`, `DB_QUEUE_RETRY_AFTER=120`,
+   `UKAPI_QUEUE_WORKER_ENABLED=true` and `UKAPI_QUEUE_MONITOR_ENABLED=true` in
+   the environment, then redeploy. Laravel Cloud restarts queue workers after
+   each deployment, so do not add a separate `queue:restart` deployment step.
+4. Keep the Laravel Cloud Scheduler enabled. It runs
+   `ukapi:queue:monitor` every five minutes and synchronously emails the operator
+   only when pending count, oldest-job age, or failed jobs breach their
+   thresholds. This scheduler-only mail is deliberately not placed on the queue
+   it monitors.
+5. Verify dispatch and consumption by requesting a password reset in a test
+   account, checking that `jobs` returns to zero, and confirming delivery. The
+   admin Operations page must show no failed jobs and no stale backlog.
+
+Laravel Cloud managed queues are not used for this deployment. If the service
+later migrates to them, update the driver, dependency, readiness check, admin
+metrics and recovery policy together rather than attaching a managed queue
+silently.
 
 ## Release sequence
 
@@ -44,18 +89,18 @@ php artisan optimize
 php artisan ukapi:production:check --probe
 ```
 
-Restart any PHP workers after deploy. Create a Laravel Cloud queue worker when
-moving queued work off the request path, then include `php artisan queue:restart`
-as part of the release.
+Laravel Cloud rolls the App and Worker clusters during deployment. Confirm both
+clusters report the new release before widening traffic.
 
 Enable Laravel Cloud's Scheduler for the production environment and set
 `UKAPI_SCHEDULER_ENABLED=true`. It runs the
 daily API-key rotation reminder, which sends customers a grouped reminder when
 an active key reaches 90 days and again no sooner than every 90 days.
-It also runs sampled service checks every five minutes and snapshot pruning
-daily. See `HEALTH_MONITORING.md` before enabling operator alerts. If alerts are
-not enabled, set `HEALTH_ALERTS_WAIVED=true` and document the external alert
-owner.
+It also runs sampled service checks and queue health monitoring every five
+minutes, plus snapshot pruning daily. See `HEALTH_MONITORING.md` before enabling
+operator alerts. If alerts are not enabled, set `HEALTH_ALERTS_WAIVED=true` and
+document the external alert owner. Queue monitoring should not be waived in
+production.
 
 ## Operational checks
 
@@ -63,7 +108,8 @@ owner.
 - `/ready` verifies MySQL and the configured cache without disclosing dependency details; it returns `503` when either is unavailable.
 - Run `php artisan ukapi:sic:refresh` deliberately after confirming the source and its terms. It never runs during a customer request.
 - Promote the first verified operator with `php artisan ukapi:grant-admin operator@example.com`.
-- Back up MySQL before migrations and verify email delivery, Valkey connectivity, CORS, API-key issuance, and the live Companies House credential before widening access.
+- Create a named Laravel Cloud manual MySQL backup before risky migrations and follow `RECOVERY.md`; backup creation alone is not proof that restoration works.
+- Run `php artisan ukapi:queue:monitor`, confirm it reports a healthy empty backlog, and inspect Laravel Cloud worker logs.
 - Run `php artisan ukapi:health:check` and confirm the MOT observation passes token acquisition and the authenticated DVSA API sample before widening access. The command never prints tokens or provider bodies.
 
 ## Dataset snapshots and change feeds

@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Domain\Operations\LoginAlertDecider;
+use App\Domain\Operations\NotificationDeliveryRecorder;
+use App\Domain\Operations\SafeNotificationSender;
 use App\Integrations\CompaniesHouse\CompaniesHouseCompanyProvider;
 use App\Integrations\Contracts\CompanyProvider;
 use App\Integrations\Contracts\CrimeProvider;
@@ -17,6 +20,8 @@ use App\Models\User;
 use App\Notifications\SecurityAlertNotification;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Events\Login;
+use Illuminate\Notifications\Events\NotificationFailed;
+use Illuminate\Notifications\Events\NotificationSent;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
@@ -77,22 +82,28 @@ class AppServiceProvider extends ServiceProvider
     protected function configureSecurityNotifications(): void
     {
         Event::listen(TwoFactorAuthenticationConfirmed::class, function (TwoFactorAuthenticationConfirmed $event): void {
-            $event->user->notify(SecurityAlertNotification::twoFactorEnabled());
+            app(SafeNotificationSender::class)->send($event->user, SecurityAlertNotification::twoFactorEnabled());
         });
 
         Event::listen(TwoFactorAuthenticationDisabled::class, function (TwoFactorAuthenticationDisabled $event): void {
-            $event->user->notify(SecurityAlertNotification::twoFactorDisabled());
+            app(SafeNotificationSender::class)->send($event->user, SecurityAlertNotification::twoFactorDisabled());
         });
         Event::listen(Login::class, function (Login $event): void {
             if ($event->guard !== 'web' || ! $event->user instanceof User) {
                 return;
             }
 
-            $event->user->notify(SecurityAlertNotification::signedIn(
-                request()->ip(),
-                request()->userAgent(),
-            ));
+            $ipAddress = request()->ip();
+            $userAgent = request()->userAgent();
+            if (app(LoginAlertDecider::class)->shouldNotify($event->user, $ipAddress, $userAgent)) {
+                app(SafeNotificationSender::class)->send(
+                    $event->user,
+                    SecurityAlertNotification::signedIn($ipAddress, $userAgent),
+                );
+            }
         });
         Event::listen(WebhookHandled::class, SendSubscriptionLifecycleNotification::class);
+        Event::listen(NotificationSent::class, [NotificationDeliveryRecorder::class, 'sent']);
+        Event::listen(NotificationFailed::class, [NotificationDeliveryRecorder::class, 'failed']);
     }
 }

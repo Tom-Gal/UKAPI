@@ -35,7 +35,7 @@ class HealthAlerts
             return;
         }
 
-        // Mark only after mail transport accepts the message, so failed delivery is retried.
+        // Mark only after the queue accepts the alert. Delivery has its own bounded retries.
         Notification::route('mail', $email)->notify(new HealthAlert($check->service, false, $check->failure_reason));
         $check->forceFill([
             'incident_notified_at' => $check->incident_notified_at ?? now(),

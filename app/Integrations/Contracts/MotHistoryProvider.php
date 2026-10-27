@@ -2,11 +2,11 @@
 
 namespace App\Integrations\Contracts;
 
+use App\Domain\Mot\MotVehicleData;
+
 interface MotHistoryProvider
 {
-    /** @return array<string, mixed> */
-    public function byRegistration(string $registration): array;
+    public function byRegistration(string $registration): MotVehicleData;
 
-    /** @return array<string, mixed> */
-    public function byVin(string $vin): array;
+    public function byVin(string $vin): MotVehicleData;
 }

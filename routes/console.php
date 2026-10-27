@@ -12,3 +12,4 @@ Schedule::command('ukapi:remind-key-rotation')->daily()->onOneServer();
 Schedule::command('ukapi:snapshots:prune')->daily()->onOneServer();
 
 Schedule::command('ukapi:health:check')->everyFiveMinutes()->onOneServer()->withoutOverlapping(10);
+Schedule::command('ukapi:queue:monitor')->everyFiveMinutes()->onOneServer()->withoutOverlapping(10);

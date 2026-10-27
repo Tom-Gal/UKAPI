@@ -7,6 +7,7 @@ use App\Domain\Geography\PostcodeData;
 use App\Domain\Geography\UkPostcode;
 use App\Integrations\Contracts\PostcodeProvider;
 use App\Support\Api\ApiException;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
@@ -16,7 +17,7 @@ final class PostcodesIoPostcodeProvider implements PostcodeProvider
 {
     public function find(UkPostcode $postcode): PostcodeData
     {
-        $response = $this->request()->get('postcodes/'.rawurlencode($postcode->compact()));
+        $response = $this->get('postcodes/'.rawurlencode($postcode->compact()));
 
         if ($response->status() === 404) {
             throw ApiException::postcodeNotFound();
@@ -27,7 +28,7 @@ final class PostcodesIoPostcodeProvider implements PostcodeProvider
 
     public function nearby(UkPostcode $postcode, int $limit, int $radiusMetres): array
     {
-        $response = $this->request()->get(
+        $response = $this->get(
             'postcodes/'.rawurlencode($postcode->compact()).'/nearest',
             ['limit' => $limit, 'radius' => $radiusMetres],
         );
@@ -41,7 +42,7 @@ final class PostcodesIoPostcodeProvider implements PostcodeProvider
 
     public function reverse(Coordinates $coordinates, int $limit = 1): array
     {
-        $response = $this->request()->get('postcodes', [
+        $response = $this->get('postcodes', [
             'lon' => $coordinates->longitude,
             'lat' => $coordinates->latitude,
             'limit' => $limit,
@@ -63,6 +64,16 @@ final class PostcodesIoPostcodeProvider implements PostcodeProvider
         return is_string($caBundle) && $caBundle !== ''
             ? $request->withOptions(['verify' => $caBundle])
             : $request;
+    }
+
+    /** @param array<string, float|int> $query */
+    private function get(string $path, array $query = []): Response
+    {
+        try {
+            return $this->request()->get($path, $query);
+        } catch (ConnectionException) {
+            throw ApiException::providerUnavailable();
+        }
     }
 
     private function mapOne(Response $response): PostcodeData

@@ -1,6 +1,6 @@
 # UKApi.co.uk Roadmap
 
-**Last audited:** 25 October 2026  
+**Last audited:** 27 October 2026
 **Purpose:** A living, prioritised list of work that remains after comparing the current repository, production runbooks, tests, public contract, and original product reports.  
 **Governing conventions:** See `AGENTS.md`.
 
@@ -19,12 +19,17 @@ The audit found a strong functional baseline:
 - 25 customer `/v1` routes are live.
 - All 25 runtime routes have exact path counterparts in `openapi/openapi.yaml`.
 - Planned endpoint definitions are retained internally but filtered from the public catalogue and documentation.
-- 229 PHP tests pass with 2,152 assertions.
+- 284 PHP tests pass with 3,019 assertions.
 - PHPStan passes with no errors.
 - TypeScript checking passes.
 - The production frontend build succeeds.
 - `composer.json` is valid and the locked Composer dependency audit reports no known advisories.
 - Durable account-level quotas, endpoint breakdowns, change feeds, SIC bulk export, Stripe billing, authentication, passkeys, structured legal pages, transactional mail, source health sampling, and dataset snapshots are already present.
+- The admin area now exposes privacy-safe endpoint latency/error aggregates, provider observations, health incidents and acknowledgement notes, quota/rate-limit hotspots, queue and notification health, snapshot age/version, and audited API-key revocation.
+- MOT responses are mapped into a whitelisted typed contract, validated again when read from the semantic cache, and documented with an exact OpenAPI schema rather than exposing the DVSA payload directly.
+- All customer and security mail is queued after commit with bounded retries on a dedicated Laravel Cloud database worker design. Critical mail has priority, familiar sign-in alerts are deduplicated without storing raw fingerprints, and scheduler-only queue failure alerts bypass the queue they monitor.
+- Independent GitHub-hosted synthetic checks cover liveness, readiness, public/authentication pages, OpenAPI and a scoped API request with repeated-failure and latency alerting.
+- Laravel Cloud MySQL backup/restore policy, RPO/RTO, an isolated restore procedure and a privacy-safe recovery manifest command are documented in `RECOVERY.md`.
 
 The local quality gates are green: Pint, PHPStan, PHPUnit, Vite Plus formatting
 and linting, TypeScript, the production frontend build, Composer audit, OpenAPI
@@ -41,6 +46,17 @@ the current branch:
 - PHPUnit is configured to fail the build for risky or assertion-free tests;
 - independent public-page, entitlement, SIC-export, and notification cases use
   named PHPUnit 12 data-provider datasets;
+- customer-route, OpenAPI, live-catalogue, feature-entitlement, endpoint-code,
+  usage-label, API-key-scope-family, route-name, and operation-id parity is
+  enforced by an automated feature test;
+- mail transport failures are isolated from successful sign-in, password,
+  API-key, subscription-webhook, usage, health, and support operations;
+- non-critical and security notifications leave web/API requests through the
+  database queue, with queue-boundary, retry and failed-job monitoring controls;
+- independent production synthetic monitoring is repository-owned and opens one
+  incident after repeated failures rather than paging on a transient response;
+- recovery verification covers critical MySQL state and treats the durable MySQL
+  SIC snapshot as authoritative on Laravel Cloud;
 - `AGENTS.md` and `ROADMAP.md` are committed repository guidance.
 
 The remaining legal launch prerequisite is not code-owned: approved legal entity,
@@ -50,41 +66,6 @@ approval process. The readiness command intentionally keeps rejecting missing or
 placeholder values; no invented identity has been added to the repository.
 
 ## P1: Production operations and resilience
-
-
-### P1.3 Move non-critical notifications off web/API requests
-
-No notification currently implements `ShouldQueue`, and there is no queued application work in `app/`. Sign-in, API-key, subscription, rotation, and operator mail therefore depend directly on mail transport latency and availability.
-
-Work:
-
-- Classify which emails must remain synchronous, if any.
-- Queue security, subscription, API-key, usage, rotation, and health notifications with safe retry/backoff rules.
-- Configure a Laravel Cloud worker for the chosen database or Valkey queue.
-- Ensure mail failure cannot reverse a successful login, key operation, webhook, API request, or health measurement.
-- Add failed-job monitoring and test queue boundaries.
-- Consider deduplicating routine sign-in alerts so users are informed without being spammed on every familiar login.
-
-### P1.4 Establish independent uptime and synthetic API monitoring
-
-The current scheduler and `/status` run inside the same application they monitor. That is useful for provider visibility but cannot satisfy independent availability monitoring by itself.
-
-Work:
-
-- Monitor `/up`, `/ready`, the public website, OpenAPI, authentication entry points, and one safe synthetic API request externally.
-- Alert on latency and repeated failures, not a single transient response.
-- Keep the synthetic API key tightly scoped/limited and outside source control.
-- Link incident handling and operator contacts from `HEALTH_MONITORING.md`.
-
-### P1.5 Test backup and restore, not only backup creation
-
-Work:
-
-- Document Laravel Cloud MySQL backup frequency, retention, encryption, and ownership.
-- Perform and record a restore drill into an isolated environment.
-- Confirm migrations, Cashier subscription records, durable usage, plan catalogue, snapshot heads, service health, and users survive as intended.
-- Document recovery-time and recovery-point expectations.
-- Include persistent SIC snapshot storage and any queue/failed-job data in the recovery decision.
 
 ### P1.6 Add MySQL integration coverage to CI
 
@@ -98,12 +79,11 @@ Work:
 
 ### P1.7 Improve observability around the API contract
 
-The app records durable usage and provider health but does not yet expose the full KPI/operational picture described in the reports.
+The app records durable usage and provider health. The admin operations view now exposes request/status-family counts, average and bucketed p95 endpoint latency, persisted provider latency, health incidents, rejection hotspots, queue/notification health, and snapshot age without retaining request payloads. It does not yet expose the full KPI/operational picture described in the reports.
 
 Add privacy-conscious measurements for:
 
-- request count and status family by stable endpoint code;
-- p50/p95 latency by endpoint family;
+- p50 latency and longer-window p95 trends by endpoint family;
 - cache hit/stale/negative-cache rates;
 - upstream latency, timeout, rejection, throttle, and schema-error rates;
 - quota rejections and rate-limit rejections;
@@ -138,20 +118,16 @@ Work:
 
 ## P1: Contract and maintenance automation
 
-### P1.10 Add automated contract parity tests
+### P1.10 Expand automated contract parity tests
 
-The audit manually confirmed exact parity between 25 runtime routes and 25 OpenAPI paths, but CI currently only parses the YAML.
+The first automated parity phase is complete. CI now fails when the 25 runtime routes, OpenAPI operations, live catalogue entries, feature entitlements, endpoint codes, usage labels, API-key scope families, route names, or OpenAPI operation IDs diverge.
 
-Add tests that fail when:
+Continue progressively with tests that fail when:
 
-- a `/v1` runtime route is absent from OpenAPI or vice versa;
-- a metered route lacks `ukapi_endpoint`;
-- a stable endpoint code lacks a usage-dashboard label;
-- a live catalogue endpoint is missing from routes/OpenAPI;
-- a public route is accidentally marked live before deployment;
-- a plan-gated route lacks the documented feature requirement.
-
-Method, parameters, bounds, and response-schema parity can be added progressively after path parity.
+- path/query parameter names or required/optional state differ;
+- validation and plan-specific bounds differ from OpenAPI;
+- documented response or error schemas no longer match representative runtime responses;
+- response and quota/rate-limit header declarations drift from middleware behaviour.
 
 ### P1.11 Remove duplicated plan/pricing truth
 
@@ -252,20 +228,6 @@ SIC CSV export is the existing pattern. Before adding other exports:
 
 ## P2: Customer and operator experience
 
-### P2.8 Improve admin operations
-
-The current admin area is intentionally small. Add only operationally useful capabilities:
-
-- endpoint/provider error and latency overview;
-- failed health incidents and acknowledgement notes;
-- user plan/subscription state with safe Stripe links;
-- quota/rate-limit hotspots;
-- failed jobs and notification delivery health;
-- source snapshot age/version;
-- auditable, narrowly authorised support actions.
-
-Do not build arbitrary impersonation or database-edit screens without a clear support need and strong audit controls.
-
 ### P2.9 Accessibility and browser regression coverage
 
 Add automated coverage for critical public/auth/dashboard journeys while retaining manual visual review:
@@ -287,6 +249,7 @@ Turn approved policy wording into an operational retention schedule:
 - preserve records only where an approved legal/business basis requires it;
 - document Stripe, mail provider, Laravel Cloud log, and backup retention as third-party/system boundaries;
 - add scheduled pruning/anonymisation commands and tests where data is not deleted immediately;
+- set explicit retention for endpoint metrics, health incidents, notification-delivery events, admin/API-key audit events, usage aggregates and rejection counters introduced by the operational dashboards;
 - keep privacy copy aligned with actual behaviour.
 
 Obtain legal approval before changing retention promises.
@@ -327,12 +290,11 @@ Continue to avoid microservices, Kafka, Kubernetes, Elasticsearch/OpenSearch, Gr
 ## Suggested execution order
 
 1. Supply and approve the production legal identity and retention values.
-2. Queue notifications and verify Laravel Cloud worker/scheduler operation.
-3. Establish external uptime monitoring and complete a restore drill.
-4. Add MySQL CI and contract-parity tests.
-5. Remove duplicated plan/pricing truth.
-6. Add low-risk outcode, council, bank-holiday, working-day, and tax-year endpoints.
-7. Implement food hygiene.
-8. Expand observability, resilience, snapshots, and customer usage insight based on production data.
-9. Improve admin operations and add a privacy-conscious marketing workflow only after the operational and legal foundations are approved.
-10. Approach planning, broader exports, teams, SDKs, and new datasets only after licensing review and demand validation.
+2. Activate and verify the documented Laravel Cloud worker, synthetic-monitor secret and first isolated MySQL restore drill; record the real drill evidence in `RECOVERY.md`.
+3. Add MySQL CI and expand contract-parity coverage to parameters, bounds, schemas, and headers.
+4. Remove duplicated plan/pricing truth.
+5. Add low-risk outcode, council, bank-holiday, working-day, and tax-year endpoints.
+6. Implement food hygiene.
+7. Expand observability, resilience, snapshots, and customer usage insight based on production data.
+8. Add accessibility/browser coverage and approved retention/deletion operations.
+9. Approach planning, broader exports, teams, SDKs, and new datasets only after licensing review and demand validation.

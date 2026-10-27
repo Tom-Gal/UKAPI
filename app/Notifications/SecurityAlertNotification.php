@@ -3,13 +3,14 @@
 namespace App\Notifications;
 
 use App\Models\User;
-use Illuminate\Bus\Queueable;
+use App\Notifications\Concerns\QueuesMail;
+use Illuminate\Contracts\Queue\ShouldQueueAfterCommit;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-final class SecurityAlertNotification extends Notification
+final class SecurityAlertNotification extends Notification implements ShouldQueueAfterCommit
 {
-    use Queueable;
+    use QueuesMail;
 
     public function __construct(
         public readonly string $heading,
@@ -75,5 +76,10 @@ final class SecurityAlertNotification extends Notification
                 'activityDetails' => $this->activityDetails,
                 'securityUrl' => url('/settings/security'),
             ]);
+    }
+
+    protected function mailQueueName(): string
+    {
+        return (string) config('ukapi.notifications.critical_queue', 'mail-critical');
     }
 }

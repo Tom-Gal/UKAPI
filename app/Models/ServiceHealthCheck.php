@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $status
  * @property string|null $failure_reason
  * @property int $consecutive_failures
+ * @property int|null $latency_ms
  * @property CarbonImmutable|null $last_attempt_at
  * @property CarbonImmutable|null $last_checked_at
  * @property CarbonImmutable|null $last_success_at
@@ -33,6 +34,7 @@ class ServiceHealthCheck extends Model
             'incident_notified_at' => 'immutable_datetime',
             'last_alert_at' => 'immutable_datetime',
             'consecutive_failures' => 'integer',
+            'latency_ms' => 'integer',
         ];
     }
 }

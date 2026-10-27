@@ -2,11 +2,15 @@
 
 namespace App\Domain\Health;
 
+use App\Notifications\Concerns\QueuesMail;
+use Illuminate\Contracts\Queue\ShouldQueueAfterCommit;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-final class HealthAlert extends Notification
+final class HealthAlert extends Notification implements ShouldQueueAfterCommit
 {
+    use QueuesMail;
+
     public function __construct(
         public readonly string $service,
         public readonly bool $recovered,
@@ -31,5 +35,10 @@ final class HealthAlert extends Notification
             ->line('Checked at: '.now()->toIso8601String())
             ->line('This is a sampled availability check. Source freshness is reported separately on the status page.')
             ->action('View status', url('/status'));
+    }
+
+    protected function mailQueueName(): string
+    {
+        return (string) config('ukapi.notifications.critical_queue', 'mail-critical');
     }
 }

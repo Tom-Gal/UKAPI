@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Domain\ApiKeys\ApiKeyManager;
 use App\Domain\ApiKeys\EndpointFamily;
 use App\Domain\ApiKeys\IpAllowList;
+use App\Domain\Operations\SafeNotificationSender;
 use App\Domain\Usage\Entitlements;
 use App\Models\ApiKey;
 use App\Models\ApiKeyAuditEvent;
@@ -18,6 +19,8 @@ use Inertia\Response;
 
 final class ApiKeyController extends Controller
 {
+    public function __construct(private readonly SafeNotificationSender $notifications) {}
+
     public function index(Request $request, Entitlements $entitlements, ApiKeyManager $manager): Response
     {
         $user = $request->user();
@@ -83,7 +86,7 @@ final class ApiKeyController extends Controller
             ipAllowList: $policy['ip_allow_list'],
             requestId: $request->header('X-Request-Id'),
         );
-        $request->user()->notify(ApiKeyActivityNotification::created($issued['key']));
+        $this->notifications->send($request->user(), ApiKeyActivityNotification::created($issued['key']));
 
         return to_route('api-keys.index')->with('api_key_created', [
             'name' => $issued['key']->name,
@@ -132,7 +135,7 @@ final class ApiKeyController extends Controller
             overlapHours: (int) $attributes['overlap_hours'],
             requestId: $request->header('X-Request-Id'),
         );
-        $request->user()->notify(ApiKeyActivityNotification::created($issued['key']));
+        $this->notifications->send($request->user(), ApiKeyActivityNotification::created($issued['key']));
 
         return to_route('api-keys.index')->with('api_key_created', [
             'name' => $issued['key']->name,
@@ -146,7 +149,7 @@ final class ApiKeyController extends Controller
     {
         $this->authoriseOwner($request, $apiKey);
         if ($manager->revoke($apiKey, $request->user(), $request->header('X-Request-Id'))) {
-            $request->user()->notify(ApiKeyActivityNotification::revoked($apiKey));
+            $this->notifications->send($request->user(), ApiKeyActivityNotification::revoked($apiKey));
         }
 
         return to_route('api-keys.index');

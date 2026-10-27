@@ -6,7 +6,11 @@ use App\Models\ServiceHealthCheck;
 
 final class HealthMonitor
 {
-    public function __construct(private readonly HealthProbe $probe, private readonly HealthAlerts $alerts) {}
+    public function __construct(
+        private readonly HealthProbe $probe,
+        private readonly HealthAlerts $alerts,
+        private readonly HealthIncidentRecorder $incidents,
+    ) {}
 
     /** @return array<string, string> */
     public function run(): array
@@ -16,6 +20,7 @@ final class HealthMonitor
             $check = ServiceHealthCheck::firstOrCreate(['service' => $service]);
             // Persist before network I/O: a killed process leaves an honest incomplete attempt.
             $check->forceFill(['last_attempt_at' => now(), 'status' => 'unknown'])->save();
+            $startedAt = hrtime(true);
             try {
                 $result = $this->probe->check($service);
                 $check->forceFill([
@@ -40,8 +45,15 @@ final class HealthMonitor
                 ]);
             }
             $check->last_checked_at = now();
+            $check->latency_ms = (int) max(0, ceil((hrtime(true) - $startedAt) / 1_000_000));
             $check->save();
             $outcomes[$service] = $check->status;
+
+            try {
+                $this->incidents->record($check);
+            } catch (\Throwable $exception) {
+                report($exception);
+            }
 
             try {
                 $this->alerts->send($check);

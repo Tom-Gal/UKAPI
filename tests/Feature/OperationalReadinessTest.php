@@ -113,6 +113,8 @@ class OperationalReadinessTest extends TestCase
                 'ukapi.sic_reference.snapshot_path' => base_path('tests/Fixtures/missing-sic-directory/sic.json'),
                 'ukapi.operations.scheduler_enabled' => false,
                 'ukapi.operations.queue_worker_enabled' => false,
+                'ukapi.operations.queue_monitor.enabled' => false,
+                'ukapi.operations.queue_monitor.waived' => false,
                 'queue.default' => 'database',
             ]);
 
@@ -124,6 +126,7 @@ class OperationalReadinessTest extends TestCase
                 ->expectsOutput('[missing] SIC snapshot storage: Set SIC_REFERENCE_SNAPSHOT_PATH to an existing writable directory when refresh is enabled.')
                 ->expectsOutput('[missing] Laravel scheduler: Set UKAPI_SCHEDULER_ENABLED=true for the Laravel Cloud scheduler.')
                 ->expectsOutput('[missing] Queue worker expectation: Set UKAPI_QUEUE_WORKER_ENABLED to match QUEUE_CONNECTION and the Laravel Cloud worker.')
+                ->expectsOutput('[missing] Queue failure monitoring: Enable UKAPI_QUEUE_MONITOR_ENABLED with HEALTH_ALERT_EMAIL, or explicitly waive it.')
                 ->assertFailed();
         } finally {
             $this->restoreTestingConfiguration($mysql);
@@ -143,12 +146,15 @@ class OperationalReadinessTest extends TestCase
                 'health.alerts.waived' => true,
                 'queue.default' => 'sync',
                 'ukapi.operations.queue_worker_enabled' => false,
+                'ukapi.operations.queue_monitor.enabled' => false,
+                'ukapi.operations.queue_monitor.waived' => true,
             ]);
 
             $this->artisan('ukapi:production:check')
                 ->expectsOutput('[ok] Health monitoring')
                 ->expectsOutput('[ok] Operator alerts')
                 ->expectsOutput('[ok] Queue worker expectation')
+                ->expectsOutput('[ok] Queue failure monitoring')
                 ->assertSuccessful();
         } finally {
             $this->restoreTestingConfiguration($mysql);
@@ -180,6 +186,10 @@ class OperationalReadinessTest extends TestCase
             'ukapi.sic_reference.refresh_enabled' => false,
             'ukapi.operations.scheduler_enabled' => true,
             'ukapi.operations.queue_worker_enabled' => true,
+            'ukapi.operations.queue_monitor.enabled' => true,
+            'ukapi.operations.queue_monitor.waived' => false,
+            'ukapi.operations.queue_monitor.max_pending' => 100,
+            'ukapi.operations.queue_monitor.max_oldest_seconds' => 300,
             'queue.default' => 'database',
             'legal.entity_name' => 'Approved Operator Name',
             'legal.registered_office' => '1 Example Street, London, SW1A 1AA',

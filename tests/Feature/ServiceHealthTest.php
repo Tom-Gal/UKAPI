@@ -82,6 +82,7 @@ class ServiceHealthTest extends TestCase
             $this->assertNotNull($check->last_attempt_at);
             $this->assertNotNull($check->last_checked_at);
             $this->assertNotNull($check->last_success_at);
+            $this->assertNotNull($check->latency_ms);
         }
         $this->publicStatus()->assertJsonPath('props.services.1.source_freshness', 'unknown')
             ->assertJsonPath('props.services.2.source_freshness', 'fresh')
@@ -108,6 +109,12 @@ class ServiceHealthTest extends TestCase
         $this->assertTrue($check->last_success_at->equalTo($previousSuccess));
         $this->assertTrue($check->last_attempt_at->gt($previousSuccess));
         $this->assertSame(1, $check->consecutive_failures);
+        $this->assertNotNull($check->latency_ms);
+        $this->assertDatabaseHas('service_health_incidents', [
+            'service' => 'postcodes',
+            'failure_reason' => 'probe_failed',
+            'occurrences' => 1,
+        ]);
         $response = $this->publicStatus()->assertJsonPath('props.services.1.state', 'unavailable');
         foreach (['test-secret-do-not-publish', 'private-upstream-error', 'Authorization', 'incident_notified_at', 'snapshot_path'] as $private) {
             $this->assertStringNotContainsString($private, $response->getContent());

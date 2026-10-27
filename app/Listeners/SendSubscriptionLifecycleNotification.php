@@ -3,6 +3,7 @@
 namespace App\Listeners;
 
 use App\Domain\Billing\PlanCatalog;
+use App\Domain\Operations\SafeNotificationSender;
 use App\Models\User;
 use App\Notifications\SubscriptionNotification;
 use Illuminate\Support\Carbon;
@@ -10,7 +11,10 @@ use Laravel\Cashier\Events\WebhookHandled;
 
 final class SendSubscriptionLifecycleNotification
 {
-    public function __construct(private readonly PlanCatalog $plans) {}
+    public function __construct(
+        private readonly PlanCatalog $plans,
+        private readonly SafeNotificationSender $notifications,
+    ) {}
 
     public function handle(WebhookHandled $event): void
     {
@@ -31,13 +35,13 @@ final class SendSubscriptionLifecycleNotification
         $planLabel = $this->planLabel($subscription);
 
         if ($type === 'customer.subscription.created') {
-            $user->notify(SubscriptionNotification::confirmed($planLabel));
+            $this->notifications->send($user, SubscriptionNotification::confirmed($planLabel));
 
             return;
         }
 
         if ($type === 'customer.subscription.deleted') {
-            $user->notify(SubscriptionNotification::cancelled($planLabel));
+            $this->notifications->send($user, SubscriptionNotification::cancelled($planLabel));
 
             return;
         }
@@ -53,7 +57,7 @@ final class SendSubscriptionLifecycleNotification
         }
 
         if (array_key_exists('cancel_at_period_end', $previous) && ($subscription['cancel_at_period_end'] ?? false)) {
-            $user->notify(SubscriptionNotification::cancellationScheduled(
+            $this->notifications->send($user, SubscriptionNotification::cancellationScheduled(
                 $planLabel,
                 $this->cancellationDate($subscription),
             ));
@@ -62,7 +66,7 @@ final class SendSubscriptionLifecycleNotification
         }
 
         if (array_key_exists('items', $previous)) {
-            $user->notify(SubscriptionNotification::changed($planLabel));
+            $this->notifications->send($user, SubscriptionNotification::changed($planLabel));
         }
     }
 

@@ -1,0 +1,71 @@
+name: Production synthetic monitor
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: production-synthetic-monitor
+  cancel-in-progress: false
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
+        with:
+          php-version: '8.4'
+          extensions: curl, mbstring
+          coverage: none
+
+      - name: Run repeated production checks
+        id: synthetic
+        continue-on-error: true
+        env:
+          SYNTHETIC_API_KEY: ${{ secrets.SYNTHETIC_API_KEY }}
+          SYNTHETIC_WEB_BASE_URL: ${{ vars.SYNTHETIC_WEB_BASE_URL }}
+          SYNTHETIC_API_BASE_URL: ${{ vars.SYNTHETIC_API_BASE_URL }}
+          SYNTHETIC_PUBLIC_MAX_MS: ${{ vars.SYNTHETIC_PUBLIC_MAX_MS }}
+          SYNTHETIC_DEPENDENCY_MAX_MS: ${{ vars.SYNTHETIC_DEPENDENCY_MAX_MS }}
+          SYNTHETIC_API_MAX_MS: ${{ vars.SYNTHETIC_API_MAX_MS }}
+        run: php scripts/production-synthetic-check.php
+
+      - name: Open an incident issue after repeated failures
+        if: steps.synthetic.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          title='[monitor] Production synthetic checks failing'
+          issue_number="$(gh issue list --state open --search 'Production synthetic checks failing in:title' --json number --jq '.[0].number // empty')"
+          if [ -z "$issue_number" ]; then
+            gh issue create --title "$title" --body "Repeated production checks failed. Inspect the [workflow run]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID) and follow HEALTH_MONITORING.md."
+          fi
+
+      - name: Close the synthetic incident after recovery
+        if: steps.synthetic.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          issue_number="$(gh issue list --state open --search 'Production synthetic checks failing in:title' --json number --jq '.[0].number // empty')"
+          if [ -n "$issue_number" ]; then
+            gh issue close "$issue_number" --comment "Production synthetic checks recovered in run $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID."
+          fi
+
+      - name: Fail the run when production remains unhealthy
+        if: steps.synthetic.outcome == 'failure'
+        run: exit 1

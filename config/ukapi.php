@@ -15,6 +15,19 @@ return [
         // explicit without trying to introspect host-level deployment state.
         'scheduler_enabled' => (bool) env('UKAPI_SCHEDULER_ENABLED', false),
         'queue_worker_enabled' => (bool) env('UKAPI_QUEUE_WORKER_ENABLED', false),
+        'queue_monitor' => [
+            'enabled' => (bool) env('UKAPI_QUEUE_MONITOR_ENABLED', false),
+            'waived' => (bool) env('UKAPI_QUEUE_MONITOR_WAIVED', false),
+            'max_pending' => (int) env('UKAPI_QUEUE_MONITOR_MAX_PENDING', 100),
+            'max_oldest_seconds' => (int) env('UKAPI_QUEUE_MONITOR_MAX_OLDEST_SECONDS', 300),
+            'repeat_after_minutes' => (int) env('UKAPI_QUEUE_MONITOR_REPEAT_AFTER_MINUTES', 60),
+        ],
+    ],
+
+    'notifications' => [
+        'critical_queue' => env('UKAPI_CRITICAL_MAIL_QUEUE', 'mail-critical'),
+        'default_queue' => env('UKAPI_DEFAULT_MAIL_QUEUE', 'mail'),
+        'login_deduplication_days' => (int) env('UKAPI_LOGIN_ALERT_DEDUPLICATION_DAYS', 30),
     ],
 
     /*
@@ -262,6 +275,8 @@ return [
         'access_token' => env('MOT_HISTORY_ACCESS_TOKEN'),
         'connect_timeout_seconds' => (int) env('MOT_HISTORY_CONNECT_TIMEOUT', 2),
         'timeout_seconds' => (int) env('MOT_HISTORY_TIMEOUT', 10),
+        'cache_ttl_minutes' => (int) env('MOT_HISTORY_CACHE_TTL_MINUTES', 15),
+        'negative_cache_ttl_minutes' => (int) env('MOT_HISTORY_NEGATIVE_CACHE_TTL_MINUTES', 10),
         // DVSA publishes a 10-request burst limit. Keep one shared local budget
         // for customer traffic and scheduled health probes.
         'provider_request_limit' => (int) env('MOT_HISTORY_PROVIDER_REQUEST_LIMIT', 10),

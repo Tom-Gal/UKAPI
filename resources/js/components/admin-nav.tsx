@@ -4,6 +4,7 @@ const items = [
     ['Overview', '/admin'],
     ['Users', '/admin/users'],
     ['Providers', '/admin/providers'],
+    ['Operations', '/admin/operations'],
 ];
 
 export function AdminNav() {

@@ -7,6 +7,9 @@ type Provider = {
     configuration: string;
     health: 'available' | 'unavailable' | 'stale' | 'unknown';
     health_detail: string;
+    latency_ms: number | null;
+    consecutive_failures: number;
+    last_checked_at: string | null;
 };
 export default function AdminProviders({
     providers,
@@ -24,13 +27,15 @@ export default function AdminProviders({
             <AdminNav />
             <main className="p-5 lg:p-8">
                 <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
-                    <table className="w-full min-w-[600px] text-left text-sm">
+                    <table className="w-full min-w-[840px] text-left text-sm">
                         <thead className="bg-slate-50 text-xs tracking-wide text-slate-500 uppercase">
                             <tr>
                                 <th className="px-5 py-3">Provider</th>
                                 <th className="px-5 py-3">Coverage</th>
                                 <th className="px-5 py-3">Configuration</th>
                                 <th className="px-5 py-3">Observed health</th>
+                                <th className="px-5 py-3">Latency</th>
+                                <th className="px-5 py-3">Last checked</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -58,6 +63,24 @@ export default function AdminProviders({
                                         >
                                             {provider.health_detail}
                                         </span>
+                                    </td>
+                                    <td className="px-5 py-4 font-mono text-xs text-slate-600">
+                                        {provider.latency_ms === null
+                                            ? '—'
+                                            : `${provider.latency_ms} ms`}
+                                        {provider.consecutive_failures > 0 && (
+                                            <span className="mt-1 block font-sans font-semibold text-rose-700">
+                                                {provider.consecutive_failures}{' '}
+                                                consecutive failures
+                                            </span>
+                                        )}
+                                    </td>
+                                    <td className="px-5 py-4 text-xs text-slate-600">
+                                        {provider.last_checked_at
+                                            ? new Date(
+                                                  provider.last_checked_at,
+                                              ).toLocaleString('en-GB')
+                                            : 'Not measured'}
                                     </td>
                                 </tr>
                             ))}

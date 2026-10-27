@@ -2,28 +2,37 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Domain\Mot\MotHistoryLookup;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\MotRegistrationRequest;
 use App\Http\Requests\Api\V1\MotVinRequest;
-use App\Integrations\Contracts\MotHistoryProvider;
 use App\Support\Api\ApiResponse;
 use Illuminate\Http\JsonResponse;
 
 final class MotHistoryController extends Controller
 {
-    public function registration(MotRegistrationRequest $request, MotHistoryProvider $provider): JsonResponse
+    public function registration(MotRegistrationRequest $request, MotHistoryLookup $lookup): JsonResponse
     {
-        return ApiResponse::success($request, $provider->byRegistration($request->registration()), $this->meta());
+        $result = $lookup->byRegistration($request->registration());
+
+        return ApiResponse::success($request, $result->vehicle->toArray(), $this->meta($result->cached));
     }
 
-    public function vin(MotVinRequest $request, MotHistoryProvider $provider): JsonResponse
+    public function vin(MotVinRequest $request, MotHistoryLookup $lookup): JsonResponse
     {
-        return ApiResponse::success($request, $provider->byVin($request->vin()), $this->meta());
+        $result = $lookup->byVin($request->vin());
+
+        return ApiResponse::success($request, $result->vehicle->toArray(), $this->meta($result->cached));
     }
 
-    /** @return array<string, string> */
-    private function meta(): array
+    /** @return array<string, bool|string|null> */
+    private function meta(bool $cached): array
     {
-        return ['source' => 'mot_history', 'coverage' => 'GB and Northern Ireland'];
+        return [
+            'cached' => $cached,
+            'source' => 'mot_history',
+            'source_updated_at' => null,
+            'coverage' => 'Great Britain and Northern Ireland',
+        ];
     }
 }

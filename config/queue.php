@@ -40,8 +40,8 @@ return [
             'connection' => env('DB_QUEUE_CONNECTION'),
             'table' => env('DB_QUEUE_TABLE', 'jobs'),
             'queue' => env('DB_QUEUE', 'default'),
-            'retry_after' => (int) env('DB_QUEUE_RETRY_AFTER', 90),
-            'after_commit' => false,
+            'retry_after' => (int) env('DB_QUEUE_RETRY_AFTER', 120),
+            'after_commit' => true,
         ],
 
         'beanstalkd' => [
@@ -69,9 +69,9 @@ return [
             // Laravel retains "redis" as the driver name; this connection is Valkey.
             'connection' => env('VALKEY_QUEUE_CONNECTION', 'default'),
             'queue' => env('VALKEY_QUEUE', 'default'),
-            'retry_after' => (int) env('VALKEY_QUEUE_RETRY_AFTER', 90),
+            'retry_after' => (int) env('VALKEY_QUEUE_RETRY_AFTER', 120),
             'block_for' => null,
-            'after_commit' => false,
+            'after_commit' => true,
         ],
 
         'deferred' => [

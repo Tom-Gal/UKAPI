@@ -1,0 +1,33 @@
+{
+    "registration": "AB12CDE",
+    "firstUsedDate": "2012-03-15",
+    "registrationDate": "2012-03-15",
+    "manufactureDate": "2012-01-10",
+    "primaryColour": "Blue",
+    "engineSize": "1798",
+    "model": "COROLLA",
+    "make": "TOYOTA",
+    "fuelType": "Petrol",
+    "hasOutstandingRecall": "No",
+    "motTests": [
+        {
+            "completedDate": "2026-03-14T10:30:00.000Z",
+            "motTestNumber": 123456789012,
+            "dataSource": "DVSA",
+            "expiryDate": "2027-03-13",
+            "registrationAtTimeOfTest": "AB12CDE",
+            "testResult": "PASSED",
+            "odometerValue": "74210",
+            "odometerUnit": "MI",
+            "odometerResultType": "READ",
+            "defects": [
+                {
+                    "dangerous": false,
+                    "text": "Nearside front tyre worn close to the legal limit",
+                    "type": "ADVISORY"
+                }
+            ]
+        }
+    ],
+    "uncontractedProviderField": "must not be exposed"
+}

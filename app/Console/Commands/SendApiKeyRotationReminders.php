@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Domain\Operations\SafeNotificationSender;
 use App\Models\User;
 use App\Notifications\ApiKeyRotationReminderNotification;
 use Illuminate\Console\Command;
@@ -12,7 +13,7 @@ final class SendApiKeyRotationReminders extends Command
 
     protected $description = 'Remind customers to rotate active API keys that are at least 90 days old.';
 
-    public function handle(): int
+    public function handle(SafeNotificationSender $notifications): int
     {
         $reminderCutoff = now()->subDays(90);
         $resentCutoff = now()->subDays(90);
@@ -31,7 +32,7 @@ final class SendApiKeyRotationReminders extends Command
                 ->where(fn ($query) => $query
                     ->whereNull('last_rotation_reminded_at')
                     ->orWhere('last_rotation_reminded_at', '<=', $resentCutoff))])
-            ->each(function (User $user) use (&$sent): void {
+            ->each(function (User $user) use (&$sent, $notifications): void {
                 $keys = $user->apiKeys;
 
                 if ($keys->isEmpty()) {
@@ -47,7 +48,9 @@ final class SendApiKeyRotationReminders extends Command
                     ];
                 }
 
-                $user->notify(new ApiKeyRotationReminderNotification($keysForEmail));
+                if (! $notifications->send($user, new ApiKeyRotationReminderNotification($keysForEmail))) {
+                    return;
+                }
 
                 foreach ($keys as $key) {
                     $key->forceFill(['last_rotation_reminded_at' => now()])->save();

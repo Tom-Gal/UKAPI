@@ -3,6 +3,8 @@
 namespace Tests\Feature;
 
 use App\Domain\Snapshots\SnapshotStore;
+use App\Models\DatasetSnapshot;
+use App\Models\DatasetSnapshotHead;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Request as HttpClientRequest;
@@ -219,6 +221,8 @@ class CompanyApiTest extends TestCase
 
         config()->set('ukapi.sic_reference.snapshot_path', base_path('tests/Fixtures/CompaniesHouse/missing-sic-reference.json'));
         config()->set('ukapi.sic_reference.seed_snapshot_path', base_path('tests/Fixtures/CompaniesHouse/missing-sic-reference.json'));
+        DatasetSnapshotHead::query()->delete();
+        DatasetSnapshot::query()->delete();
 
         $this->getJson('/v1/sic/62012', $headers)
             ->assertStatus(503)

@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\V1\VatController;
 use App\Http\Middleware\AuthenticateApiKey;
 use App\Http\Middleware\EnforceApiRateLimit;
 use App\Http\Middleware\EnforceMonthlyQuota;
+use App\Http\Middleware\RecordApiOperation;
 use App\Http\Middleware\TrackFirstApiSuccess;
 use Illuminate\Support\Facades\Route;
 
@@ -24,6 +25,7 @@ Route::prefix('v1')
         EnforceApiRateLimit::class,
         EnforceMonthlyQuota::class,
         TrackFirstApiSuccess::class,
+        RecordApiOperation::class,
     ])
     ->group(function (): void {
         Route::get('vat/calculate', [VatController::class, 'calculate'])

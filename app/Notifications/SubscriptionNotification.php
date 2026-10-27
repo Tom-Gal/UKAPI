@@ -3,13 +3,14 @@
 namespace App\Notifications;
 
 use App\Models\User;
-use Illuminate\Bus\Queueable;
+use App\Notifications\Concerns\QueuesMail;
+use Illuminate\Contracts\Queue\ShouldQueueAfterCommit;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-final class SubscriptionNotification extends Notification
+final class SubscriptionNotification extends Notification implements ShouldQueueAfterCommit
 {
-    use Queueable;
+    use QueuesMail;
 
     private function __construct(
         private readonly string $event,

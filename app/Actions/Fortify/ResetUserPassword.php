@@ -3,6 +3,7 @@
 namespace App\Actions\Fortify;
 
 use App\Concerns\PasswordValidationRules;
+use App\Domain\Operations\SafeNotificationSender;
 use App\Models\User;
 use App\Notifications\SecurityAlertNotification;
 use Illuminate\Support\Facades\Validator;
@@ -11,6 +12,8 @@ use Laravel\Fortify\Contracts\ResetsUserPasswords;
 class ResetUserPassword implements ResetsUserPasswords
 {
     use PasswordValidationRules;
+
+    public function __construct(private readonly SafeNotificationSender $notifications) {}
 
     /**
      * Validate and reset the user's forgotten password.
@@ -27,6 +30,6 @@ class ResetUserPassword implements ResetsUserPasswords
             'password' => $input['password'],
         ])->save();
 
-        $user->notify(SecurityAlertNotification::passwordChanged());
+        $this->notifications->send($user, SecurityAlertNotification::passwordChanged());
     }
 }

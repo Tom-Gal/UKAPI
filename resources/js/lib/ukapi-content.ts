@@ -448,6 +448,7 @@ const allEndpointFamilies: EndpointFamily[] = [
                 coverage: 'UK',
                 source: 'Companies House SIC 2007 snapshot',
                 freshness: 'On refresh',
+                feature: 'change_feeds',
                 live: true,
             },
             {
@@ -478,13 +479,24 @@ const allEndpointFamilies: EndpointFamily[] = [
   "data": {
     "registration": "AB12CDE",
     "make": "TOYOTA",
-    "model": "Corolla",
-    "motTests": []
+    "model": "COROLLA",
+    "firstUsedDate": "2012-03-15",
+    "registrationDate": "2012-03-15",
+    "manufactureDate": "2012-01-10",
+    "manufactureYear": null,
+    "primaryColour": "Blue",
+    "engineSize": "1798",
+    "fuelType": "Petrol",
+    "hasOutstandingRecall": "No",
+    "motTestDueDate": null,
+    "motTests": [{ "completedDate": "2026-03-14T10:30:00.000Z", "motTestNumber": "123456789012", "dataSource": "DVSA", "expiryDate": "2027-03-13", "registrationAtTimeOfTest": "AB12CDE", "testResult": "PASSED", "odometerValue": "74210", "odometerUnit": "MI", "odometerResultType": "READ", "location": null, "defects": [] }]
   },
   "meta": {
     "request_id": "req_01…",
+    "cached": false,
     "source": "mot_history",
-    "coverage": "GB and Northern Ireland"
+    "source_updated_at": null,
+    "coverage": "Great Britain and Northern Ireland"
   }
 }`,
                 live: true,
@@ -501,7 +513,7 @@ const allEndpointFamilies: EndpointFamily[] = [
                     'Look up vehicle details and MOT test history by registration number.',
                 coverage: 'Great Britain and Northern Ireland',
                 source: 'DVSA MOT History API',
-                freshness: 'Live provider response',
+                freshness: '15 minutes',
             },
             {
                 method: 'GET',
@@ -521,7 +533,7 @@ const allEndpointFamilies: EndpointFamily[] = [
                     'Look up vehicle details and MOT test history by vehicle identification number.',
                 coverage: 'Great Britain and Northern Ireland',
                 source: 'DVSA MOT History API',
-                freshness: 'Live provider response',
+                freshness: '15 minutes',
             },
         ],
     },
@@ -818,6 +830,7 @@ const allEndpointFamilies: EndpointFamily[] = [
                     'England, Wales and Northern Ireland; Scotland has British Transport Police data only',
                 source: 'Police.uk',
                 freshness: 'Monthly snapshots',
+                feature: 'change_feeds',
                 live: true,
             },
         ],
@@ -952,6 +965,7 @@ const allEndpointFamilies: EndpointFamily[] = [
                 coverage: 'England',
                 source: 'Environment Agency',
                 freshness: '5 minutes',
+                feature: 'change_feeds',
                 live: true,
             },
         ],

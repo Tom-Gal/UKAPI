@@ -131,6 +131,20 @@ class PostcodeApiTest extends TestCase
             ->assertJsonMissingPath('error.details');
     }
 
+    public function test_provider_connection_failures_are_a_controlled_service_unavailable_response(): void
+    {
+        $token = $this->createApiKey();
+        Http::fake([
+            'https://api.postcodes.io/postcodes/BL26XX' => Http::failedConnection('private transport detail'),
+        ]);
+
+        $response = $this->getJson('/v1/postcodes/BL26XX', ['Authorization' => "Bearer {$token}"])
+            ->assertServiceUnavailable()
+            ->assertJsonPath('error.code', 'upstream_unavailable');
+
+        $this->assertStringNotContainsString('private transport detail', $response->getContent());
+    }
+
     private function createApiKey(): string
     {
         $user = User::factory()->create();

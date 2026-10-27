@@ -47,11 +47,11 @@ paths:
                 - $ref: '#/components/parameters/MotRegistration'
             responses:
                 '200':
-                    description: MOT history returned by DVSA
+                    description: Normalised vehicle and MOT test history
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/SuccessEnvelope'
+                                $ref: '#/components/schemas/MotHistoryEnvelope'
                 '401':
                     $ref: '#/components/responses/InvalidApiKey'
                 '403':
@@ -62,6 +62,8 @@ paths:
                     $ref: '#/components/responses/InvalidParameter'
                 '429':
                     $ref: '#/components/responses/RateLimited'
+                '502':
+                    $ref: '#/components/responses/UpstreamInvalidResponse'
                 '503':
                     $ref: '#/components/responses/UpstreamUnavailable'
     /v1/mot/vin/{vin}:
@@ -73,11 +75,11 @@ paths:
                 - $ref: '#/components/parameters/MotVin'
             responses:
                 '200':
-                    description: MOT history returned by DVSA
+                    description: Normalised vehicle and MOT test history
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/SuccessEnvelope'
+                                $ref: '#/components/schemas/MotHistoryEnvelope'
                 '401':
                     $ref: '#/components/responses/InvalidApiKey'
                 '403':
@@ -88,6 +90,8 @@ paths:
                     $ref: '#/components/responses/InvalidParameter'
                 '429':
                     $ref: '#/components/responses/RateLimited'
+                '502':
+                    $ref: '#/components/responses/UpstreamInvalidResponse'
                 '503':
                     $ref: '#/components/responses/UpstreamUnavailable'
     /v1/vat/calculate:
@@ -104,7 +108,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/SuccessEnvelope'
+                                $ref: '#/components/schemas/VatCalculationEnvelope'
                 '401':
                     $ref: '#/components/responses/InvalidApiKey'
                 '403':
@@ -127,7 +131,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/SuccessEnvelope'
+                                $ref: '#/components/schemas/VatRemovalEnvelope'
                 '401':
                     $ref: '#/components/responses/InvalidApiKey'
                 '403':
@@ -1066,28 +1070,208 @@ components:
                     schema:
                         $ref: '#/components/schemas/ErrorEnvelope'
     schemas:
-        SuccessEnvelope:
+        VatCalculationEnvelope:
             type: object
             required: [data, meta]
             properties:
                 data:
                     type: object
-                meta:
-                    type: object
-                    required: [request_id]
+                    required:
+                        [
+                            amount,
+                            rate_percent,
+                            vat_amount,
+                            total_amount,
+                            currency,
+                        ]
                     properties:
-                        request_id:
+                        amount:
                             type: string
-                        details:
-                            type: object
-                            additionalProperties: true
-                            example: req_01j8d5s1wdm85crh9b739hw4gd
-                        cached:
-                            type: boolean
-                        source:
+                        rate_percent:
                             type: string
-                        coverage:
+                        vat_amount:
                             type: string
+                        total_amount:
+                            type: string
+                        currency:
+                            type: string
+                            const: GBP
+                meta:
+                    $ref: '#/components/schemas/VatMeta'
+        VatRemovalEnvelope:
+            type: object
+            required: [data, meta]
+            properties:
+                data:
+                    type: object
+                    required:
+                        [
+                            gross_amount,
+                            rate_percent,
+                            vat_amount,
+                            net_amount,
+                            currency,
+                        ]
+                    properties:
+                        gross_amount:
+                            type: string
+                        rate_percent:
+                            type: string
+                        vat_amount:
+                            type: string
+                        net_amount:
+                            type: string
+                        currency:
+                            type: string
+                            const: GBP
+                meta:
+                    $ref: '#/components/schemas/VatMeta'
+        VatMeta:
+            type: object
+            required: [request_id, cached, source, coverage, disclaimer]
+            properties:
+                request_id:
+                    type: string
+                cached:
+                    type: boolean
+                    const: false
+                source:
+                    type: string
+                    const: ukapi
+                coverage:
+                    type: string
+                    const: UK
+                disclaimer:
+                    type: string
+        MotHistoryEnvelope:
+            type: object
+            required: [data, meta]
+            properties:
+                data:
+                    $ref: '#/components/schemas/MotVehicle'
+                meta:
+                    $ref: '#/components/schemas/MotHistoryMeta'
+        MotHistoryMeta:
+            type: object
+            required: [request_id, cached, source, source_updated_at, coverage]
+            properties:
+                request_id:
+                    type: string
+                cached:
+                    type: boolean
+                source:
+                    type: string
+                    const: mot_history
+                source_updated_at:
+                    type: [string, 'null']
+                    description: Source-provided update date when available.
+                coverage:
+                    type: string
+                    const: Great Britain and Northern Ireland
+        MotVehicle:
+            type: object
+            required:
+                [
+                    registration,
+                    make,
+                    model,
+                    firstUsedDate,
+                    registrationDate,
+                    manufactureDate,
+                    manufactureYear,
+                    primaryColour,
+                    engineSize,
+                    fuelType,
+                    hasOutstandingRecall,
+                    motTestDueDate,
+                    motTests,
+                ]
+            properties:
+                registration:
+                    type: [string, 'null']
+                make:
+                    type: [string, 'null']
+                model:
+                    type: [string, 'null']
+                firstUsedDate:
+                    type: [string, 'null']
+                registrationDate:
+                    type: [string, 'null']
+                manufactureDate:
+                    type: [string, 'null']
+                manufactureYear:
+                    type: [string, 'null']
+                primaryColour:
+                    type: [string, 'null']
+                engineSize:
+                    type: [string, 'null']
+                    description: Engine capacity in cubic centimetres when supplied by the source.
+                fuelType:
+                    type: [string, 'null']
+                hasOutstandingRecall:
+                    type: string
+                    enum: [Yes, No, Unknown, Unavailable]
+                motTestDueDate:
+                    type: [string, 'null']
+                motTests:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/MotTest'
+        MotTest:
+            type: object
+            required:
+                [
+                    completedDate,
+                    motTestNumber,
+                    dataSource,
+                    expiryDate,
+                    registrationAtTimeOfTest,
+                    testResult,
+                    odometerValue,
+                    odometerUnit,
+                    odometerResultType,
+                    location,
+                    defects,
+                ]
+            properties:
+                completedDate:
+                    type: [string, 'null']
+                motTestNumber:
+                    type: [string, 'null']
+                    description: String form avoids loss of precision in JSON clients.
+                dataSource:
+                    type: string
+                    enum: [DVSA, DVA NI, CVS]
+                expiryDate:
+                    type: [string, 'null']
+                registrationAtTimeOfTest:
+                    type: [string, 'null']
+                testResult:
+                    type: string
+                    enum: [PASSED, FAILED]
+                odometerValue:
+                    type: [string, 'null']
+                odometerUnit:
+                    type: [string, 'null']
+                odometerResultType:
+                    type: string
+                    enum: [READ, UNREADABLE, NO_ODOMETER]
+                location:
+                    type: [string, 'null']
+                defects:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/MotDefect'
+        MotDefect:
+            type: object
+            required: [text, type, dangerous]
+            properties:
+                text:
+                    type: [string, 'null']
+                type:
+                    type: [string, 'null']
+                dangerous:
+                    type: [boolean, 'null']
         ErrorEnvelope:
             type: object
             required: [error]
