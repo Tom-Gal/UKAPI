@@ -16,7 +16,7 @@ When project sources disagree, use this order:
 4. `UKApi.co.uk_Senior_Engineer_Report.md` and `UKApi.co.uk_MVP_Report.md` as architecture and product intent.
 5. Historical chat decisions and old generated reports.
 
-The two reports are useful background, but some details are intentionally superseded. In particular, the live baseline is PHP 8.4.1+, Laravel 13, React 19, MySQL in Laravel Cloud, and Valkey through Laravel's Redis-compatible cache driver. Do not revert current code to older PHP, Redis, endpoint, pricing, or product assumptions merely because a report mentions them.
+The two reports are useful background, but some details are intentionally superseded. In particular, the live baseline is PHP 8.4.1+, Laravel 13, React 19, MySQL in Laravel Cloud, and Redis through Laravel's Redis cache driver. Do not revert current code to older PHP, Redis, endpoint, pricing, or product assumptions merely because a report mentions them.
 
 ## Product in one paragraph
 
@@ -39,7 +39,7 @@ UKApi.co.uk gives developers one account, one API key, one billing relationship,
 
 - Backend: PHP `^8.4.1`, Laravel 13, Fortify, Passkeys, Cashier, Wayfinder, PHPUnit 12, Larastan/PHPStan level 7, Pint.
 - Frontend: React 19, TypeScript with strict checking, Inertia 3, Tailwind CSS 4, Radix primitives, Lucide icons, Vite Plus.
-- Production: Laravel Cloud, MySQL, HTTPS, scheduler enabled, and a shared Valkey-compatible cache/rate-limit store.
+- Production: Laravel Cloud, MySQL, HTTPS, scheduler enabled, and a shared Redis cache/rate-limit store.
 - Local and CI tests: SQLite in memory, array cache, synchronous queue, and array mailer unless a test overrides them.
 - Billing: Stripe Checkout, Customer Portal, Cashier webhooks, monthly and annual GBP prices.
 - Delivery branch: `master`. A push can trigger deployment, so never push or deploy unless the user explicitly asks.

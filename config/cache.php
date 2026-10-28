@@ -15,7 +15,7 @@ return [
     |
     */
 
-    // Keep Redis/Valkey as the preferred production store, but allow
+    // Keep Redis as the preferred production store, but allow
     // authentication and throttling to continue when the cache service is
     // temporarily unavailable during deploys or local setup.
     'default' => env('CACHE_STORE', 'failover'),
@@ -83,8 +83,8 @@ return [
 
         'redis' => [
             'driver' => 'redis',
-            'connection' => env('VALKEY_CACHE_CONNECTION', 'cache'),
-            'lock_connection' => env('VALKEY_CACHE_LOCK_CONNECTION', 'default'),
+            'connection' => env('REDIS_CACHE_CONNECTION', 'cache'),
+            'lock_connection' => env('REDIS_CACHE_LOCK_CONNECTION', 'default'),
         ],
 
         'dynamodb' => [
@@ -116,7 +116,7 @@ return [
     | Cache Key Prefix
     |--------------------------------------------------------------------------
     |
-    | When utilizing the APC, database, memcached, Valkey, and DynamoDB cache
+    | When utilizing the APC, database, memcached, Redis, and DynamoDB cache
     | stores, there might be other applications using the same cache. For
     | that reason, you may prefix every cache key to avoid collisions.
     |

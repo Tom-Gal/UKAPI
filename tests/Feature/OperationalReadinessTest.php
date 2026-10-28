@@ -58,7 +58,7 @@ class OperationalReadinessTest extends TestCase
         $this->assertTrue($request->isSecure());
     }
 
-    public function test_production_check_accepts_consistent_legal_valkey_and_provider_configuration(): void
+    public function test_production_check_accepts_consistent_legal_redis_and_provider_configuration(): void
     {
         $mysql = config('database.connections.mysql');
 
@@ -66,7 +66,8 @@ class OperationalReadinessTest extends TestCase
             $this->configureProduction();
 
             $this->artisan('ukapi:production:check')
-                ->expectsOutput('[ok] Valkey cache')
+                ->expectsOutput('[ok] Redis cache')
+                ->expectsOutput('[ok] Redis connection configuration')
                 ->expectsOutput('[ok] Legal entity name')
                 ->expectsOutput('[ok] Legal registered office')
                 ->expectsOutput('[ok] MOT token URL')
@@ -125,7 +126,7 @@ class OperationalReadinessTest extends TestCase
                 ->expectsOutput('[missing] Operator alerts: Enable alerts with HEALTH_ALERT_EMAIL or explicitly set HEALTH_ALERTS_WAIVED=true.')
                 ->expectsOutput('[missing] SIC snapshot storage: Set SIC_REFERENCE_SNAPSHOT_PATH to an existing writable directory when refresh is enabled.')
                 ->expectsOutput('[missing] Laravel scheduler: Set UKAPI_SCHEDULER_ENABLED=true for the Laravel Cloud scheduler.')
-                ->expectsOutput('[missing] Queue execution mode: Without a persistent Laravel Cloud worker, set QUEUE_CONNECTION=sync and UKAPI_QUEUE_WORKER_ENABLED=false. Otherwise enable the matching database or Valkey worker.')
+                ->expectsOutput('[missing] Queue execution mode: Without a persistent Laravel Cloud worker, set QUEUE_CONNECTION=sync and UKAPI_QUEUE_WORKER_ENABLED=false. Otherwise enable the matching database or Redis worker.')
                 ->expectsOutput('[missing] Queue backlog monitoring: Enable database queue monitoring with HEALTH_ALERT_EMAIL when a worker exists, or set UKAPI_QUEUE_MONITOR_WAIVED=true for the intentional sync fallback.')
                 ->assertFailed();
         } finally {
@@ -170,6 +171,10 @@ class OperationalReadinessTest extends TestCase
             // Exercise the production connection name without reaching a live
             // MySQL host from the test suite.
             'database.connections.mysql' => config('database.connections.sqlite'),
+            'database.redis.default.host' => 'redis.internal.test',
+            'database.redis.default.password' => 'redis-password',
+            'database.redis.cache.host' => 'redis.internal.test',
+            'database.redis.cache.password' => 'redis-password',
             'cache.default' => 'redis',
             'mail.default' => 'smtp',
             'cors.allowed_origins' => ['https://ukapi.co.uk'],

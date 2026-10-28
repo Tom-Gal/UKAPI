@@ -42,7 +42,7 @@ the current branch:
 
 - formatting and frontend quality gates are clean;
 - CI runs the same Composer backend gate used locally;
-- environment, Valkey, MOT, and legal configuration checks agree with the runbook;
+- environment, Redis, MOT, and legal configuration checks agree with the runbook;
 - PHPUnit is configured to fail the build for risky or assertion-free tests;
 - independent public-page, entitlement, SIC-export, and notification cases use
   named PHPUnit 12 data-provider datasets;

@@ -43,11 +43,11 @@ The active SIC reference is part of `dataset_snapshots` and
 Cloud's ephemeral filesystem and is not a backup dependency. The bundled
 version remains the first-deployment fallback.
 
-Valkey contains caches, rate-limit state, scheduler locks, OAuth token cache and
+Redis contains caches, rate-limit state, scheduler locks, OAuth token cache and
 familiar-login deduplication markers. Treat those as reconstructable and do not
 restore them. Durable quotas and usage remain in MySQL. After a database restore,
 use a fresh `CACHE_PREFIX` if there is any chance that the restored environment
-could see production Valkey keys.
+could see production Redis keys.
 
 Pending database jobs and failed jobs are included in the MySQL backup. During a
 drill, do not start a worker against the restored database. For a real recovery,
@@ -77,7 +77,7 @@ snapshot change.
    unmistakable isolated name. Never attach the restored database to the
    production environment.
 5. Create or use an isolated Laravel Cloud recovery environment at the same
-   application commit. Attach the restored database. Use a fresh Valkey prefix,
+   application commit. Attach the restored database. Use a fresh Redis prefix,
    `MAIL_MAILER=array`, `QUEUE_CONNECTION=sync`,
    `UKAPI_QUEUE_WORKER_ENABLED=false`, `UKAPI_QUEUE_MONITOR_ENABLED=false`, and
    disable Stripe/webhook, provider-health and outbound mail activity. Do not

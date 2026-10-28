@@ -98,7 +98,7 @@ tickets because they can contain mail content and customer identifiers.
 
 For an incident, acknowledge it in the admin Operations page, inspect the
 independent monitor and Laravel Cloud logs/metrics, decide whether the failure is
-application, queue, MySQL, Valkey, mail or upstream-provider owned, and record a
+application, queue, MySQL, Redis, mail or upstream-provider owned, and record a
 safe note. Never paste secrets, authorization headers, provider bodies, queue
 payloads or personal data into GitHub issues or acknowledgement notes.
 

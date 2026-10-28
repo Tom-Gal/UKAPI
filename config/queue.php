@@ -16,7 +16,7 @@ return [
     // A persistent worker is not available on every Laravel Cloud plan. Keep
     // the safe no-worker behaviour as the default: notifications execute via
     // Laravel's synchronous driver until an operator explicitly enables a
-    // database or Valkey worker.
+    // database or Redis worker.
     'default' => env('QUEUE_CONNECTION', 'sync'),
 
     /*
@@ -70,10 +70,9 @@ return [
 
         'redis' => [
             'driver' => 'redis',
-            // Laravel retains "redis" as the driver name; this connection is Valkey.
-            'connection' => env('VALKEY_QUEUE_CONNECTION', 'default'),
-            'queue' => env('VALKEY_QUEUE', 'default'),
-            'retry_after' => (int) env('VALKEY_QUEUE_RETRY_AFTER', 120),
+            'connection' => env('REDIS_QUEUE_CONNECTION', 'default'),
+            'queue' => env('REDIS_QUEUE', 'default'),
+            'retry_after' => (int) env('REDIS_QUEUE_RETRY_AFTER', 120),
             'block_for' => null,
             'after_commit' => true,
         ],

@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Route;
 
 final class ProductionReadinessCheck extends Command
 {
-    protected $signature = 'ukapi:production:check {--probe : Also connect to MySQL and Valkey}';
+    protected $signature = 'ukapi:production:check {--probe : Also connect to MySQL and Redis}';
 
     protected $description = 'Check the required production configuration without printing secrets.';
 
@@ -24,7 +24,8 @@ final class ProductionReadinessCheck extends Command
             ['APP_VERSION', $this->validReleaseIdentifier(config('app.version')), 'Set APP_VERSION to a deployed commit SHA or release identifier, not dev.'],
             ['SESSION_SECURE_COOKIE', (bool) config('session.secure'), 'Set SESSION_SECURE_COOKIE=true.'],
             ['MySQL', config('database.default') === 'mysql', 'Set DB_CONNECTION=mysql.'],
-            ['Valkey cache', config('cache.default') === 'redis', 'Set CACHE_STORE=redis and configure Valkey.'],
+            ['Redis cache', config('cache.default') === 'redis', 'Set CACHE_STORE=redis and configure the attached Redis resource.'],
+            ['Redis connection configuration', $this->redisConnectionIsConfigured(), 'Attach the Laravel Cloud Redis resource so REDIS_HOST and REDIS_PASSWORD are injected, or configure a non-local REDIS_URL/REDIS_* connection.'],
             ['Mail delivery', ! in_array(config('mail.default'), ['array', 'log'], true), 'Configure a real production mailer.'],
             ['CORS and API hosts', $this->corsAndApiHostsAreConsistent(), 'Set UKAPI_API_URL and CORS_ALLOWED_ORIGINS to the HTTPS public web/API origins.'],
             ['Legal entity name', $this->validLegalValue(config('legal.entity_name')), 'Set LEGAL_ENTITY_NAME to the approved legal or trading identity.'],
@@ -42,7 +43,7 @@ final class ProductionReadinessCheck extends Command
             ['Operator alerts', $this->operatorAlertsAreConfigured(), 'Enable alerts with HEALTH_ALERT_EMAIL or explicitly set HEALTH_ALERTS_WAIVED=true.'],
             ['SIC snapshot storage', $this->sicSnapshotStorageIsReady(), 'Set SIC_REFERENCE_SNAPSHOT_PATH to an existing writable directory when refresh is enabled.'],
             ['Laravel scheduler', (bool) config('ukapi.operations.scheduler_enabled'), 'Set UKAPI_SCHEDULER_ENABLED=true for the Laravel Cloud scheduler.'],
-            ['Queue execution mode', $this->queueWorkerExpectationIsConsistent(), 'Without a persistent Laravel Cloud worker, set QUEUE_CONNECTION=sync and UKAPI_QUEUE_WORKER_ENABLED=false. Otherwise enable the matching database or Valkey worker.'],
+            ['Queue execution mode', $this->queueWorkerExpectationIsConsistent(), 'Without a persistent Laravel Cloud worker, set QUEUE_CONNECTION=sync and UKAPI_QUEUE_WORKER_ENABLED=false. Otherwise enable the matching database or Redis worker.'],
             ['Queue backlog monitoring', $this->queueMonitorIsConfigured(), 'Enable database queue monitoring with HEALTH_ALERT_EMAIL when a worker exists, or set UKAPI_QUEUE_MONITOR_WAIVED=true for the intentional sync fallback.'],
             ['Stripe secret key', filled(config('cashier.secret')), 'Set STRIPE_SECRET in the secret manager.'],
             ['Stripe publishable key', filled(config('cashier.key')), 'Set STRIPE_KEY in the secret manager.'],
@@ -182,6 +183,52 @@ final class ProductionReadinessCheck extends Command
         return $workerEnabled && in_array($connection, ['database', 'redis'], true);
     }
 
+    private function redisConnectionIsConfigured(): bool
+    {
+        $store = config('cache.stores.redis');
+        if (! is_array($store)) {
+            return false;
+        }
+
+        $connections = array_unique([
+            $store['connection'] ?? 'cache',
+            $store['lock_connection'] ?? 'default',
+        ]);
+
+        foreach ($connections as $connectionName) {
+            if (! is_string($connectionName)) {
+                return false;
+            }
+
+            $connection = config("database.redis.{$connectionName}");
+            if (! is_array($connection) || ! $this->redisConnectionHasRemoteEndpoint($connection)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /** @param array<string, mixed> $connection */
+    private function redisConnectionHasRemoteEndpoint(array $connection): bool
+    {
+        $url = $connection['url'] ?? null;
+        if (is_string($url) && trim($url) !== '') {
+            $host = parse_url($url, PHP_URL_HOST);
+
+            return is_string($host) && ! in_array(strtolower($host), ['127.0.0.1', 'localhost'], true);
+        }
+
+        $host = $connection['host'] ?? null;
+        $password = $connection['password'] ?? null;
+
+        return is_string($host)
+            && trim($host) !== ''
+            && ! in_array(strtolower(trim($host)), ['127.0.0.1', 'localhost'], true)
+            && is_string($password)
+            && trim($password) !== '';
+    }
+
     private function queueMonitorIsConfigured(): bool
     {
         if ((bool) config('ukapi.operations.queue_monitor.enabled')) {
@@ -208,10 +255,10 @@ final class ProductionReadinessCheck extends Command
 
         try {
             $cache->get('ukapi:health:readiness');
-            $this->info('[ok] Valkey connection');
+            $this->info('[ok] Redis connection');
         } catch (\Throwable $exception) {
             report($exception);
-            $this->error('[missing] Valkey connection');
+            $this->error('[missing] Redis connection');
 
             return false;
         }
