@@ -5,6 +5,7 @@ namespace App\Domain\Usage;
 use App\Models\ApiKey;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
+use Throwable;
 
 final class UsageMeter
 {
@@ -33,7 +34,7 @@ final class UsageMeter
         $at ??= CarbonImmutable::now('UTC');
         $month = $this->periodStart($at)->toDateString();
 
-        return DB::transaction(function () use ($apiKey, $endpointCode, $quota, $at, $month): ?int {
+        $reservation = function () use ($apiKey, $endpointCode, $quota, $at, $month): ?int {
             DB::table('monthly_usage')->insertOrIgnore([
                 'user_id' => $apiKey->user_id,
                 'month' => $month,
@@ -68,12 +69,38 @@ final class UsageMeter
                 ->where('date', $date)->increment('requests', 1, ['updated_at' => $at]);
 
             return (int) $account->value('requests');
-        }, 5);
+        };
+
+        // Laravel retries transaction deadlocks immediately. A small bounded
+        // outer retry with jitter prevents competing account requests from
+        // repeatedly colliding on MySQL's row locks at the same instant.
+        foreach (range(1, 3) as $attempt) {
+            try {
+                return DB::transaction($reservation, 5);
+            } catch (Throwable $exception) {
+                if (! $this->isConcurrencyFailure($exception) || $attempt === 3) {
+                    throw $exception;
+                }
+
+                usleep(($attempt * 20_000) + random_int(0, 10_000));
+            }
+        }
+
+        throw new \LogicException('Usage reservation attempts were exhausted.');
     }
 
     public function periodStart(?CarbonImmutable $at = null): CarbonImmutable
     {
         return ($at ?? CarbonImmutable::now('UTC'))->utc()->startOfMonth();
+    }
+
+    private function isConcurrencyFailure(Throwable $exception): bool
+    {
+        $message = $exception->getMessage();
+
+        return str_contains($message, 'SQLSTATE[40001]')
+            || str_contains($message, 'Deadlock found')
+            || str_contains($message, 'Serialization failure');
     }
 
     public function monthlyResetAt(?CarbonImmutable $at = null): int
