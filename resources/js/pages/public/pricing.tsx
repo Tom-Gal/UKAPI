@@ -63,14 +63,16 @@ export default function Pricing() {
                                     </li>
                                 ))}
                             </ul>
-                            <Link
-                                href={auth.user ? '/billing' : '/register'}
-                                className={`mt-8 border px-4 py-3 text-center text-sm font-bold transition ${plan.emphasis ? 'border-white bg-white text-[#122019] hover:bg-[#dce9ff]' : 'border-slate-950 bg-transparent text-slate-900 hover:bg-[#e4ece7]'}`}
-                            >
-                                {auth.user
-                                    ? `Choose ${plan.name}`
-                                    : 'Create account'}
-                            </Link>
+                            <div className="mt-auto pt-8">
+                                <Link
+                                    href={auth.user ? '/billing' : '/register'}
+                                    className={`block border px-4 py-3 text-center text-sm font-bold transition ${plan.emphasis ? 'border-white bg-white text-[#122019] hover:bg-[#dce9ff]' : 'border-slate-950 bg-transparent text-slate-900 hover:bg-[#e4ece7]'}`}
+                                >
+                                    {auth.user
+                                        ? `Choose ${plan.name}`
+                                        : 'Create account'}
+                                </Link>
+                            </div>
                         </article>
                     ))}
                     <article className="flex flex-col border-r border-b border-slate-950 bg-[#e4ece7] p-6">
@@ -97,12 +99,14 @@ export default function Pricing() {
                                 </li>
                             ))}
                         </ul>
-                        <a
-                            href="mailto:contact@ukapi.co.uk?subject=Enterprise%20API%20enquiry"
-                            className="mt-8 border border-slate-950 bg-transparent px-4 py-3 text-center text-sm font-bold transition hover:bg-white"
-                        >
-                            Contact us
-                        </a>
+                        <div className="mt-auto pt-8">
+                            <a
+                                href="mailto:contact@ukapi.co.uk?subject=Enterprise%20API%20enquiry"
+                                className="block border border-slate-950 bg-transparent px-4 py-3 text-center text-sm font-bold transition hover:bg-white"
+                            >
+                                Contact us
+                            </a>
+                        </div>
                     </article>
                 </div>
                 <p className="mt-8 max-w-2xl text-sm leading-6 text-slate-500">

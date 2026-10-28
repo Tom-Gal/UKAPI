@@ -1015,7 +1015,12 @@ export const plans = [
         annualPrice: '£0',
         quota: '5,000',
         description: 'Evaluation and hobby projects.',
-        features: ['Current data'],
+        features: [
+            'Current data',
+            '5 requests/second',
+            'Up to 25 results/page',
+            'Scoped live & test API keys',
+        ],
         emphasis: false,
     },
     {
@@ -1024,7 +1029,12 @@ export const plans = [
         annualPrice: '£90',
         quota: '50,000',
         description: 'Current UK data for personal and small projects.',
-        features: ['Current data'],
+        features: [
+            'Current data',
+            '10 requests/second',
+            'Up to 50 results/page',
+            'Scoped live & test API keys',
+        ],
         emphasis: false,
     },
     {
@@ -1035,9 +1045,13 @@ export const plans = [
         description: 'Historical data, change feeds and commercial use.',
         features: [
             'Current data',
+            '25 requests/second',
+            'Up to 100 results/page',
+            'Scoped live & test API keys',
             'Historical data',
             'Change feeds',
             'Commercial use',
+            'IP allow lists',
         ],
         emphasis: true,
     },
@@ -1047,7 +1061,13 @@ export const plans = [
         annualPrice: '£890',
         quota: '1,000,000',
         description: 'Bulk export, higher limits and priority support.',
-        features: ['Everything in Pro', 'Bulk export'],
+        features: [
+            'Everything in Pro',
+            '50 requests/second',
+            'Up to 100 results/page',
+            'Bulk export',
+            'Priority support',
+        ],
         emphasis: false,
     },
 ];
@@ -1057,6 +1077,7 @@ export const enterprisePlan = {
     description:
         'For teams that need more than Scale, with a plan shaped around your volume and requirements.',
     features: [
+        'Everything in Scale',
         'Higher request volumes',
         'Dedicated support',
         'Custom commercial terms',

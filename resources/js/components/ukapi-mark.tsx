@@ -3,19 +3,27 @@ import { cn } from '@/lib/utils';
 export function UkapiMark({
     compact = false,
     className,
+    tone = 'default',
 }: {
     compact?: boolean;
     className?: string;
+    tone?: 'default' | 'inverse';
 }) {
+    const inverse = tone === 'inverse';
+
     return (
         <span
             className={cn(
-                'inline-flex items-center gap-2.5 font-semibold tracking-tight text-slate-950',
+                'inline-flex items-center gap-2.5 font-semibold tracking-tight',
+                inverse ? 'text-[#f5f7f4]' : 'text-slate-950',
                 className,
             )}
         >
             <span
-                className="grid size-8 shrink-0 place-items-center text-slate-950"
+                className={cn(
+                    'grid size-8 shrink-0 place-items-center',
+                    inverse ? 'text-[#f5f7f4]' : 'text-slate-950',
+                )}
                 aria-hidden="true"
             >
                 <svg
@@ -44,7 +52,12 @@ export function UkapiMark({
                     <span className="text-[15px] tracking-[-0.055em]">
                         UKApi.co.uk
                     </span>
-                    <span className="mt-1 font-mono text-[8px] font-medium tracking-[0.18em] text-slate-500 uppercase">
+                    <span
+                        className={cn(
+                            'mt-1 font-mono text-[8px] font-medium tracking-[0.18em] uppercase',
+                            inverse ? 'text-[#8fb49f]' : 'text-slate-500',
+                        )}
+                    >
                         Data field service
                     </span>
                 </span>

@@ -1,12 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import {
-    ArrowRight,
-    BookOpen,
-    Check,
-    Database,
-    Map,
-    ShieldCheck,
-} from 'lucide-react';
+import { ArrowRight, BookOpen, Check } from 'lucide-react';
 import { endpointFamilies, enterprisePlan, plans } from '@/lib/ukapi-content';
 
 const example = [
@@ -155,96 +148,178 @@ export default function Welcome() {
             </section>
 
             <section className="border-y border-slate-950 bg-[#dbe4cd]">
-                <div className="atlas-shell grid lg:grid-cols-3">
-                    <Value
-                        icon={Database}
-                        title="Predictable contracts"
-                        text="A consistent JSON envelope, stable error codes and clear versioning across every source."
-                    />
-                    <Value
-                        icon={Map}
-                        title="Coverage in view"
-                        text="UK-wide, England-only and partial coverage are treated as product information, not fine print."
-                    />
-                    <Value
-                        icon={ShieldCheck}
-                        title="Provenance included"
-                        text="Freshness, upstream source and request IDs travel with the data that needs them."
-                    />
-                </div>
-            </section>
-
-            <section className="atlas-shell py-20 lg:py-28">
-                <div className="grid gap-10 lg:grid-cols-[.8fr_1.2fr]">
-                    <div>
-                        <p className="atlas-kicker">Usage bands</p>
-                        <h2 className="mt-5 text-4xl leading-none font-semibold tracking-[-0.04em]">
-                            Start useful. Scale plainly.
+                <div className="atlas-shell grid lg:grid-cols-[.72fr_1.28fr]">
+                    <div className="border-b border-slate-950 py-14 lg:border-r lg:border-b-0 lg:py-20 lg:pr-14">
+                        <p className="atlas-kicker">Contract field notes</p>
+                        <h2 className="mt-5 max-w-lg text-4xl leading-[1.02] font-semibold tracking-[-0.04em] sm:text-5xl">
+                            Upstream complexity stays upstream.
                         </h2>
-                        <p className="mt-5 max-w-md leading-7 text-slate-600">
-                            Every live endpoint counts as one request. Pick a
-                            monthly allowance; the API stays the same. Quotas
-                            are hard at launch, with no overage billing.
+                        <p className="mt-6 max-w-lg text-base leading-7 text-slate-700">
+                            Providers disagree on authentication, schemas,
+                            coverage and freshness. UKApi.co.uk turns those
+                            differences into one documented contract while
+                            keeping the important limits attached to the data.
                         </p>
+                        <Link
+                            href="/data-sources"
+                            className="mt-7 inline-flex items-center gap-2 border-b border-slate-950 pb-1 text-sm font-bold hover:text-[#2563c7]"
+                        >
+                            Inspect the source register{' '}
+                            <ArrowRight className="size-4" />
+                        </Link>
                     </div>
-                    <div className="grid border-t border-l border-slate-950 sm:grid-cols-2 lg:grid-cols-5">
-                        {plans.map((plan) => (
-                            <div
-                                key={plan.name}
-                                className={`relative border-r border-b border-slate-950 p-6 ${plan.emphasis ? 'bg-[#122019] text-white' : 'bg-white'}`}
-                            >
-                                {plan.emphasis && (
-                                    <span className="absolute top-0 right-0 bg-[#2563c7] px-2 py-1 font-mono text-[9px] tracking-widest uppercase">
-                                        Most useful
-                                    </span>
-                                )}
-                                <p className="font-mono text-[11px] font-bold tracking-widest uppercase">
-                                    {plan.name}
-                                </p>
-                                <p className="mt-7 text-4xl font-semibold tracking-tight">
-                                    {plan.price}
-                                    <span className="font-sans text-sm font-normal opacity-60">
-                                        {' '}
-                                        / mo
-                                    </span>
-                                </p>
-                                <p
-                                    className={`mt-3 font-mono text-xs ${plan.emphasis ? 'text-[#b9cba6]' : 'text-[#2563c7]'}`}
-                                >
-                                    {plan.quota} requests
-                                </p>
-                                <p className="mt-4 text-sm leading-6 opacity-70">
-                                    {plan.description}
-                                </p>
+
+                    <div className="py-12 lg:py-16 lg:pl-14">
+                        <div className="border border-slate-950 bg-[#f5f7f4] shadow-[6px_6px_0_#8fb49f] sm:shadow-[8px_8px_0_#8fb49f]">
+                            <div className="grid grid-cols-[1fr_auto_1fr_auto_1fr] items-center border-b border-slate-950 bg-[#122019] px-4 py-4 text-center font-mono text-[9px] font-bold tracking-[0.12em] text-[#dce5d8] uppercase sm:px-6 sm:text-[10px]">
+                                <span>Provider</span>
+                                <ArrowRight
+                                    className="size-3.5 text-[#6ea1f2]"
+                                    aria-hidden="true"
+                                />
+                                <span>UKApi layer</span>
+                                <ArrowRight
+                                    className="size-3.5 text-[#6ea1f2]"
+                                    aria-hidden="true"
+                                />
+                                <span>/v1 contract</span>
                             </div>
-                        ))}
-                        <div className="flex flex-col border-r border-b border-slate-950 bg-[#e4ece7] p-6 sm:col-span-2 lg:col-span-1">
-                            <p className="font-mono text-[11px] font-bold tracking-widest uppercase">
-                                {enterprisePlan.name}
-                            </p>
-                            <p className="mt-7 text-4xl font-semibold tracking-tight">
-                                Contact
-                            </p>
-                            <p className="mt-3 font-mono text-xs text-[#2563c7]">
-                                Built around your volume
-                            </p>
-                            <p className="mt-4 text-sm leading-6 text-slate-700">
-                                {enterprisePlan.description}
-                            </p>
-                            <a
-                                href="mailto:contact@ukapi.co.uk?subject=Enterprise%20API%20enquiry"
-                                className="mt-6 inline-flex items-center justify-center border border-slate-950 bg-transparent px-4 py-3 text-sm font-bold transition hover:bg-white"
-                            >
-                                Contact us{' '}
-                                <ArrowRight className="ml-2 size-4" />
-                            </a>
+                            <ContractField
+                                field="source"
+                                value="Named provider, never an anonymous payload"
+                            />
+                            <ContractField
+                                field="coverage"
+                                value="UK, Great Britain, England or partial, stated plainly"
+                            />
+                            <ContractField
+                                field="freshness"
+                                value="Source timestamp and cache state where available"
+                            />
+                            <ContractField
+                                field="request_id"
+                                value="A traceable identifier on every response"
+                            />
+                            <div className="grid gap-2 border-t border-slate-950 bg-white px-5 py-4 sm:grid-cols-[8rem_1fr] sm:items-center sm:px-6">
+                                <span className="font-mono text-[10px] font-bold tracking-[0.12em] text-[#2563c7] uppercase">
+                                    Result
+                                </span>
+                                <code className="min-w-0 overflow-x-auto font-mono text-xs font-bold text-slate-800">
+                                    {
+                                        '{ data, meta: { request_id, source, coverage } }'
+                                    }
+                                </code>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div className="mt-8 flex justify-end">
-                    <Link href="/pricing" className="atlas-button-secondary">
-                        Compare every plan <ArrowRight className="size-4" />
-                    </Link>
+            </section>
+
+            <section className="border-t border-slate-950 bg-[#eef2ed]">
+                <div className="atlas-shell py-20 lg:py-28">
+                    <div className="grid gap-8 border-b border-slate-950 pb-10 lg:grid-cols-[1fr_auto] lg:items-end">
+                        <div>
+                            <p className="atlas-kicker">Usage bands</p>
+                            <h2 className="mt-5 text-4xl leading-none font-semibold tracking-[-0.04em] sm:text-5xl">
+                                Start useful. Scale plainly.
+                            </h2>
+                            <p className="mt-5 max-w-2xl leading-7 text-slate-600">
+                                Every live endpoint counts as one request. Pick
+                                a monthly allowance; the API contract stays the
+                                same. Quotas are hard at launch, with no overage
+                                billing.
+                            </p>
+                        </div>
+                        <Link
+                            href="/pricing"
+                            className="atlas-button-secondary"
+                        >
+                            Compare every plan <ArrowRight className="size-4" />
+                        </Link>
+                    </div>
+
+                    <div className="mt-10 border-t border-l border-slate-950">
+                        <div className="grid sm:grid-cols-2 lg:grid-cols-4">
+                            {plans.map((plan) => (
+                                <article
+                                    key={plan.name}
+                                    className={`relative grid grid-rows-[3rem_9rem_7rem_minmax(7.5rem,1fr)] border-r border-b border-slate-950 ${plan.emphasis ? 'bg-[#122019] text-white shadow-[inset_0_5px_0_#2563c7]' : 'bg-white'}`}
+                                >
+                                    <div className="flex items-start justify-between gap-3 px-6 pt-6 sm:px-7">
+                                        <h3 className="font-mono text-[11px] font-bold tracking-[0.16em] uppercase">
+                                            {plan.name}
+                                        </h3>
+                                        {plan.emphasis && (
+                                            <span className="font-mono text-[9px] font-bold tracking-[0.12em] text-[#8fb49f] uppercase">
+                                                Most useful
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    <dl className="contents">
+                                        <div className="border-b border-current/20 px-6 pt-6 sm:px-7">
+                                            <dt className="font-mono text-[9px] tracking-[0.14em] uppercase opacity-55">
+                                                Monthly price
+                                            </dt>
+                                            <dd className="mt-2 text-5xl font-semibold tracking-[-0.04em]">
+                                                {plan.price}
+                                                <span className="ml-1 text-sm font-normal tracking-normal opacity-55">
+                                                    / mo
+                                                </span>
+                                            </dd>
+                                        </div>
+                                        <div className="border-b border-current/20 px-6 pt-5 sm:px-7">
+                                            <dt className="font-mono text-[9px] tracking-[0.14em] uppercase opacity-55">
+                                                Request allowance
+                                            </dt>
+                                            <dd
+                                                className={`mt-2 font-mono text-sm font-bold ${plan.emphasis ? 'text-[#b9cba6]' : 'text-[#2563c7]'}`}
+                                            >
+                                                {plan.quota} / month
+                                            </dd>
+                                        </div>
+                                    </dl>
+
+                                    <div className="px-6 pt-5 sm:px-7">
+                                        <p className="font-mono text-[9px] tracking-[0.14em] uppercase opacity-55">
+                                            Designed for
+                                        </p>
+                                        <p className="mt-2 text-sm leading-6 opacity-75">
+                                            {plan.description}
+                                        </p>
+                                    </div>
+                                </article>
+                            ))}
+                        </div>
+
+                        <div className="grid border-r border-b border-slate-950 bg-[#dbe4cd] lg:grid-cols-[.65fr_1.35fr_auto] lg:items-center">
+                            <div className="border-b border-slate-950 p-6 sm:p-7 lg:border-r lg:border-b-0">
+                                <p className="font-mono text-[10px] font-bold tracking-[0.16em] text-[#2563c7] uppercase">
+                                    Custom route
+                                </p>
+                                <h3 className="mt-2 text-2xl font-semibold tracking-tight">
+                                    {enterprisePlan.name}
+                                </h3>
+                            </div>
+                            <div className="border-b border-slate-950 p-6 sm:p-7 lg:border-r lg:border-b-0">
+                                <p className="max-w-2xl text-sm leading-6 text-slate-700">
+                                    {enterprisePlan.description}
+                                </p>
+                                <p className="mt-3 font-mono text-[10px] leading-5 tracking-[0.06em] text-slate-600 uppercase">
+                                    {enterprisePlan.features.join(' · ')}
+                                </p>
+                            </div>
+                            <div className="p-6 sm:p-7">
+                                <a
+                                    href="mailto:contact@ukapi.co.uk?subject=Enterprise%20API%20enquiry"
+                                    className="atlas-button w-full whitespace-nowrap lg:w-auto"
+                                >
+                                    Discuss enterprise{' '}
+                                    <ArrowRight className="size-4" />
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -281,20 +356,13 @@ function Stat({ value, label }: { value: string; label: string }) {
     );
 }
 
-function Value({
-    icon: Icon,
-    title,
-    text,
-}: {
-    icon: typeof Database;
-    title: string;
-    text: string;
-}) {
+function ContractField({ field, value }: { field: string; value: string }) {
     return (
-        <div className="border-b border-slate-950 p-8 last:border-b-0 lg:border-r lg:border-b-0 lg:last:border-r-0">
-            <Icon className="size-6 text-[#2563c7]" strokeWidth={1.7} />
-            <h3 className="mt-8 font-sans text-lg font-bold">{title}</h3>
-            <p className="mt-3 text-sm leading-6 text-slate-700">{text}</p>
+        <div className="grid gap-2 border-b border-slate-300 px-5 py-4 last:border-b-0 sm:grid-cols-[8rem_1fr] sm:items-center sm:px-6">
+            <code className="font-mono text-xs font-bold text-[#2563c7]">
+                {field}
+            </code>
+            <p className="text-sm leading-6 text-slate-700">{value}</p>
         </div>
     );
 }

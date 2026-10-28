@@ -154,7 +154,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
             <footer className="border-t border-slate-950 bg-[#122019] text-[#f5f7f4]">
                 <div className="atlas-shell grid gap-10 py-12 md:grid-cols-[1.4fr_.8fr_.8fr]">
                     <div>
-                        <UkapiMark className="text-[#f5f7f4] [&_span:last-child_span:last-child]:text-[#8fb49f]" />
+                        <UkapiMark tone="inverse" />
                         <p className="mt-5 max-w-md text-sm leading-6 text-[#cbd2c7]">
                             Useful UK data through one predictable API. Built
                             for developers, with source limits left in view.
