@@ -53,7 +53,37 @@ jobs:
         run: composer types:check
 
       - name: Run PHP tests
-        run: php artisan test
+        id: php_tests
+        continue-on-error: true
+        run: |
+          mkdir -p storage/test-results
+          php artisan test --log-junit storage/test-results/phpunit.xml
+
+      - name: Publish PHP test failure annotations
+        if: always()
+        env:
+          PHP_TEST_OUTCOME: ${{ steps.php_tests.outcome }}
+        run: |
+          if [ -f storage/test-results/phpunit.xml ]; then
+            php -r '
+              $report = simplexml_load_file($argv[1]);
+              if ($report === false) {
+                  fwrite(STDERR, "::error title=PHPUnit report::Could not parse PHPUnit JUnit output.\n");
+                  exit(1);
+              }
+
+              $failures = $report->xpath("//testcase[failure or error]") ?: [];
+              foreach ($failures as $failure) {
+                  $class = (string) $failure["class"];
+                  $name = (string) $failure["name"];
+                  fwrite(STDERR, "::error title=PHPUnit failure::{$class}::{$name}\n");
+              }
+            ' storage/test-results/phpunit.xml
+          else
+            echo "::error title=PHPUnit report::PHPUnit did not produce a JUnit report."
+          fi
+
+          test "$PHP_TEST_OUTCOME" = success
 
       - name: Audit locked PHP dependencies
         run: composer audit --locked --no-interaction
