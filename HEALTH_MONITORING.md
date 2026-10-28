@@ -63,17 +63,27 @@ keep their frequency within source terms and published limits.
 
 ## Queue and failed-job monitoring
 
+The current Laravel Cloud plan has no persistent Worker cluster, so production
+uses the explicit synchronous fallback: `QUEUE_CONNECTION=sync`,
+`UKAPI_QUEUE_WORKER_ENABLED=false`, `UKAPI_QUEUE_MONITOR_ENABLED=false`, and
+`UKAPI_QUEUE_MONITOR_WAIVED=true`. No jobs are intentionally written to the
+database queue in that mode. Monitor the mail provider and the ordinary health
+alerts; do not create a scheduler workaround to consume queue jobs.
+
+When a persistent database worker becomes available, remove that waiver and
+enable the queue configuration below.
+
 `ukapi:queue:monitor` runs every five minutes and watches the database-backed
 mail queue. It reports a degraded queue when any failed job exists, more than
 `UKAPI_QUEUE_MONITOR_MAX_PENDING` jobs are waiting, or the oldest job exceeds
 `UKAPI_QUEUE_MONITOR_MAX_OLDEST_SECONDS`. Repeated alerts are limited by
 `UKAPI_QUEUE_MONITOR_REPEAT_AFTER_MINUTES`, and one recovery alert is sent.
 
-The queue alarm is the only synchronous application email. It runs from the
-scheduler, never a web or API request, and deliberately bypasses the unhealthy
-queue. Laravel Cloud worker logs and the admin Operations page provide the job
-details. Do not include serialized job payloads in incident tickets because they
-can contain mail content and customer identifiers.
+The queue alarm is the only synchronous application email when queue mode is
+enabled. It runs from the scheduler, never a web or API request, and deliberately
+bypasses the unhealthy queue. Laravel Cloud worker logs and the admin Operations
+page provide the job details. Do not include serialized job payloads in incident
+tickets because they can contain mail content and customer identifiers.
 
 ## Incident ownership and response
 
@@ -108,6 +118,6 @@ Before launch, verify:
    later successful check sends recovery.
 4. The production synthetic workflow fails only after repeated errors or latency
    breaches, opens one issue, and closes it after recovery.
-5. A deliberately stopped Laravel Cloud worker causes the queue monitor to alert
-   once the oldest-job threshold is crossed; restarting it sends recovery after
-   the backlog drains.
+5. When queue mode is enabled, a deliberately stopped Laravel Cloud worker causes
+   the queue monitor to alert once the oldest-job threshold is crossed; restarting
+   it sends recovery after the backlog drains.

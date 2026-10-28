@@ -1,6 +1,6 @@
 # UKApi.co.uk Roadmap
 
-**Last audited:** 27 October 2026
+**Last audited:** 28 October 2026
 **Purpose:** A living, prioritised list of work that remains after comparing the current repository, production runbooks, tests, public contract, and original product reports.  
 **Governing conventions:** See `AGENTS.md`.
 
@@ -27,7 +27,7 @@ The audit found a strong functional baseline:
 - Durable account-level quotas, endpoint breakdowns, change feeds, SIC bulk export, Stripe billing, authentication, passkeys, structured legal pages, transactional mail, source health sampling, and dataset snapshots are already present.
 - The admin area now exposes privacy-safe endpoint latency/error aggregates, provider observations, health incidents and acknowledgement notes, quota/rate-limit hotspots, queue and notification health, snapshot age/version, and audited API-key revocation.
 - MOT responses are mapped into a whitelisted typed contract, validated again when read from the semantic cache, and documented with an exact OpenAPI schema rather than exposing the DVSA payload directly.
-- All customer and security mail is queued after commit with bounded retries on a dedicated Laravel Cloud database worker design. Critical mail has priority, familiar sign-in alerts are deduplicated without storing raw fingerprints, and scheduler-only queue failure alerts bypass the queue they monitor.
+- All customer and security mail implements after-commit queue delivery with bounded retries, priority handling and familiar sign-in deduplication. The current Laravel Cloud plan has no persistent Worker cluster, so production intentionally uses the safe synchronous fallback until that capability is available; queue backlog and failed-job controls remain ready but inactive.
 - Independent GitHub-hosted synthetic checks cover liveness, readiness, public/authentication pages, OpenAPI and a scoped API request with repeated-failure and latency alerting.
 - Laravel Cloud MySQL backup/restore policy, RPO/RTO, an isolated restore procedure and a privacy-safe recovery manifest command are documented in `RECOVERY.md`.
 
@@ -51,8 +51,9 @@ the current branch:
   enforced by an automated feature test;
 - mail transport failures are isolated from successful sign-in, password,
   API-key, subscription-webhook, usage, health, and support operations;
-- non-critical and security notifications leave web/API requests through the
-  database queue, with queue-boundary, retry and failed-job monitoring controls;
+- notification classes have database-queue, retry and failed-job monitoring
+  controls, plus an explicit safe synchronous mode for Laravel Cloud plans
+  without persistent workers;
 - independent production synthetic monitoring is repository-owned and opens one
   incident after repeated failures rather than paging on a transient response;
 - recovery verification covers critical MySQL state and treats the durable MySQL
@@ -66,6 +67,25 @@ approval process. The readiness command intentionally keeps rejecting missing or
 placeholder values; no invented identity has been added to the repository.
 
 ## P1: Production operations and resilience
+
+### P1.3 Activate queued notification delivery when persistent workers are available
+
+The application code supports priority database queues, bounded retry/backoff,
+queue-boundary tests and failed-job monitoring. It cannot be activated on the
+current Laravel Cloud plan because it has no persistent Worker cluster. The
+deployed configuration therefore uses `QUEUE_CONNECTION=sync` and an explicit
+queue-monitor waiver so mail is delivered rather than left in an unconsumed
+database queue.
+
+Work when the hosting capability is available:
+
+- provision a dedicated Laravel Cloud Worker cluster and enable the documented
+  `mail-critical,mail` process;
+- switch the environment to the database queue configuration and remove the
+  monitor waiver;
+- verify dispatch, consumption, retry, failed-job alerting and recovery with a
+  non-production account; and
+- record the operational evidence in `DEPLOYMENT.md` and this roadmap.
 
 ### P1.6 Add MySQL integration coverage to CI
 
@@ -290,11 +310,12 @@ Continue to avoid microservices, Kafka, Kubernetes, Elasticsearch/OpenSearch, Gr
 ## Suggested execution order
 
 1. Supply and approve the production legal identity and retention values.
-2. Activate and verify the documented Laravel Cloud worker, synthetic-monitor secret and first isolated MySQL restore drill; record the real drill evidence in `RECOVERY.md`.
-3. Add MySQL CI and expand contract-parity coverage to parameters, bounds, schemas, and headers.
-4. Remove duplicated plan/pricing truth.
-5. Add low-risk outcode, council, bank-holiday, working-day, and tax-year endpoints.
-6. Implement food hygiene.
-7. Expand observability, resilience, snapshots, and customer usage insight based on production data.
-8. Add accessibility/browser coverage and approved retention/deletion operations.
-9. Approach planning, broader exports, teams, SDKs, and new datasets only after licensing review and demand validation.
+2. Activate the synthetic-monitor secret and perform the first isolated MySQL restore drill; record the real drill evidence in `RECOVERY.md`.
+3. When the Laravel Cloud plan provides a persistent Worker cluster, activate and verify queued notification delivery as P1.3.
+4. Add MySQL CI and expand contract-parity coverage to parameters, bounds, schemas, and headers.
+5. Remove duplicated plan/pricing truth.
+6. Add low-risk outcode, council, bank-holiday, working-day, and tax-year endpoints.
+7. Implement food hygiene.
+8. Expand observability, resilience, snapshots, and customer usage insight based on production data.
+9. Add accessibility/browser coverage and approved retention/deletion operations.
+10. Approach planning, broader exports, teams, SDKs, and new datasets only after licensing review and demand validation.

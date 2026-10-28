@@ -125,25 +125,21 @@ class OperationalReadinessTest extends TestCase
                 ->expectsOutput('[missing] Operator alerts: Enable alerts with HEALTH_ALERT_EMAIL or explicitly set HEALTH_ALERTS_WAIVED=true.')
                 ->expectsOutput('[missing] SIC snapshot storage: Set SIC_REFERENCE_SNAPSHOT_PATH to an existing writable directory when refresh is enabled.')
                 ->expectsOutput('[missing] Laravel scheduler: Set UKAPI_SCHEDULER_ENABLED=true for the Laravel Cloud scheduler.')
-                ->expectsOutput('[missing] Queue worker expectation: Set UKAPI_QUEUE_WORKER_ENABLED to match QUEUE_CONNECTION and the Laravel Cloud worker.')
-                ->expectsOutput('[missing] Queue failure monitoring: Enable UKAPI_QUEUE_MONITOR_ENABLED with HEALTH_ALERT_EMAIL, or explicitly waive it.')
+                ->expectsOutput('[missing] Queue execution mode: Without a persistent Laravel Cloud worker, set QUEUE_CONNECTION=sync and UKAPI_QUEUE_WORKER_ENABLED=false. Otherwise enable the matching database or Valkey worker.')
+                ->expectsOutput('[missing] Queue backlog monitoring: Enable database queue monitoring with HEALTH_ALERT_EMAIL when a worker exists, or set UKAPI_QUEUE_MONITOR_WAIVED=true for the intentional sync fallback.')
                 ->assertFailed();
         } finally {
             $this->restoreTestingConfiguration($mysql);
         }
     }
 
-    public function test_production_check_accepts_explicit_monitoring_alert_and_sync_queue_waivers(): void
+    public function test_production_check_accepts_the_intentional_sync_no_worker_mode(): void
     {
         $mysql = config('database.connections.mysql');
 
         try {
             $this->configureProduction();
             config()->set([
-                'health.enabled' => false,
-                'health.waived' => true,
-                'health.alerts.enabled' => false,
-                'health.alerts.waived' => true,
                 'queue.default' => 'sync',
                 'ukapi.operations.queue_worker_enabled' => false,
                 'ukapi.operations.queue_monitor.enabled' => false,
@@ -153,8 +149,8 @@ class OperationalReadinessTest extends TestCase
             $this->artisan('ukapi:production:check')
                 ->expectsOutput('[ok] Health monitoring')
                 ->expectsOutput('[ok] Operator alerts')
-                ->expectsOutput('[ok] Queue worker expectation')
-                ->expectsOutput('[ok] Queue failure monitoring')
+                ->expectsOutput('[ok] Queue execution mode')
+                ->expectsOutput('[ok] Queue backlog monitoring')
                 ->assertSuccessful();
         } finally {
             $this->restoreTestingConfiguration($mysql);

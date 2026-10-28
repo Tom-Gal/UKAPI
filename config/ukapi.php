@@ -11,8 +11,10 @@ return [
     'api_url' => env('UKAPI_API_URL', 'https://api.ukapi.co.uk'),
 
     'operations' => [
-        // These values make Laravel Cloud's scheduler and worker expectations
-        // explicit without trying to introspect host-level deployment state.
+        // These values make Laravel Cloud's scheduler and optional worker
+        // expectations explicit without trying to introspect host-level
+        // deployment state. A no-worker environment uses the sync queue
+        // connection and records an explicit queue-monitor waiver.
         'scheduler_enabled' => (bool) env('UKAPI_SCHEDULER_ENABLED', false),
         'queue_worker_enabled' => (bool) env('UKAPI_QUEUE_WORKER_ENABLED', false),
         'queue_monitor' => [

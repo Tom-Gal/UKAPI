@@ -13,7 +13,11 @@ return [
     |
     */
 
-    'default' => env('QUEUE_CONNECTION', 'database'),
+    // A persistent worker is not available on every Laravel Cloud plan. Keep
+    // the safe no-worker behaviour as the default: notifications execute via
+    // Laravel's synchronous driver until an operator explicitly enables a
+    // database or Valkey worker.
+    'default' => env('QUEUE_CONNECTION', 'sync'),
 
     /*
     |--------------------------------------------------------------------------
