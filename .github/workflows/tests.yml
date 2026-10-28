@@ -161,7 +161,7 @@ jobs:
         run: |
           mkdir -p storage/test-results
           set +e
-          php artisan test --configuration=phpunit.mysql.xml \
+          vendor/bin/phpunit --configuration=phpunit.mysql.xml \
             --log-junit storage/test-results/mysql-concurrency.xml \
             tests/Feature/MySqlUsageConcurrencyTest.php
           outcome=$?
@@ -185,7 +185,7 @@ jobs:
         continue-on-error: true
         run: |
           mkdir -p storage/test-results
-          php artisan test --configuration=phpunit.mysql.xml --log-junit storage/test-results/mysql.xml \
+          vendor/bin/phpunit --configuration=phpunit.mysql.xml --log-junit storage/test-results/mysql.xml \
             tests/Feature/DurableUsageTest.php \
             tests/Feature/PlanEntitlementsTest.php \
             tests/Feature/SnapshotStoreTest.php \

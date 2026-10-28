@@ -18,7 +18,7 @@ final class MySqlUsageConcurrencyTest extends TestCase
 
         $user = User::factory()->create();
         $keys = [];
-        foreach (range(1, 2) as $index) {
+        foreach (range(1, 6) as $index) {
             $keys[] = $user->apiKeys()->create([
                 'public_id' => 'k_mysql_concurrency_'.$index.'_'.Str::lower(Str::random(8)),
                 'secret_hash' => 'unused-by-meter-test',
