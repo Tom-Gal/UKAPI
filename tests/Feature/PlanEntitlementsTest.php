@@ -19,6 +19,7 @@ class PlanEntitlementsTest extends TestCase
 
     public function test_the_durable_catalog_exposes_the_expected_plan_matrix(): void
     {
+        $this->configureTestPrices();
         $catalog = app(PlanCatalog::class);
 
         $this->assertSame([
@@ -48,9 +49,7 @@ class PlanEntitlementsTest extends TestCase
             EnforceApiRateLimit::class,
         ])->get('/v1/test-plan-feature', static fn () => response()->json(['ok' => true]));
 
-        config()->set('ukapi.paid_plans.hobby.stripe_price', 'price_hobby_matrix');
-        config()->set('ukapi.paid_plans.pro.stripe_price', 'price_pro_matrix');
-        config()->set('ukapi.paid_plans.scale.stripe_price', 'price_scale_matrix');
+        $this->configureTestPrices();
 
         $user = User::factory()->create();
         if ($stripePrice !== null) {
@@ -85,12 +84,12 @@ class PlanEntitlementsTest extends TestCase
 
     public function test_annual_prices_are_supported_without_changing_stable_plan_keys(): void
     {
-        config()->set('ukapi.paid_plans.pro.annual_stripe_price', 'price_pro_annual_test');
+        $this->configureTestPrices();
 
         $plan = app(PlanCatalog::class)->checkoutable('pro', 'year');
 
         $this->assertSame('pro', $plan['key']);
-        $this->assertSame('price_pro_annual_test', $plan['stripe_price']);
+        $this->assertSame('price_pro_matrix_annual', $plan['stripe_price']);
     }
 
     /** @return array{0: mixed, 1: string} */
@@ -106,5 +105,17 @@ class PlanEntitlementsTest extends TestCase
         ]);
 
         return [$apiKey, "uk_test_{$apiKey->public_id}.{$secret}"];
+    }
+
+    private function configureTestPrices(): void
+    {
+        config()->set([
+            'ukapi.paid_plans.hobby.stripe_price' => 'price_hobby_matrix',
+            'ukapi.paid_plans.hobby.annual_stripe_price' => 'price_hobby_matrix_annual',
+            'ukapi.paid_plans.pro.stripe_price' => 'price_pro_matrix',
+            'ukapi.paid_plans.pro.annual_stripe_price' => 'price_pro_matrix_annual',
+            'ukapi.paid_plans.scale.stripe_price' => 'price_scale_matrix',
+            'ukapi.paid_plans.scale.annual_stripe_price' => 'price_scale_matrix_annual',
+        ]);
     }
 }
