@@ -158,7 +158,27 @@ jobs:
           php artisan migrate --force
 
       - name: Verify MySQL cross-process quota reservation
-        run: php artisan test --configuration=phpunit.mysql.xml tests/Feature/MySqlUsageConcurrencyTest.php
+        run: |
+          mkdir -p storage/test-results
+          set +e
+          php artisan test --configuration=phpunit.mysql.xml \
+            --log-junit storage/test-results/mysql-concurrency.xml \
+            tests/Feature/MySqlUsageConcurrencyTest.php
+          outcome=$?
+
+          if [ "$outcome" -ne 0 ] && [ -f storage/test-results/mysql-concurrency.xml ]; then
+            php -r '
+              $report = simplexml_load_file($argv[1]);
+              foreach (($report?->xpath("//testcase[failure or error]") ?: []) as $failure) {
+                  $detail = trim((string) ($failure->failure ?? $failure->error ?? ""));
+                  $detail = preg_replace("/\\s+/", " ", $detail) ?? "";
+                  $detail = substr($detail, 0, 500);
+                  fwrite(STDERR, "::error title=MySQL quota concurrency test::{$detail}\\n");
+              }
+            ' storage/test-results/mysql-concurrency.xml
+          fi
+
+          exit "$outcome"
 
       - name: Run focused MySQL integration tests
         id: mysql_tests
