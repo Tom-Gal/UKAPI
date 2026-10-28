@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminIncidentController;
 use App\Http\Controllers\AdminSupportActionController;
+use App\Http\Controllers\AdminTestingController;
 use App\Http\Controllers\ApiKeyController;
 use App\Http\Controllers\ApiKeySecurityExportController;
 use App\Http\Controllers\BillingController;
@@ -48,6 +49,8 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     Route::get('/users', [AdminController::class, 'users'])->name('users');
     Route::get('/providers', [AdminController::class, 'providers'])->name('providers');
     Route::get('/operations', [AdminController::class, 'operations'])->name('operations');
+    Route::get('/testing', [AdminController::class, 'testing'])->name('testing');
+    Route::post('/testing/health', [AdminTestingController::class, 'health'])->name('testing.health');
     Route::post('/incidents/{incident}/acknowledge', [AdminIncidentController::class, 'acknowledge'])
         ->name('incidents.acknowledge');
     Route::post('/api-keys/{apiKey}/revoke', [AdminSupportActionController::class, 'revokeApiKey'])

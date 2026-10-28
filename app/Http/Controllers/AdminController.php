@@ -4,18 +4,22 @@ namespace App\Http\Controllers;
 
 use App\Domain\Health\HealthStatus;
 use App\Domain\Operations\AdminOperations;
+use App\Domain\Operations\ProductionReadiness;
 use App\Models\ApiKey;
 use App\Models\DatasetSnapshotHead;
 use App\Models\ServiceHealthCheck;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class AdminController extends Controller
 {
-    public function overview(HealthStatus $health, AdminOperations $operations): Response
+    public function overview(HealthStatus $health, AdminOperations $operations, ProductionReadiness $readiness): Response
     {
         $providers = $this->providerStatus($health);
+        $healthServices = $health->services();
+        $readinessChecks = $readiness->checks();
 
         return Inertia::render('admin/overview', [
             'usersCount' => User::count(),
@@ -27,6 +31,22 @@ class AdminController extends Controller
                 fn (array $provider): bool => ! in_array($provider['configuration'], ['Credential missing', 'Snapshot missing'], true),
             )),
             'operations' => $operations->headline(),
+            'healthSummary' => $this->healthSummary($healthServices),
+            'readinessSummary' => $this->readinessSummary($readinessChecks),
+        ]);
+    }
+
+    public function testing(Request $request, HealthStatus $health, ProductionReadiness $readiness): Response
+    {
+        $runtime = $readiness->runtime();
+
+        return Inertia::render('admin/testing', [
+            'runtime' => $runtime,
+            'readinessChecks' => $readiness->checks(),
+            'services' => $health->services(),
+            'apiUrl' => $runtime['api_url'],
+            'healthResults' => $request->session()->get('health_results'),
+            'status' => $request->session()->get('status'),
         ]);
     }
 
@@ -113,6 +133,30 @@ class AdminController extends Controller
                     ? 'Snapshot available'
                     : 'Snapshot missing',
             ),
+        ];
+    }
+
+    /** @param list<array<string, mixed>> $services
+     * @return array{available: int, total: int, attention: int}
+     */
+    private function healthSummary(array $services): array
+    {
+        return [
+            'available' => count(array_filter($services, static fn (array $service): bool => $service['state'] === 'available')),
+            'total' => count($services),
+            'attention' => count(array_filter($services, static fn (array $service): bool => $service['state'] !== 'available')),
+        ];
+    }
+
+    /** @param list<array{key: string, passed: bool, guidance: string}> $checks
+     * @return array{passed: int, total: int, attention: int}
+     */
+    private function readinessSummary(array $checks): array
+    {
+        return [
+            'passed' => count(array_filter($checks, static fn (array $check): bool => $check['passed'])),
+            'total' => count($checks),
+            'attention' => count(array_filter($checks, static fn (array $check): bool => ! $check['passed'])),
         ];
     }
 }

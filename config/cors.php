@@ -2,7 +2,7 @@
 
 return [
 
-    'paths' => ['v1/*', 'openapi/*'],
+    'paths' => ['ready', 'v1/*', 'openapi/*'],
 
     'allowed_methods' => ['GET', 'OPTIONS'],
 

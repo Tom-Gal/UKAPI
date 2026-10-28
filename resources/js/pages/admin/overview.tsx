@@ -1,4 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
+import { Activity, CircleCheck, TriangleAlert } from 'lucide-react';
 import { AdminNav } from '@/components/admin-nav';
 import { DashboardPageHeader } from '@/components/dashboard-page-header';
 
@@ -7,6 +8,8 @@ export default function AdminOverview({
     activeKeysCount,
     providersCount,
     operations,
+    healthSummary,
+    readinessSummary,
 }: {
     usersCount: number;
     activeKeysCount: number;
@@ -17,6 +20,16 @@ export default function AdminOverview({
         failed_jobs: number;
         notification_failures_24h: number;
         rejections_today: number;
+    };
+    healthSummary: {
+        available: number;
+        total: number;
+        attention: number;
+    };
+    readinessSummary: {
+        passed: number;
+        total: number;
+        attention: number;
     };
 }) {
     return (
@@ -65,6 +78,61 @@ export default function AdminOverview({
                         value={providersCount}
                         link="/admin/providers"
                     />
+                    <Card
+                        label="Service health"
+                        value={`${healthSummary.available} / ${healthSummary.total}`}
+                        detail={
+                            healthSummary.attention === 0
+                                ? 'All observed services available'
+                                : `${healthSummary.attention} service(s) need attention`
+                        }
+                        link="/admin/testing"
+                        attention={healthSummary.attention > 0}
+                    />
+                    <Card
+                        label="Readiness checks"
+                        value={`${readinessSummary.passed} / ${readinessSummary.total}`}
+                        detail={
+                            readinessSummary.attention === 0
+                                ? 'Production configuration is ready'
+                                : `${readinessSummary.attention} configuration item(s) need attention`
+                        }
+                        link="/admin/testing"
+                        attention={readinessSummary.attention > 0}
+                    />
+                </div>
+                <div className="mt-8 grid gap-4 lg:grid-cols-2">
+                    <Link
+                        href="/admin/testing"
+                        className="flex items-start gap-4 border border-slate-200 bg-white p-5 hover:border-blue-300"
+                    >
+                        <Activity className="mt-0.5 size-5 text-[#2563c7]" />
+                        <span>
+                            <span className="block font-semibold">
+                                Open testing centre
+                            </span>
+                            <span className="mt-1 block text-sm leading-6 text-slate-600">
+                                Run the internal health probes and check the
+                                deployed API surface.
+                            </span>
+                        </span>
+                    </Link>
+                    <div className="flex items-start gap-4 border border-slate-200 bg-white p-5">
+                        {readinessSummary.attention === 0 ? (
+                            <CircleCheck className="mt-0.5 size-5 text-emerald-700" />
+                        ) : (
+                            <TriangleAlert className="mt-0.5 size-5 text-amber-700" />
+                        )}
+                        <span>
+                            <span className="block font-semibold">
+                                Configuration is read-only here
+                            </span>
+                            <span className="mt-1 block text-sm leading-6 text-slate-600">
+                                Change environment-backed settings through the
+                                deployment system, then rerun the checks.
+                            </span>
+                        </span>
+                    </div>
                 </div>
             </main>
         </>
