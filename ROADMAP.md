@@ -89,13 +89,16 @@ Work when the hosting capability is available:
 
 ### P1.6 Add MySQL integration coverage to CI
 
-SQLite is fast and should remain the default test database, but it cannot validate every MySQL locking, collation, JSON, index, or concurrent quota behaviour.
+Complete in the repository: CI now runs a focused MySQL 8.4 job alongside the
+fast full SQLite suite. It validates a fresh schema, rolls back and reapplies
+the latest migration, and exercises durable usage, cross-process quota
+reservation, plan catalogue, snapshots, recovery manifests and Companies House
+fixture mapping against MySQL.
 
-Work:
-
-- Add a focused MySQL CI job for migrations, durable usage/concurrency, plan catalogue, snapshots, and representative provider-backed feature tests.
-- Keep the full fast SQLite suite.
-- Verify a fresh MySQL schema and an upgrade from a representative prior migration state.
+Operational follow-up: review MySQL CI failures alongside Laravel Cloud's MySQL
+version when either changes, and expand this job only where a production query
+or migration uses MySQL-specific behaviour that the focused suite does not yet
+cover.
 
 ### P1.7 Improve observability around the API contract
 
