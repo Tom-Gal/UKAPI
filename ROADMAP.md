@@ -315,7 +315,7 @@ Continue to avoid microservices, Kafka, Kubernetes, Elasticsearch/OpenSearch, Gr
 1. Supply and approve the production legal identity and retention values.
 2. Activate the synthetic-monitor secret and perform the first isolated MySQL restore drill; record the real drill evidence in `RECOVERY.md`.
 3. When the Laravel Cloud plan provides a persistent Worker cluster, activate and verify queued notification delivery as P1.3.
-4. Add MySQL CI and expand contract-parity coverage to parameters, bounds, schemas, and headers.
+4. Expand MySQL CI only for production-specific behaviour and extend contract-parity coverage to parameters, bounds, schemas, and headers.
 5. Remove duplicated plan/pricing truth.
 6. Add low-risk outcode, council, bank-holiday, working-day, and tax-year endpoints.
 7. Implement food hygiene.
