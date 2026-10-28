@@ -35,6 +35,13 @@ final class UsageMeter
         $month = $this->periodStart($at)->toDateString();
 
         $reservation = function () use ($apiKey, $endpointCode, $quota, $at, $month): ?int {
+            // Serialise only this account's short MySQL usage transaction.
+            // This establishes a consistent lock order before aggregate rows
+            // are created, while requests for different accounts remain concurrent.
+            if (DB::connection()->getDriverName() === 'mysql') {
+                DB::table('users')->where('id', $apiKey->user_id)->lockForUpdate()->value('id');
+            }
+
             DB::table('monthly_usage')->insertOrIgnore([
                 'user_id' => $apiKey->user_id,
                 'month' => $month,
