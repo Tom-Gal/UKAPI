@@ -76,7 +76,10 @@ jobs:
               foreach ($failures as $failure) {
                   $class = (string) $failure["class"];
                   $name = (string) $failure["name"];
-                  fwrite(STDERR, "::error title=PHPUnit failure::{$class}::{$name}\n");
+                  $detail = trim((string) ($failure->failure ?? $failure->error ?? ""));
+                  $detail = preg_replace("/\s+/", " ", $detail) ?? "";
+                  $detail = substr($detail, 0, 500);
+                  fwrite(STDERR, "::error title=PHPUnit failure::{$class}::{$name} {$detail}\n");
               }
             ' storage/test-results/phpunit.xml
           else
