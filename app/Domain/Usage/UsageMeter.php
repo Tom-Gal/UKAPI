@@ -74,15 +74,15 @@ final class UsageMeter
         // Laravel retries transaction deadlocks immediately. A small bounded
         // outer retry with jitter prevents competing account requests from
         // repeatedly colliding on MySQL's row locks at the same instant.
-        foreach (range(1, 3) as $attempt) {
+        foreach (range(1, 5) as $attempt) {
             try {
                 return DB::transaction($reservation, 5);
             } catch (Throwable $exception) {
-                if (! $this->isConcurrencyFailure($exception) || $attempt === 3) {
+                if (! $this->isConcurrencyFailure($exception) || $attempt === 5) {
                     throw $exception;
                 }
 
-                usleep(($attempt * 20_000) + random_int(0, 10_000));
+                usleep((25_000 * (2 ** ($attempt - 1))) + random_int(0, 25_000));
             }
         }
 
