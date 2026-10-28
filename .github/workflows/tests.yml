@@ -158,11 +158,43 @@ jobs:
           php artisan migrate --force
 
       - name: Run focused MySQL integration tests
-        run: >-
-          php artisan test --configuration=phpunit.mysql.xml
-          tests/Feature/MySqlUsageConcurrencyTest.php
-          tests/Feature/DurableUsageTest.php
-          tests/Feature/PlanEntitlementsTest.php
-          tests/Feature/SnapshotStoreTest.php
-          tests/Feature/RecoveryManifestTest.php
-          tests/Feature/CompanyApiTest.php
+        id: mysql_tests
+        continue-on-error: true
+        run: |
+          mkdir -p storage/test-results
+          php artisan test --configuration=phpunit.mysql.xml --log-junit storage/test-results/mysql.xml \
+            tests/Feature/MySqlUsageConcurrencyTest.php \
+            tests/Feature/DurableUsageTest.php \
+            tests/Feature/PlanEntitlementsTest.php \
+            tests/Feature/SnapshotStoreTest.php \
+            tests/Feature/RecoveryManifestTest.php \
+            tests/Feature/CompanyApiTest.php
+
+      - name: Publish MySQL test failure annotations
+        if: always()
+        env:
+          MYSQL_TEST_OUTCOME: ${{ steps.mysql_tests.outcome }}
+        run: |
+          if [ -f storage/test-results/mysql.xml ]; then
+            php -r '
+              $report = simplexml_load_file($argv[1]);
+              if ($report === false) {
+                  fwrite(STDERR, "::error title=MySQL PHPUnit report::Could not parse JUnit output.\n");
+                  exit(1);
+              }
+
+              $failures = $report->xpath("//testcase[failure or error]") ?: [];
+              foreach ($failures as $failure) {
+                  $class = (string) $failure["class"];
+                  $name = (string) $failure["name"];
+                  $detail = trim((string) ($failure->failure ?? $failure->error ?? ""));
+                  $detail = preg_replace("/\s+/", " ", $detail) ?? "";
+                  $detail = substr($detail, 0, 500);
+                  fwrite(STDERR, "::error title=MySQL PHPUnit failure::{$class}::{$name} {$detail}\n");
+              }
+            ' storage/test-results/mysql.xml
+          else
+            echo "::error title=MySQL PHPUnit report::PHPUnit did not produce a JUnit report."
+          fi
+
+          test "$MYSQL_TEST_OUTCOME" = success
