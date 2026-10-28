@@ -56,7 +56,9 @@ final class MySqlUsageConcurrencyTest extends TestCase
             foreach ($workers as $worker) {
                 $worker->wait();
                 $this->assertTrue($worker->isSuccessful(), $worker->getErrorOutput().$worker->getOutput());
-                $admitted += json_decode($worker->getOutput(), true, flags: JSON_THROW_ON_ERROR)['admitted'];
+                $output = trim($worker->getOutput());
+                $this->assertJson($output, $worker->getErrorOutput().$output);
+                $admitted += json_decode($output, true, flags: JSON_THROW_ON_ERROR)['admitted'];
             }
 
             $this->assertSame(7, $admitted);

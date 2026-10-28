@@ -72,28 +72,28 @@ class DurableUsageTest extends TestCase
     public function test_breakdown_storage_failure_rolls_back_the_reservation(): void
     {
         [$key] = $this->key();
-        Schema::rename('monthly_endpoint_usage', 'unavailable_endpoint_usage');
+        $this->renameUsageTable('monthly_endpoint_usage', 'unavailable_endpoint_usage');
         try {
             (new UsageMeter)->reserve($key, 'vat.calculate', 5);
             $this->fail('The reservation must fail when its transaction cannot commit.');
         } catch (QueryException) {
             $this->assertSame(0, (new UsageMeter)->currentMonthlyUsage($key));
         } finally {
-            Schema::rename('unavailable_endpoint_usage', 'monthly_endpoint_usage');
+            $this->renameUsageTable('unavailable_endpoint_usage', 'monthly_endpoint_usage');
         }
     }
 
     public function test_accounting_outage_returns_503_without_running_the_endpoint(): void
     {
         [, $token] = $this->key();
-        Schema::rename('monthly_usage', 'unavailable_monthly_usage');
+        $this->renameUsageTable('monthly_usage', 'unavailable_monthly_usage');
         try {
             $this->withToken($token)->getJson('/v1/vat/calculate?amount=100&rate=20')
                 ->assertStatus(503)->assertJsonPath('error.code', 'usage_unavailable')
                 ->assertHeader('Retry-After', '30')->assertJsonMissingPath('data');
             $this->assertSame(0, DB::table('monthly_endpoint_usage')->count());
         } finally {
-            Schema::rename('unavailable_monthly_usage', 'monthly_usage');
+            $this->renameUsageTable('unavailable_monthly_usage', 'monthly_usage');
         }
     }
 
@@ -127,5 +127,22 @@ class DurableUsageTest extends TestCase
         ]);
 
         return [$key, "uk_test_{$key->public_id}.{$secret}"];
+    }
+
+    private function renameUsageTable(string $from, string $to): void
+    {
+        if (DB::connection()->getDriverName() !== 'mysql') {
+            Schema::rename($from, $to);
+
+            return;
+        }
+
+        // MySQL DDL implicitly commits. Run it through a separate connection so
+        // RefreshDatabase's test transaction and UsageMeter's savepoints remain
+        // valid while this test simulates an unavailable durable table.
+        $connection = 'mysql_schema_test';
+        config()->set("database.connections.{$connection}", config('database.connections.mysql'));
+        DB::purge($connection);
+        Schema::connection($connection)->rename($from, $to);
     }
 }
