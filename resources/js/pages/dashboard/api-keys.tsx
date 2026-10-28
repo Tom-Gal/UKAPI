@@ -3,6 +3,8 @@ import {
     Copy,
     Download,
     History,
+    MoreHorizontal,
+    Plus,
     RotateCw,
     Settings2,
     ShieldAlert,
@@ -12,6 +14,22 @@ import {
     DashboardPageHeader,
     EmptyState,
 } from '@/components/dashboard-page-header';
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -59,6 +77,8 @@ type CreatedKey = {
     overlap_hours?: number;
 };
 
+type KeyModal = 'policy' | 'rotate' | 'revoke' | null;
+
 export default function ApiKeys({
     apiKeys,
     auditEvents,
@@ -69,9 +89,12 @@ export default function ApiKeys({
     const { flash } = usePage<{
         flash: { api_key_created?: CreatedKey };
     }>().props;
+    const [createOpen, setCreateOpen] = useState(false);
     const newKey = flash.api_key_created;
     const command = newKey
-        ? `curl "https://api.ukapi.co.uk/v1/postcodes/BL2%206XX" -H "Authorization: Bearer ${newKey.token}" -H "Accept: application/json"`
+        ? 'curl "https://api.ukapi.co.uk/v1/postcodes/BL2%206XX" -H "Authorization: Bearer ' +
+          newKey.token +
+          '" -H "Accept: application/json"'
         : '';
 
     return (
@@ -80,138 +103,75 @@ export default function ApiKeys({
             <DashboardPageHeader
                 eyebrow="Credentials"
                 title="API keys"
-                description="Create, scope, rotate, and audit credentials. Secret values are shown exactly once and are never included in activity records."
+                description="A focused register for the credentials that connect your systems to UKApi.co.uk."
+                action={
+                    <Button
+                        type="button"
+                        onClick={() => setCreateOpen(true)}
+                        className="w-full sm:w-auto"
+                    >
+                        <Plus className="size-4" /> Create key
+                    </Button>
+                }
             />
-            <main className="space-y-6 p-5 lg:p-8">
+            <main className="space-y-8 p-5 lg:p-8">
                 {newKey && <SecretNotice newKey={newKey} command={command} />}
 
-                <div className="grid gap-6 xl:grid-cols-[.75fr_1.25fr]">
-                    <section className="border border-slate-200 bg-white p-6">
-                        <h2 className="font-semibold">Create an API key</h2>
-                        <p className="mt-2 text-sm leading-6 text-slate-600">
-                            Test and live keys use the same API data, quotas,
-                            and billing today. Their prefixes help you keep
-                            deployments separate; test is not a sandbox.
-                        </p>
-                        <Form
-                            action="/api-keys"
-                            method="post"
-                            className="mt-6 space-y-5"
-                        >
-                            {({ processing, errors }) => (
-                                <>
-                                    <div className="grid gap-2">
-                                        <Label htmlFor="name">Key name</Label>
-                                        <Input
-                                            id="name"
-                                            name="name"
-                                            required
-                                            maxLength={80}
-                                            placeholder="Production server"
-                                        />
-                                        <FieldError value={errors.name} />
-                                    </div>
-                                    <fieldset className="grid gap-2">
-                                        <legend className="text-sm font-medium">
-                                            Environment label
-                                        </legend>
-                                        <label className="flex items-start gap-2 text-sm">
-                                            <input
-                                                type="radio"
-                                                name="environment"
-                                                value="test"
-                                                defaultChecked
-                                                className="mt-1"
-                                            />
-                                            <span>
-                                                Test, starts with{' '}
-                                                <code>uk_test_</code>
-                                            </span>
-                                        </label>
-                                        <label className="flex items-start gap-2 text-sm">
-                                            <input
-                                                type="radio"
-                                                name="environment"
-                                                value="live"
-                                                className="mt-1"
-                                            />
-                                            <span>
-                                                Live, starts with{' '}
-                                                <code>uk_live_</code>
-                                            </span>
-                                        </label>
-                                        <FieldError
-                                            value={errors.environment}
-                                        />
-                                    </fieldset>
-                                    <ScopeFields
-                                        scopeOptions={scopeOptions}
-                                        error={errors.scopes}
-                                    />
-                                    <IpAllowListField
-                                        canUse={canUseIpAllowLists}
-                                        planLabel={planLabel}
-                                        error={errors.ip_allow_list}
-                                    />
-                                    <Button
-                                        disabled={processing}
-                                        className="w-full bg-[#13231a] hover:bg-[#2563c7]"
-                                    >
-                                        {processing
-                                            ? 'Creating key…'
-                                            : 'Create API key'}
-                                    </Button>
-                                </>
-                            )}
-                        </Form>
-                    </section>
-
-                    <section className="border border-slate-200 bg-white">
-                        <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
-                            <h2 className="font-semibold">Your keys</h2>
-                            <span className="font-mono text-xs text-slate-500">
-                                {apiKeys.length} total
-                            </span>
+                <section className="border border-slate-200 bg-white">
+                    <div className="flex flex-wrap items-end justify-between gap-3 border-b border-slate-200 px-5 py-4">
+                        <div>
+                            <p className="atlas-kicker">Credential register</p>
+                            <h2 className="mt-2 text-xl font-semibold">
+                                Your keys
+                            </h2>
+                            <p className="mt-1 text-sm text-slate-600">
+                                Prefixes and activity are visible here. Policy
+                                settings stay one click away.
+                            </p>
                         </div>
-                        {apiKeys.length === 0 ? (
-                            <EmptyState title="No keys yet">
-                                <p>
-                                    Create a test key to prepare your
-                                    integration.
-                                </p>
-                            </EmptyState>
-                        ) : (
-                            <div className="divide-y divide-slate-200">
-                                {apiKeys.map((key) => (
-                                    <KeyPanel
-                                        key={key.id}
-                                        apiKey={key}
-                                        scopeOptions={scopeOptions}
-                                        canUseIpAllowLists={canUseIpAllowLists}
-                                        planLabel={planLabel}
-                                    />
-                                ))}
-                            </div>
-                        )}
-                    </section>
-                </div>
+                        <span className="font-mono text-xs text-slate-500">
+                            {apiKeys.length} total
+                        </span>
+                    </div>
+                    {apiKeys.length === 0 ? (
+                        <EmptyState title="No keys yet">
+                            <p>
+                                Create a test key to prepare your integration.
+                            </p>
+                        </EmptyState>
+                    ) : (
+                        <div className="divide-y divide-slate-200">
+                            {apiKeys.map((key) => (
+                                <KeyRow
+                                    key={key.id}
+                                    apiKey={key}
+                                    scopeOptions={scopeOptions}
+                                    canUseIpAllowLists={canUseIpAllowLists}
+                                    planLabel={planLabel}
+                                />
+                            ))}
+                        </div>
+                    )}
+                </section>
 
                 <section className="border border-slate-200 bg-white">
-                    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-5 py-4">
+                    <div className="flex flex-wrap items-end justify-between gap-3 border-b border-slate-200 px-5 py-4">
                         <div>
-                            <h2 className="flex items-center gap-2 font-semibold">
-                                <History className="size-4" /> Security activity
+                            <p className="atlas-kicker">Audit trail</p>
+                            <h2 className="mt-2 flex items-center gap-2 text-xl font-semibold">
+                                <History className="size-4 text-[#2563c7]" />
+                                Security activity
                             </h2>
-                            <p className="mt-1 text-xs text-slate-500">
-                                Key lifecycle and policy events only. No request
-                                contents, bearer secrets, or response data.
+                            <p className="mt-1 text-sm text-slate-600">
+                                Key lifecycle and policy changes only. No
+                                request contents or bearer secrets.
                             </p>
                         </div>
                         <a
                             href="/api-keys/security-export.csv"
                             className="inline-flex items-center gap-2 border border-slate-300 px-3 py-2 text-sm font-semibold hover:border-[#2563c7] hover:text-[#174ea6]"
                         >
-                            <Download className="size-4" /> Export security CSV
+                            <Download className="size-4" /> Export CSV
                         </a>
                     </div>
                     {auditEvents.length === 0 ? (
@@ -223,23 +183,26 @@ export default function ApiKeys({
                             {auditEvents.map((event) => (
                                 <div
                                     key={event.id}
-                                    className="grid gap-1 px-5 py-3 text-sm sm:grid-cols-[1fr_auto]"
+                                    className="grid gap-3 px-5 py-4 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center"
                                 >
-                                    <div>
-                                        <span className="font-medium text-slate-900">
+                                    <span className="flex size-8 items-center justify-center border border-slate-200 bg-slate-50 text-[#2563c7]">
+                                        <History className="size-4" />
+                                    </span>
+                                    <div className="min-w-0">
+                                        <p className="text-sm font-semibold text-slate-900">
                                             {formatAction(event.action)}
-                                        </span>{' '}
-                                        <span className="text-slate-600">
-                                            {event.key_name}
-                                        </span>
-                                        <p className="mt-1 font-mono text-xs text-slate-500">
+                                            <span className="font-normal text-slate-500">
+                                                {' · ' + event.key_name}
+                                            </span>
+                                        </p>
+                                        <p className="mt-1 truncate font-mono text-xs text-slate-500">
                                             {event.key_prefix}…
                                             {event.request_id
-                                                ? ` · ${event.request_id}`
+                                                ? ' · ' + event.request_id
                                                 : ''}
                                         </p>
                                     </div>
-                                    <time className="text-xs text-slate-500">
+                                    <time className="text-xs text-slate-500 sm:text-right">
                                         {event.created_at
                                             ? formatDateTime(event.created_at)
                                             : 'Unknown time'}
@@ -250,11 +213,135 @@ export default function ApiKeys({
                     )}
                 </section>
             </main>
+
+            <CreateKeyDialog
+                open={createOpen}
+                onOpenChange={setCreateOpen}
+                scopeOptions={scopeOptions}
+                canUseIpAllowLists={canUseIpAllowLists}
+                planLabel={planLabel}
+            />
         </>
     );
 }
 
-function KeyPanel({
+function CreateKeyDialog({
+    open,
+    onOpenChange,
+    scopeOptions,
+    canUseIpAllowLists,
+    planLabel,
+}: {
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+    scopeOptions: ScopeOption[];
+    canUseIpAllowLists: boolean;
+    planLabel: string;
+}) {
+    return (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+            <DialogContent className="max-h-[min(760px,calc(100vh-2rem))] overflow-y-auto sm:max-w-2xl">
+                <DialogHeader>
+                    <p className="atlas-kicker">New credential</p>
+                    <DialogTitle>Create an API key</DialogTitle>
+                    <DialogDescription>
+                        Set the identity and access policy once. The secret will
+                        be shown exactly once after creation.
+                    </DialogDescription>
+                </DialogHeader>
+                <Form
+                    action="/api-keys"
+                    method="post"
+                    className="space-y-5"
+                    onSuccess={() => onOpenChange(false)}
+                >
+                    {({ processing, errors }) => (
+                        <>
+                            <div className="grid gap-2">
+                                <Label htmlFor="new-key-name">Key name</Label>
+                                <Input
+                                    id="new-key-name"
+                                    name="name"
+                                    required
+                                    maxLength={80}
+                                    placeholder="Production server"
+                                />
+                                <FieldError value={errors.name} />
+                            </div>
+                            <fieldset className="grid gap-2">
+                                <legend className="text-sm font-medium">
+                                    Environment label
+                                </legend>
+                                <div className="grid gap-2 sm:grid-cols-2">
+                                    <label className="flex items-start gap-2 border border-slate-200 p-3 text-sm has-[:checked]:border-[#2563c7] has-[:checked]:bg-blue-50/40">
+                                        <input
+                                            type="radio"
+                                            name="environment"
+                                            value="test"
+                                            defaultChecked
+                                            className="mt-1"
+                                        />
+                                        <span>
+                                            <span className="block font-semibold">
+                                                Test
+                                            </span>
+                                            <span className="mt-1 block text-xs text-slate-500">
+                                                Starts with{' '}
+                                                <code>uk_test_</code>
+                                            </span>
+                                        </span>
+                                    </label>
+                                    <label className="flex items-start gap-2 border border-slate-200 p-3 text-sm has-[:checked]:border-[#2563c7] has-[:checked]:bg-blue-50/40">
+                                        <input
+                                            type="radio"
+                                            name="environment"
+                                            value="live"
+                                            className="mt-1"
+                                        />
+                                        <span>
+                                            <span className="block font-semibold">
+                                                Live
+                                            </span>
+                                            <span className="mt-1 block text-xs text-slate-500">
+                                                Starts with{' '}
+                                                <code>uk_live_</code>
+                                            </span>
+                                        </span>
+                                    </label>
+                                </div>
+                                <FieldError value={errors.environment} />
+                            </fieldset>
+                            <ScopeFields
+                                scopeOptions={scopeOptions}
+                                error={errors.scopes}
+                            />
+                            <IpAllowListField
+                                canUse={canUseIpAllowLists}
+                                planLabel={planLabel}
+                                error={errors.ip_allow_list}
+                                id="new-key-ip-allow-list"
+                            />
+                            <DialogFooter className="border-t border-slate-200 pt-4">
+                                <DialogClose asChild>
+                                    <Button type="button" variant="ghost">
+                                        Cancel
+                                    </Button>
+                                </DialogClose>
+                                <Button disabled={processing}>
+                                    {processing
+                                        ? 'Creating key…'
+                                        : 'Create API key'}
+                                </Button>
+                            </DialogFooter>
+                        </>
+                    )}
+                </Form>
+            </DialogContent>
+        </Dialog>
+    );
+}
+
+function KeyRow({
     apiKey,
     scopeOptions,
     canUseIpAllowLists,
@@ -265,64 +352,119 @@ function KeyPanel({
     canUseIpAllowLists: boolean;
     planLabel: string;
 }) {
+    const [modal, setModal] = useState<KeyModal>(null);
     const active = apiKey.status === 'active';
     const usable = active || apiKey.status === 'rotating';
 
     return (
-        <article className="p-5">
-            <div className="flex flex-wrap items-start justify-between gap-4">
-                <div>
+        <>
+            <article className="grid gap-4 px-5 py-4 transition-colors hover:bg-[#f7faf8] sm:grid-cols-[minmax(0,1fr)_minmax(220px,.7fr)_auto] sm:items-center">
+                <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="font-medium">{apiKey.name}</h3>
+                        <h3 className="truncate font-semibold text-slate-950">
+                            {apiKey.name}
+                        </h3>
                         <Status value={apiKey.status} />
                         <span className="border border-slate-200 px-2 py-0.5 text-xs font-semibold text-slate-600 uppercase">
                             {apiKey.environment}
                         </span>
                     </div>
-                    <p className="mt-1 font-mono text-xs text-slate-500">
+                    <p className="mt-1 truncate font-mono text-xs text-slate-500">
                         {apiKey.prefix}…
                     </p>
-                    <p className="mt-2 text-xs text-slate-500">
-                        {apiKey.last_used_at
-                            ? `Last used for ${apiKey.last_used_endpoint_family_label ?? 'an API endpoint'} around ${formatDateTime(apiKey.last_used_at)}`
-                            : 'Not used yet'}
-                    </p>
-                    {apiKey.expires_at && active && (
-                        <p className="mt-1 text-xs font-medium text-amber-700">
-                            Rotation overlap ends{' '}
-                            {formatDateTime(apiKey.expires_at)}
-                        </p>
-                    )}
                 </div>
-                {usable && (
-                    <Form action={`/api-keys/${apiKey.id}`} method="delete">
-                        {({ processing }) => (
-                            <Button
-                                type="submit"
-                                disabled={processing}
-                                variant="outline"
-                                className="border-red-200 text-red-700 hover:bg-red-50 hover:text-red-800"
+                <div className="grid grid-cols-2 gap-4 text-xs sm:grid-cols-1 sm:gap-1">
+                    <div>
+                        <span className="text-slate-500">Last used</span>
+                        <span className="mt-1 block font-medium text-slate-700">
+                            {apiKey.last_used_at
+                                ? formatDateTime(apiKey.last_used_at)
+                                : 'Not used yet'}
+                        </span>
+                    </div>
+                    <div>
+                        <span className="text-slate-500">Access</span>
+                        <span className="mt-1 block font-medium text-slate-700">
+                            {apiKey.scopes?.length
+                                ? String(apiKey.scopes.length) +
+                                  ' endpoint families'
+                                : 'Unrestricted'}
+                            {apiKey.ip_allow_list.length > 0
+                                ? ' · IP restricted'
+                                : ''}
+                        </span>
+                    </div>
+                </div>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            aria-label={'Actions for ' + apiKey.name}
+                            className="justify-self-end"
+                        >
+                            <MoreHorizontal className="size-4" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-52">
+                        {active && (
+                            <DropdownMenuItem
+                                onSelect={() => setModal('policy')}
                             >
-                                Revoke
-                            </Button>
+                                <Settings2 className="size-4" />
+                                Edit access policy
+                            </DropdownMenuItem>
                         )}
-                    </Form>
-                )}
-            </div>
+                        {active && (
+                            <DropdownMenuItem
+                                onSelect={() => setModal('rotate')}
+                            >
+                                <RotateCw className="size-4" />
+                                Rotate key
+                            </DropdownMenuItem>
+                        )}
+                        {usable && (
+                            <>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem
+                                    variant="destructive"
+                                    onSelect={() => setModal('revoke')}
+                                >
+                                    Revoke key
+                                </DropdownMenuItem>
+                            </>
+                        )}
+                        {!usable && (
+                            <DropdownMenuItem disabled>
+                                No actions available
+                            </DropdownMenuItem>
+                        )}
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </article>
 
-            {active && (
-                <div className="mt-5 grid gap-5 border-t border-slate-100 pt-5 lg:grid-cols-2">
+            <Dialog
+                open={modal === 'policy'}
+                onOpenChange={(open) => !open && setModal(null)}
+            >
+                <DialogContent className="max-h-[min(760px,calc(100vh-2rem))] overflow-y-auto sm:max-w-2xl">
+                    <DialogHeader>
+                        <p className="atlas-kicker">Access policy</p>
+                        <DialogTitle>Edit {apiKey.name}</DialogTitle>
+                        <DialogDescription>
+                            Changes apply to the existing key. The secret itself
+                            never changes.
+                        </DialogDescription>
+                    </DialogHeader>
                     <Form
-                        action={`/api-keys/${apiKey.id}`}
+                        action={'/api-keys/' + apiKey.id}
                         method="patch"
-                        className="space-y-4"
+                        className="space-y-5"
+                        onSuccess={() => setModal(null)}
                     >
                         {({ processing, errors }) => (
                             <>
-                                <h4 className="flex items-center gap-2 text-sm font-semibold">
-                                    <Settings2 className="size-4" /> Access
-                                    policy
-                                </h4>
                                 <ScopeFields
                                     scopeOptions={scopeOptions}
                                     selected={apiKey.scopes}
@@ -333,39 +475,51 @@ function KeyPanel({
                                     planLabel={planLabel}
                                     value={apiKey.ip_allow_list.join('\n')}
                                     error={errors.ip_allow_list}
+                                    id={'ip-allow-list-' + apiKey.id}
                                 />
-                                <Button
-                                    type="submit"
-                                    disabled={processing}
-                                    variant="outline"
-                                >
-                                    Save policy
-                                </Button>
+                                <DialogFooter className="border-t border-slate-200 pt-4">
+                                    <DialogClose asChild>
+                                        <Button type="button" variant="ghost">
+                                            Cancel
+                                        </Button>
+                                    </DialogClose>
+                                    <Button type="submit" disabled={processing}>
+                                        {processing ? 'Saving…' : 'Save policy'}
+                                    </Button>
+                                </DialogFooter>
                             </>
                         )}
                     </Form>
+                </DialogContent>
+            </Dialog>
 
+            <Dialog
+                open={modal === 'rotate'}
+                onOpenChange={(open) => !open && setModal(null)}
+            >
+                <DialogContent className="sm:max-w-lg">
+                    <DialogHeader>
+                        <p className="atlas-kicker">Credential rotation</p>
+                        <DialogTitle>Rotate {apiKey.name}</DialogTitle>
+                        <DialogDescription>
+                            A replacement keeps the same access policy. Choose
+                            how long the old key should remain valid.
+                        </DialogDescription>
+                    </DialogHeader>
                     <Form
-                        action={`/api-keys/${apiKey.id}/rotate`}
+                        action={'/api-keys/' + apiKey.id + '/rotate'}
                         method="post"
-                        className="space-y-4 border-t border-slate-100 pt-5 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-5"
+                        className="space-y-5"
+                        onSuccess={() => setModal(null)}
                     >
                         {({ processing, errors }) => (
                             <>
-                                <h4 className="flex items-center gap-2 text-sm font-semibold">
-                                    <RotateCw className="size-4" /> Rotate key
-                                </h4>
-                                <p className="text-xs leading-5 text-slate-600">
-                                    A replacement is created with the same
-                                    policy. The old key remains valid only for
-                                    the selected overlap.
-                                </p>
                                 <div className="grid gap-2">
-                                    <Label htmlFor={`overlap-${apiKey.id}`}>
+                                    <Label htmlFor={'overlap-' + apiKey.id}>
                                         Controlled overlap
                                     </Label>
                                     <select
-                                        id={`overlap-${apiKey.id}`}
+                                        id={'overlap-' + apiKey.id}
                                         name="overlap_hours"
                                         defaultValue="1"
                                         className="h-10 border border-slate-300 bg-white px-3 text-sm"
@@ -375,6 +529,10 @@ function KeyPanel({
                                         <option value="6">6 hours</option>
                                         <option value="24">24 hours</option>
                                     </select>
+                                    <p className="text-xs leading-5 text-slate-500">
+                                        The new secret will be shown once after
+                                        the replacement is created.
+                                    </p>
                                     <FieldError
                                         value={
                                             errors.overlap_hours ??
@@ -382,19 +540,68 @@ function KeyPanel({
                                         }
                                     />
                                 </div>
-                                <Button
-                                    type="submit"
-                                    disabled={processing}
-                                    variant="outline"
-                                >
-                                    Create replacement
-                                </Button>
+                                <DialogFooter className="border-t border-slate-200 pt-4">
+                                    <DialogClose asChild>
+                                        <Button type="button" variant="ghost">
+                                            Cancel
+                                        </Button>
+                                    </DialogClose>
+                                    <Button type="submit" disabled={processing}>
+                                        {processing
+                                            ? 'Creating replacement…'
+                                            : 'Create replacement'}
+                                    </Button>
+                                </DialogFooter>
                             </>
                         )}
                     </Form>
-                </div>
-            )}
-        </article>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog
+                open={modal === 'revoke'}
+                onOpenChange={(open) => !open && setModal(null)}
+            >
+                <DialogContent className="sm:max-w-lg">
+                    <DialogHeader>
+                        <p className="atlas-kicker text-rose-700">
+                            Destructive action
+                        </p>
+                        <DialogTitle>Revoke {apiKey.name}?</DialogTitle>
+                        <DialogDescription>
+                            Any system using this key will stop authenticating.
+                            This action cannot be undone.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="border border-rose-200 bg-rose-50 p-4 text-sm leading-6 text-rose-900">
+                        <span className="font-mono">{apiKey.prefix}…</span> will
+                        be revoked and recorded in security activity.
+                    </div>
+                    <Form
+                        action={'/api-keys/' + apiKey.id}
+                        method="delete"
+                        onSuccess={() => setModal(null)}
+                    >
+                        {({ processing }) => (
+                            <DialogFooter>
+                                <DialogClose asChild>
+                                    <Button type="button" variant="ghost">
+                                        Keep key
+                                    </Button>
+                                </DialogClose>
+                                <Button
+                                    type="submit"
+                                    variant="destructive"
+                                    disabled={processing}
+                                >
+                                    {processing ? 'Revoking…' : 'Revoke key'}
+                                </Button>
+                            </DialogFooter>
+                        )}
+                    </Form>
+                </DialogContent>
+            </Dialog>
+        </>
     );
 }
 
@@ -420,7 +627,7 @@ function ScopeFields({
                 {scopeOptions.map((scope) => (
                     <label
                         key={scope.key}
-                        className="flex items-start gap-2 text-xs text-slate-700"
+                        className="flex items-start gap-2 border border-slate-200 p-3 text-xs text-slate-700 has-[:checked]:border-[#2563c7] has-[:checked]:bg-blue-50/40"
                     >
                         <input
                             type="checkbox"
@@ -443,27 +650,32 @@ function IpAllowListField({
     planLabel,
     value = '',
     error,
+    id,
 }: {
     canUse: boolean;
     planLabel: string;
     value?: string;
     error?: string;
+    id: string;
 }) {
     return (
         <div className="grid gap-2">
-            <Label>IP allow list</Label>
+            <Label htmlFor={id}>IP allow list</Label>
             <textarea
+                id={id}
                 name="ip_allow_list"
                 rows={3}
                 defaultValue={value}
                 readOnly={!canUse}
                 placeholder="203.0.113.10&#10;2001:db8::/48"
-                className="w-full border border-slate-300 bg-white px-3 py-2 font-mono text-xs disabled:bg-slate-50 disabled:text-slate-400"
+                className="w-full border border-slate-300 bg-white px-3 py-2 font-mono text-xs read-only:bg-slate-50 read-only:text-slate-400"
             />
             <p className="text-xs leading-5 text-slate-500">
                 {canUse
                     ? 'Optional. One IPv4, IPv6, or CIDR range per line, up to 20 entries.'
-                    : `Available on Pro and Scale. Your current plan is ${planLabel}.`}
+                    : 'Available on Pro and Scale. Your current plan is ' +
+                      planLabel +
+                      '.'}
             </p>
             <FieldError value={error} />
         </div>
@@ -491,7 +703,14 @@ function SecretNotice({
                         This is the only time the full secret for “{newKey.name}
                         ” can be shown.
                         {newKey.activity === 'rotated' &&
-                            ` The old key has ${newKey.overlap_hours === 0 ? 'no overlap' : `${newKey.overlap_hours} hour${newKey.overlap_hours === 1 ? '' : 's'} of overlap`}.`}
+                            ' The old key has ' +
+                                (newKey.overlap_hours === 0
+                                    ? 'no overlap'
+                                    : String(newKey.overlap_hours) +
+                                      ' hour' +
+                                      (newKey.overlap_hours === 1 ? '' : 's') +
+                                      ' of overlap') +
+                                '.'}
                     </p>
                     <div className="mt-4 flex items-center gap-2 border border-amber-200 bg-white p-3">
                         <code className="min-w-0 flex-1 text-xs break-all text-slate-800">
@@ -521,11 +740,15 @@ function SecretNotice({
 }
 
 function Status({ value }: { value: string }) {
-    const active = value === 'active';
+    const tone =
+        value === 'active'
+            ? 'bg-emerald-50 text-emerald-700'
+            : value === 'rotating'
+              ? 'bg-blue-50 text-blue-700'
+              : 'bg-slate-100 text-slate-600';
+
     return (
-        <span
-            className={`px-2 py-0.5 text-xs font-semibold ${active ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}
-        >
+        <span className={'px-2 py-0.5 text-xs font-semibold ' + tone}>
             {value}
         </span>
     );
