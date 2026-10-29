@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Domain\Billing\PlanCatalog;
 use App\Http\Middleware\HandleInertiaRequests;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
@@ -41,6 +42,23 @@ class PublicPagesTest extends TestCase
             ->assertOk()
             ->assertJsonPath('component', 'public/docs')
             ->assertJsonPath('props.section', 'getting-started');
+    }
+
+    public function test_public_pricing_uses_the_server_plan_catalogue_without_private_billing_fields(): void
+    {
+        $catalogue = app(PlanCatalog::class)->publicPlans();
+
+        $this->withHeader('X-Inertia', 'true')
+            ->withHeader(
+                'X-Inertia-Version',
+                app(HandleInertiaRequests::class)->version(request()),
+            )
+            ->get('/pricing')
+            ->assertOk()
+            ->assertJsonPath('component', 'public/pricing')
+            ->assertJsonPath('props.plans', $catalogue)
+            ->assertJsonMissingPath('props.plans.0.stripe_price')
+            ->assertJsonMissingPath('props.plans.0.prices');
     }
 
     public function test_crawl_assets_are_publicly_available(): void

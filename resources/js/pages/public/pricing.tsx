@@ -1,10 +1,15 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { Check } from 'lucide-react';
 import { PageHero } from '@/pages/public/api-catalogue';
-import { enterprisePlan, plans } from '@/lib/ukapi-content';
+import {
+    enterprisePlan,
+    presentPlans,
+    type PublicPlan,
+} from '@/lib/ukapi-content';
 
-export default function Pricing() {
+export default function Pricing({ plans }: { plans: PublicPlan[] }) {
     const { auth } = usePage().props;
+    const displayedPlans = presentPlans(plans);
 
     return (
         <>
@@ -21,7 +26,7 @@ export default function Pricing() {
             />
             <div className="atlas-shell pb-24">
                 <div className="grid border-t border-l border-slate-950 md:grid-cols-2 lg:grid-cols-5">
-                    {plans.map((plan) => (
+                    {displayedPlans.map((plan) => (
                         <article
                             key={plan.name}
                             className={`relative flex flex-col border-r border-b border-slate-950 p-6 ${plan.emphasis ? 'bg-[#122019] text-white' : 'bg-white'}`}
@@ -56,7 +61,7 @@ export default function Pricing() {
                             <ul
                                 className={`mt-6 space-y-3 border-t pt-5 text-sm ${plan.emphasis ? 'border-[#526158] text-[#e7ece6]' : 'border-slate-300 text-slate-700'}`}
                             >
-                                {plan.features.map((feature) => (
+                                {plan.displayFeatures.map((feature) => (
                                     <li key={feature} className="flex gap-2">
                                         <Check className="size-4 shrink-0 text-[#2563c7]" />
                                         {feature}

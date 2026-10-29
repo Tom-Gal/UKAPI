@@ -1008,45 +1008,39 @@ export const endpointFamilies = allEndpointFamilies
     }))
     .filter((family) => family.endpoints.length > 0);
 
-export const plans = [
-    {
-        name: 'Free',
-        price: '£0',
-        annualPrice: '£0',
-        quota: '5,000',
+export type PublicPlan = {
+    key: string;
+    label: string;
+    monthly_price_pence: number;
+    annual_price_pence: number;
+    monthly_request_quota: number;
+    burst_requests_per_second: number;
+    max_page_size: number;
+    features: string[];
+    commercial_use: boolean;
+};
+
+type PlanPresentation = {
+    description: string;
+    displayFeatures: string[];
+    emphasis: boolean;
+};
+
+const planPresentation: Record<string, PlanPresentation> = {
+    free: {
         description: 'Evaluation and hobby projects.',
-        features: [
-            'Current data',
-            '5 requests/second',
-            'Up to 25 results/page',
-            'Scoped live & test API keys',
-        ],
+        displayFeatures: ['Current data', 'Scoped live & test API keys'],
         emphasis: false,
     },
-    {
-        name: 'Hobby',
-        price: '£9',
-        annualPrice: '£90',
-        quota: '50,000',
+    hobby: {
         description: 'Current UK data for personal and small projects.',
-        features: [
-            'Current data',
-            '10 requests/second',
-            'Up to 50 results/page',
-            'Scoped live & test API keys',
-        ],
+        displayFeatures: ['Current data', 'Scoped live & test API keys'],
         emphasis: false,
     },
-    {
-        name: 'Pro',
-        price: '£29',
-        annualPrice: '£290',
-        quota: '250,000',
+    pro: {
         description: 'Historical data, change feeds and commercial use.',
-        features: [
+        displayFeatures: [
             'Current data',
-            '25 requests/second',
-            'Up to 100 results/page',
             'Scoped live & test API keys',
             'Historical data',
             'Change feeds',
@@ -1055,22 +1049,51 @@ export const plans = [
         ],
         emphasis: true,
     },
-    {
-        name: 'Scale',
-        price: '£89',
-        annualPrice: '£890',
-        quota: '1,000,000',
+    scale: {
         description: 'Bulk export, higher limits and priority support.',
-        features: [
+        displayFeatures: [
             'Everything in Pro',
-            '50 requests/second',
-            'Up to 100 results/page',
             'Bulk export',
             'Priority support',
         ],
         emphasis: false,
     },
-];
+};
+
+export type PublicPlanCard = PublicPlan &
+    PlanPresentation & {
+        name: string;
+        price: string;
+        annualPrice: string;
+        quota: string;
+    };
+
+const formatPrice = (pence: number): string =>
+    new Intl.NumberFormat('en-GB', {
+        style: 'currency',
+        currency: 'GBP',
+        maximumFractionDigits: 0,
+    }).format(pence / 100);
+
+export const presentPlans = (serverPlans: PublicPlan[]): PublicPlanCard[] =>
+    serverPlans.flatMap((plan) => {
+        const presentation = planPresentation[plan.key];
+
+        if (!presentation) {
+            return [];
+        }
+
+        return [
+            {
+                ...plan,
+                ...presentation,
+                name: plan.label,
+                price: formatPrice(plan.monthly_price_pence),
+                annualPrice: formatPrice(plan.annual_price_pence),
+                quota: plan.monthly_request_quota.toLocaleString('en-GB'),
+            },
+        ];
+    });
 
 export const enterprisePlan = {
     name: 'Enterprise',

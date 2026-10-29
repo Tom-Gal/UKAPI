@@ -94,6 +94,52 @@ final class PlanCatalog
     }
 
     /**
+     * Return the public plan contract without Stripe identifiers or internal
+     * subscription fields. Numeric values come from the same normalised
+     * catalogue used by checkout and entitlement resolution.
+     *
+     * @return list<array{
+     *     key: string,
+     *     label: string,
+     *     monthly_price_pence: int,
+     *     annual_price_pence: int,
+     *     monthly_request_quota: int,
+     *     burst_requests_per_second: int,
+     *     max_page_size: int,
+     *     features: list<string>,
+     *     commercial_use: bool
+     * }>
+     */
+    public function publicPlans(): array
+    {
+        return array_values(array_map(function (array $plan): array {
+            $monthlyPrice = $plan['prices']['month']['amount'] ?? null;
+            $annualPrice = $plan['prices']['year']['amount'] ?? null;
+
+            if ($plan['key'] === 'free') {
+                $monthlyPrice ??= 0;
+                $annualPrice ??= 0;
+            } else {
+                $configured = config("ukapi.paid_plans.{$plan['key']}", []);
+                $monthlyPrice ??= $configured['monthly_price_pence'] ?? 0;
+                $annualPrice ??= $configured['annual_price_pence'] ?? 0;
+            }
+
+            return [
+                'key' => (string) $plan['key'],
+                'label' => (string) $plan['label'],
+                'monthly_price_pence' => (int) $monthlyPrice,
+                'annual_price_pence' => (int) $annualPrice,
+                'monthly_request_quota' => (int) $plan['monthly_request_quota'],
+                'burst_requests_per_second' => (int) $plan['burst_requests_per_second'],
+                'max_page_size' => (int) $plan['max_page_size'],
+                'features' => array_values(array_map('strval', $plan['features'])),
+                'commercial_use' => (bool) $plan['commercial_use'],
+            ];
+        }, $this->all()));
+    }
+
+    /**
      * @return array<string, mixed>
      */
     public function free(): array

@@ -1,6 +1,11 @@
 import { Head, Link } from '@inertiajs/react';
 import { ArrowRight, BookOpen, Check } from 'lucide-react';
-import { endpointFamilies, enterprisePlan, plans } from '@/lib/ukapi-content';
+import {
+    endpointFamilies,
+    enterprisePlan,
+    presentPlans,
+    type PublicPlan,
+} from '@/lib/ukapi-content';
 
 const example = [
     'curl "https://api.ukapi.co.uk/v1/postcodes/BL2%206XX" -H "Authorization: Bearer YOUR_API_KEY" -H "Accept: application/json"',
@@ -11,7 +16,8 @@ const example = [
     '}',
 ].join('\n');
 
-export default function Welcome() {
+export default function Welcome({ plans }: { plans: PublicPlan[] }) {
+    const displayedPlans = presentPlans(plans);
     const liveEndpoints = endpointFamilies.reduce(
         (sum, family) => sum + family.endpoints.length,
         0,
@@ -240,7 +246,7 @@ export default function Welcome() {
 
                     <div className="mt-10 border-t border-l border-slate-950">
                         <div className="grid sm:grid-cols-2 lg:grid-cols-4">
-                            {plans.map((plan) => (
+                            {displayedPlans.map((plan) => (
                                 <article
                                     key={plan.name}
                                     className={`relative grid grid-rows-[3rem_9rem_7rem_minmax(7.5rem,1fr)] border-r border-b border-slate-950 ${plan.emphasis ? 'bg-[#122019] text-white shadow-[inset_0_5px_0_#2563c7]' : 'bg-white'}`}

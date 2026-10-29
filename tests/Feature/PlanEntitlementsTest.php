@@ -92,6 +92,60 @@ class PlanEntitlementsTest extends TestCase
         $this->assertSame('price_pro_matrix_annual', $plan['stripe_price']);
     }
 
+    public function test_public_plan_projection_matches_entitlements_prices_and_checkout_availability(): void
+    {
+        $this->configureTestPrices();
+        $catalog = app(PlanCatalog::class);
+
+        $this->assertTrue($catalog->hasConfiguredPrices());
+        $this->assertTrue($catalog->hasConfiguredAnnualPrices());
+
+        foreach ($catalog->publicPlans() as $publicPlan) {
+            $runtimePlan = $publicPlan['key'] === 'free'
+                ? $catalog->free()
+                : $catalog->checkoutable($publicPlan['key']);
+
+            $this->assertIsArray($runtimePlan);
+            $this->assertSame(
+                $runtimePlan['prices']['month']['amount'] ?? 0,
+                $publicPlan['monthly_price_pence'],
+                $publicPlan['key'].' monthly price',
+            );
+            $this->assertSame(
+                $runtimePlan['prices']['year']['amount'] ?? 0,
+                $publicPlan['annual_price_pence'],
+                $publicPlan['key'].' annual price',
+            );
+            $this->assertSame(
+                $runtimePlan['monthly_request_quota'],
+                $publicPlan['monthly_request_quota'],
+                $publicPlan['key'].' monthly quota',
+            );
+            $this->assertSame(
+                $runtimePlan['burst_requests_per_second'],
+                $publicPlan['burst_requests_per_second'],
+                $publicPlan['key'].' burst limit',
+            );
+            $this->assertSame(
+                $runtimePlan['max_page_size'],
+                $publicPlan['max_page_size'],
+                $publicPlan['key'].' page size',
+            );
+            $this->assertSame(
+                $runtimePlan['features'],
+                $publicPlan['features'],
+                $publicPlan['key'].' features',
+            );
+            $this->assertSame(
+                $runtimePlan['commercial_use'],
+                $publicPlan['commercial_use'],
+                $publicPlan['key'].' commercial use',
+            );
+            $this->assertArrayNotHasKey('stripe_price', $publicPlan);
+            $this->assertArrayNotHasKey('prices', $publicPlan);
+        }
+    }
+
     /** @return array{0: mixed, 1: string} */
     private function createApiKey(User $user): array
     {

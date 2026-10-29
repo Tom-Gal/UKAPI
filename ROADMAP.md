@@ -19,7 +19,7 @@ The audit found a strong functional baseline:
 - 25 customer `/v1` routes are live.
 - All 25 runtime routes have exact path counterparts in `openapi/openapi.yaml`.
 - Planned endpoint definitions are retained internally but filtered from the public catalogue and documentation.
-- 284 PHP tests pass with 3,019 assertions.
+- 293 PHP tests ran with 10,267 assertions, 292 passing and one environment-dependent test skipped.
 - PHPStan passes with no errors.
 - TypeScript checking passes.
 - The production frontend build succeeds.
@@ -145,12 +145,13 @@ Work:
 
 The first automated parity phase is complete. CI now fails when the 25 runtime routes, OpenAPI operations, live catalogue entries, feature entitlements, endpoint codes, usage labels, API-key scope families, route names, or OpenAPI operation IDs diverge.
 
-Continue progressively with tests that fail when:
+The next parity slice is also complete. `ApiContractParityTest` now resolves reusable OpenAPI parameter references and checks runtime route placeholders, FormRequest fields, parameter locations and requiredness against the documented contract. It also requires reusable 200-response envelope schemas, the shared authentication/forbidden/rate-limit responses, validation responses for parameterised operations, and the complete rate/quota header declaration. Verified on 29 October 2026 with 6 tests and 4,075 assertions, plus Pint and PHPStan.
 
-- path/query parameter names or required/optional state differ;
-- validation and plan-specific bounds differ from OpenAPI;
-- documented response or error schemas no longer match representative runtime responses;
-- response and quota/rate-limit header declarations drift from middleware behaviour.
+Validation-bound parity is now complete. The test suite checks runtime string, integer, fixed-size, regex, date-format and numeric-range rules against OpenAPI schemas, validates documented examples against their patterns, and verifies that every configured plan page-size limit fits the documented hard maximum. The contract now documents the runtime postcode lengths, fixed identifier lengths, VAT rate range, and dynamic `max_page_size` bound. Over-escaped OpenAPI regexes were corrected. Verified on 29 October 2026 with 7 parity tests and 7,248 assertions, plus the full Composer gate.
+
+Response and header parity is now complete for the current 25-route surface. Representative runtime VAT success, removal and validation-error responses are checked against resolved OpenAPI schemas. Every live 200 response declares the seven headers applied by the API middleware, and the reusable rate-limit response includes the correlation, burst-limit, retry and quota headers. Verified on 29 October 2026 with 8 parity tests and 7,756 assertions; the full Composer gate ran 291 tests with 10,220 assertions.
+
+The current P1.10 parity scope is complete. Extend the representative runtime schema matrix when a new endpoint family or response variant is added.
 
 ### P1.11 Remove duplicated plan/pricing truth
 
@@ -162,6 +163,8 @@ Work:
 - Keep display copy separate from entitlement values.
 - Verify monthly/annual amounts, quotas, page sizes, features, commercial-use status, and Stripe price availability together.
 - Add a public-pricing/entitlement parity test.
+
+Complete. Home and pricing now receive a safe public projection from the normalised server-side `PlanCatalog`; the frontend retains only display copy and formatting. The projection includes monthly/annual prices, quotas, burst limits, page-size limits, feature flags, and commercial-use status without exposing Stripe identifiers or internal price records. Parity tests compare the public projection with runtime entitlements and verify monthly and annual checkout availability. Verified on 29 October 2026 with the full Composer gate: 293 tests, 10,267 assertions, plus Pint, PHPStan, frontend formatting, TypeScript checking, and a production build.
 
 ### P1.12 Add scheduled source/licensing review
 

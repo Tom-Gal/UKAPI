@@ -37,6 +37,41 @@ servers:
       description: Production
 security:
     - bearerApiKey: []
+x-ukapi-runtime-headers: &ukapiRuntimeHeaders
+    X-Request-Id:
+        description: Correlation identifier echoed in the response envelope or error envelope.
+        schema:
+            type: string
+    RateLimit-Limit:
+        description: Per-key burst request limit for the current plan.
+        schema:
+            type: integer
+    RateLimit-Remaining:
+        description: Remaining per-key burst requests in the current one-second window.
+        schema:
+            type: integer
+    RateLimit-Reset:
+        description: Unix timestamp when the current per-key burst window resets.
+        schema:
+            type: integer
+    X-Quota-Limit:
+        description: Hard monthly request quota shared by the account.
+        schema:
+            type: integer
+    X-Quota-Remaining:
+        description: Remaining hard monthly requests for the account.
+        schema:
+            type: integer
+    X-Quota-Reset:
+        description: Unix timestamp of the next UTC calendar-month boundary.
+        schema:
+            type: integer
+x-ukapi-rate-limit-headers: &ukapiRateLimitHeaders
+    <<: *ukapiRuntimeHeaders
+    Retry-After:
+        description: Seconds before retrying the request.
+        schema:
+            type: integer
 paths:
     /v1/mot/registration/{registration}:
         get:
@@ -48,6 +83,7 @@ paths:
             responses:
                 '200':
                     description: Normalised vehicle and MOT test history
+                    headers: *ukapiRuntimeHeaders
                     content:
                         application/json:
                             schema:
@@ -76,6 +112,7 @@ paths:
             responses:
                 '200':
                     description: Normalised vehicle and MOT test history
+                    headers: *ukapiRuntimeHeaders
                     content:
                         application/json:
                             schema:
@@ -105,6 +142,7 @@ paths:
             responses:
                 '200':
                     description: VAT calculation
+                    headers: *ukapiRuntimeHeaders
                     content:
                         application/json:
                             schema:
@@ -128,6 +166,7 @@ paths:
             responses:
                 '200':
                     description: VAT removal calculation
+                    headers: *ukapiRuntimeHeaders
                     content:
                         application/json:
                             schema:
@@ -150,6 +189,7 @@ paths:
             responses:
                 '200':
                     description: Canonical postcode and selected geography data
+                    headers: *ukapiRuntimeHeaders
                     content:
                         application/json:
                             schema:
@@ -176,6 +216,7 @@ paths:
             responses:
                 '200':
                     description: Postcode validation result
+                    headers: *ukapiRuntimeHeaders
                     content:
                         application/json:
                             schema:
@@ -202,6 +243,7 @@ paths:
             responses:
                 '200':
                     description: Nearby postcodes ordered by provider distance
+                    headers: *ukapiRuntimeHeaders
                     content:
                         application/json:
                             schema:
@@ -229,6 +271,7 @@ paths:
             responses:
                 '200':
                     description: Nearest postcode
+                    headers: *ukapiRuntimeHeaders
                     content:
                         application/json:
                             schema:
@@ -255,6 +298,7 @@ paths:
             responses:
                 '200':
                     description: Simplified company profile
+                    headers: *ukapiRuntimeHeaders
                     content:
                         application/json:
                             schema:
@@ -285,6 +329,7 @@ paths:
             responses:
                 '200':
                     description: Paginated company search results
+                    headers: *ukapiRuntimeHeaders
                     content:
                         application/json:
                             schema:
@@ -313,6 +358,7 @@ paths:
             responses:
                 '200':
                     description: Paginated company officer results
+                    headers: *ukapiRuntimeHeaders
                     content:
                         application/json:
                             schema:
@@ -344,6 +390,7 @@ paths:
             responses:
                 '200':
                     description: Paginated company filing metadata
+                    headers: *ukapiRuntimeHeaders
                     content:
                         application/json:
                             schema:
@@ -374,6 +421,7 @@ paths:
             responses:
                 '200':
                     description: Paginated SIC search results
+                    headers: *ukapiRuntimeHeaders
                     content:
                         application/json:
                             schema:
@@ -398,6 +446,7 @@ paths:
             responses:
                 '200':
                     description: SIC record
+                    headers: *ukapiRuntimeHeaders
                     content:
                         application/json:
                             schema:
@@ -426,6 +475,7 @@ paths:
             responses:
                 '200':
                     description: Added, removed and changed SIC records
+                    headers: *ukapiRuntimeHeaders
                     content:
                         application/json:
                             schema:
@@ -465,6 +515,7 @@ paths:
                 '200':
                     description: Complete SIC CSV attachment with immutable snapshot metadata and source attribution.
                     headers:
+                        <<: *ukapiRuntimeHeaders
                         Content-Disposition:
                             schema:
                                 type: string
@@ -525,6 +576,7 @@ paths:
             responses:
                 '200':
                     description: Normalised approximate crime records
+                    headers: *ukapiRuntimeHeaders
                     content:
                         application/json:
                             schema:
@@ -555,6 +607,7 @@ paths:
             responses:
                 '200':
                     description: Crime count and category breakdown
+                    headers: *ukapiRuntimeHeaders
                     content:
                         application/json:
                             schema:
@@ -583,6 +636,7 @@ paths:
             responses:
                 '200':
                     description: Normalised Police.uk crime categories
+                    headers: *ukapiRuntimeHeaders
                     content:
                         application/json:
                             schema:
@@ -615,6 +669,7 @@ paths:
             responses:
                 '200':
                     description: Added, removed and changed crime records
+                    headers: *ukapiRuntimeHeaders
                     content:
                         application/json:
                             schema:
@@ -642,6 +697,7 @@ paths:
             responses:
                 '200':
                     description: Normalised flood warnings and alerts
+                    headers: *ukapiRuntimeHeaders
                     content:
                         application/json:
                             schema:
@@ -667,6 +723,7 @@ paths:
             responses:
                 '200':
                     description: Normalised nearby flood warnings and alerts
+                    headers: *ukapiRuntimeHeaders
                     content:
                         application/json:
                             schema:
@@ -696,6 +753,7 @@ paths:
             responses:
                 '200':
                     description: Normalised nearby monitoring stations
+                    headers: *ukapiRuntimeHeaders
                     content:
                         application/json:
                             schema:
@@ -724,6 +782,7 @@ paths:
             responses:
                 '200':
                     description: Bounded recent readings for a monitoring station
+                    headers: *ukapiRuntimeHeaders
                     content:
                         application/json:
                             schema:
@@ -755,6 +814,7 @@ paths:
             responses:
                 '200':
                     description: Added, removed and changed station readings
+                    headers: *ukapiRuntimeHeaders
                     content:
                         application/json:
                             schema:
@@ -787,7 +847,9 @@ components:
             description: UK vehicle registration, with spaces omitted or included.
             schema:
                 type: string
-                pattern: '^(?=.*[A-Za-z0-9])[A-Za-z0-9\\s]{2,8}$'
+                minLength: 2
+                maxLength: 8
+                pattern: '^(?=.*[A-Za-z0-9])[A-Za-z0-9\s]{2,8}$'
         MotVin:
             name: vin
             in: path
@@ -795,6 +857,8 @@ components:
             description: 17-character vehicle identification number.
             schema:
                 type: string
+                minLength: 17
+                maxLength: 17
                 pattern: '^[A-HJ-NPR-Z0-9]{17}$'
         Amount:
             name: amount
@@ -802,7 +866,7 @@ components:
             required: true
             schema:
                 type: string
-                pattern: '^(?:0|[1-9]\\d{0,11})(?:\\.\\d{1,2})?$'
+                pattern: '^(?:0|[1-9]\d{0,11})(?:\.\d{1,2})?$'
             example: '100.00'
         Rate:
             name: rate
@@ -810,7 +874,10 @@ components:
             required: true
             schema:
                 type: string
-                pattern: '^(?:0|[1-9]\\d{0,2})(?:\\.\\d{1,2})?$'
+                pattern: '^(?:0|[1-9]\d{0,2})(?:\.\d{1,2})?$'
+                x-ukapi-validation:
+                    numeric_minimum: 0
+                    numeric_maximum: 100
             example: '20.00'
         Postcode:
             name: postcode
@@ -827,6 +894,7 @@ components:
             description: A UK postcode. Letter case and whitespace are normalised before resolving its coordinates.
             schema:
                 type: string
+                maxLength: 16
             example: BL2 6XX
         CrimeMonth:
             name: month
@@ -862,6 +930,7 @@ components:
             description: A UK postcode. Letter case and whitespace are normalised before resolving its coordinates.
             schema:
                 type: string
+                maxLength: 16
             example: BL2 6XX
         FloodStationId:
             name: id
@@ -935,7 +1004,9 @@ components:
             description: Companies House company number. Whitespace is removed and letters are uppercased.
             schema:
                 type: string
-                pattern: '^(?=.*\\d)[A-Za-z0-9]{1,8}$'
+                minLength: 1
+                maxLength: 8
+                pattern: '^(?=.*\d)[A-Za-z0-9]{1,8}$'
             example: SC012345
         CompanyQuery:
             name: q
@@ -954,7 +1025,9 @@ components:
             description: A five-digit Companies House condensed SIC 2007 code. Whitespace is removed.
             schema:
                 type: string
-                pattern: '^\\d{5}$'
+                minLength: 5
+                maxLength: 5
+                pattern: '^\d{5}$'
             example: '62012'
         SicQuery:
             name: q
@@ -985,6 +1058,7 @@ components:
                 type: integer
                 minimum: 1
                 maximum: 100
+                x-ukapi-plan-bound: max_page_size
             example: 25
     responses:
         InvalidApiKey:
@@ -1007,29 +1081,7 @@ components:
                         $ref: '#/components/schemas/ErrorEnvelope'
         RateLimited:
             description: The per-key burst limit or hard account-wide UTC calendar-month quota has been reached.
-            headers:
-                RateLimit-Limit:
-                    schema:
-                        type: integer
-                RateLimit-Remaining:
-                    schema:
-                        type: integer
-                RateLimit-Reset:
-                    schema:
-                        type: integer
-                Retry-After:
-                    schema:
-                        type: integer
-                X-Quota-Limit:
-                    schema:
-                        type: integer
-                X-Quota-Remaining:
-                    schema:
-                        type: integer
-                X-Quota-Reset:
-                    description: Unix timestamp of the next UTC calendar-month boundary.
-                    schema:
-                        type: integer
+            headers: *ukapiRateLimitHeaders
             content:
                 application/json:
                     schema:

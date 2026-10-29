@@ -1,5 +1,6 @@
 <?php
 
+use App\Domain\Billing\PlanCatalog;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminIncidentController;
 use App\Http\Controllers\AdminSupportActionController;
@@ -15,13 +16,17 @@ use App\Http\Controllers\UsageExportController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::inertia('/', 'welcome')->name('home');
+Route::get('/', function (PlanCatalog $plans) {
+    return Inertia::render('welcome', ['plans' => $plans->publicPlans()]);
+})->name('home');
 Route::get('/ready', HealthController::class)->name('ready');
 Route::inertia('/api-catalogue', 'public/api-catalogue')->name('api-catalogue');
 Route::get('/docs/{section?}', function (?string $section = null) {
     return Inertia::render('public/docs', ['section' => $section]);
 })->name('docs');
-Route::inertia('/pricing', 'public/pricing')->name('pricing');
+Route::get('/pricing', function (PlanCatalog $plans) {
+    return Inertia::render('public/pricing', ['plans' => $plans->publicPlans()]);
+})->name('pricing');
 Route::get('/status', PublicStatusController::class)->name('status');
 Route::inertia('/terms', 'public/legal')->defaults('document', 'terms')->name('terms');
 Route::inertia('/paid-plan-terms', 'public/legal')->defaults('document', 'paid-plan-terms')->name('paid-plan-terms');
