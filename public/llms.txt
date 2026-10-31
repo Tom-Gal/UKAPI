@@ -1,6 +1,6 @@
 # UKApi.co.uk
 
-> A UK data API for developers. UKApi.co.uk normalises postcode, company, crime, flood and MOT history data into a consistent versioned API.
+> A UK data API for developers. UKApi.co.uk normalises postcode, council, calendar, company, crime, flood and MOT history data into a consistent versioned API.
 
 ## Public resources
 
@@ -20,6 +20,20 @@
 - `GET /v1/mot/vin/{vin}`: Vehicle details and MOT history by 17-character VIN.
 
 These endpoints use the DVSA MOT History API and cover Great Britain and Northern Ireland. They return the standard `data` and `meta` envelope and require the normal UKApi Bearer API key.
+
+## Geography and calendar endpoints
+
+- `GET /v1/outcodes/{outcode}`: Outcode centre and administrative references.
+- `GET /v1/councils/postcode/{postcode}`: Resolve a local authority district from a postcode.
+- `GET /v1/councils/{code}`: Look up an ONS local authority district code.
+- `GET /v1/bank-holidays`: Bank holidays for all UK divisions.
+- `GET /v1/bank-holidays/{division}`: Bank holidays for one division.
+- `GET /v1/working-days?from=&to=&division=`: Bounded weekday and public-holiday calculation.
+- `GET /v1/tax-years/current` and `GET /v1/tax-years/{year}`: UK tax-year calendar boundaries, not tax advice.
+
+Geography uses Postcodes.io and a versioned ONS local-authority reference. Bank
+holidays use the GOV.UK calendar. Coverage, freshness and source terms are
+documented on the catalogue and data-sources pages.
 
 ## Notes
 

@@ -1,8 +1,9 @@
 # Service health monitoring
 
 `php artisan ukapi:health:check` samples application dependencies and selected
-Postcodes.io, Police.uk, Environment Agency, Companies House and DVSA MOT
-History operations. It also validates the local SIC reference. The MOT check
+Postcodes.io, GOV.UK bank holidays, Police.uk, Environment Agency, Companies
+House and DVSA MOT History operations. It also validates the local SIC
+reference. The MOT check
 uses the normal cached OAuth client-credential token and samples the
 authenticated bulk-download manifest without downloading vehicle files. The
 scheduler runs it every five minutes with a distributed lock. Store the
@@ -15,6 +16,14 @@ A successful provider request proves only that sampled operation. Police.uk's
 reported data month and the local SIC retrieval age are displayed separately;
 other providers remain `unknown` for source freshness because their sampled
 responses do not expose a reliable publication date.
+
+Source and licence review is a separate scheduled control. The scheduler runs
+`php artisan ukapi:sources:review --due` every Monday at 09:00. It checks the
+owned register in `config/source_reviews.php` and fails when a review is due;
+it does not make unbounded or unaudited requests to provider documentation.
+Follow the human review procedure in `SOURCE_REVIEW.md`, then update the
+review date and reconcile public attribution, coverage, legal wording and
+provider behaviour together.
 
 Configure thresholds with the `HEALTH_*` variables in `.env.example`. In
 production, set `HEALTH_MONITORING_ENABLED=true` or explicitly record a waiver

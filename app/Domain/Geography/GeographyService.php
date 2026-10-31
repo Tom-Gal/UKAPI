@@ -11,6 +11,7 @@ final class GeographyService
     public function __construct(
         private readonly PostcodeProvider $provider,
         private readonly Repository $cache,
+        private readonly CouncilReference $councilReference,
     ) {}
 
     public function lookup(UkPostcode $postcode): GeographyLookup
@@ -29,6 +30,72 @@ final class GeographyService
         $entry = $this->postcodeEntry($postcode);
 
         return new GeographyValidation($entry['state'] === 'found', $entry['cached']);
+    }
+
+    public function outcode(UkOutcode $outcode): OutcodeLookup
+    {
+        $key = 'ukapi:v1:geography:outcode:'.$outcode->value();
+        $cached = $this->cache->get($key);
+
+        if (is_array($cached) && ($cached['state'] ?? null) === 'not_found') {
+            throw ApiException::outcodeNotFound();
+        }
+
+        if (is_array($cached) && ($cached['state'] ?? null) === 'found' && is_array($cached['data'] ?? null)) {
+            try {
+                return new OutcodeLookup(OutcodeData::fromArray($cached['data']), true);
+            } catch (\InvalidArgumentException) {
+                $this->cache->forget($key);
+            }
+        }
+
+        try {
+            $record = $this->provider->findOutcode($outcode);
+        } catch (ApiException $exception) {
+            if ($exception->apiCode === 'outcode_not_found') {
+                $this->cache->put($key, ['state' => 'not_found'], $this->negativeTtl());
+            }
+
+            throw $exception;
+        }
+
+        $this->cache->put($key, ['state' => 'found', 'data' => $record->toArray()], $this->positiveTtl());
+
+        return new OutcodeLookup($record, false);
+    }
+
+    public function council(UkCouncilCode $code): CouncilData
+    {
+        $council = $this->councilReference->find($code);
+
+        if ($council === null) {
+            throw ApiException::councilNotFound();
+        }
+
+        return $council;
+    }
+
+    /** @return array{council: CouncilData, postcode: PostcodeData, cached: bool} */
+    public function councilForPostcode(UkPostcode $postcode): array
+    {
+        $lookup = $this->lookup($postcode);
+        $code = $lookup->postcode->localAuthority['code'] ?? null;
+
+        if (! is_string($code) || $code === '') {
+            throw ApiException::councilNotFound();
+        }
+
+        try {
+            $councilCode = UkCouncilCode::from($code);
+        } catch (ApiException) {
+            throw ApiException::councilNotFound();
+        }
+
+        return [
+            'council' => $this->council($councilCode),
+            'postcode' => $lookup->postcode,
+            'cached' => $lookup->cached,
+        ];
     }
 
     public function nearby(UkPostcode $postcode, int $limit, int $radiusMetres): GeographyCollection

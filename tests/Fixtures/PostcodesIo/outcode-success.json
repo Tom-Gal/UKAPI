@@ -1,0 +1,16 @@
+{
+    "status": 200,
+    "result": {
+        "outcode": "BL2",
+        "longitude": -2.402,
+        "latitude": 53.599,
+        "northings": 411600,
+        "eastings": 372100,
+        "admin_district": ["Bolton"],
+        "parish": ["Bolton, unparished area"],
+        "admin_county": [],
+        "admin_ward": ["Breightmet"],
+        "country": ["England"],
+        "parliamentary_constituency": ["Bolton North East"]
+    }
+}

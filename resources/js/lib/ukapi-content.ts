@@ -158,7 +158,19 @@ const allEndpointFamilies: EndpointFamily[] = [
             {
                 method: 'GET',
                 path: '/v1/outcodes/{outcode}',
-                description: 'Look up an outcode.',
+                examplePath: '/v1/outcodes/BL2',
+                live: true,
+                parameters: [
+                    {
+                        name: 'outcode',
+                        location: 'path',
+                        required: true,
+                        description:
+                            'A UK postcode outward code, such as BL2 or SW1A.',
+                    },
+                ],
+                description:
+                    'Look up the normalised centre and administrative areas for a postcode outcode.',
                 coverage: 'UK',
                 source: 'Postcodes.io',
                 freshness: 'Up to 30 days',
@@ -173,18 +185,42 @@ const allEndpointFamilies: EndpointFamily[] = [
             {
                 method: 'GET',
                 path: '/v1/councils/postcode/{postcode}',
-                description: 'Resolve council from a postcode.',
+                examplePath: '/v1/councils/postcode/BL2%206XX',
+                live: true,
+                parameters: [
+                    {
+                        name: 'postcode',
+                        location: 'path',
+                        required: true,
+                        description: 'A valid UK postcode.',
+                    },
+                ],
+                description:
+                    'Resolve the current local authority district for a postcode.',
                 coverage: 'UK',
-                source: 'Postcodes.io + council metadata',
-                freshness: 'Up to 30 days',
+                source: 'Postcodes.io + ONS',
+                freshness:
+                    'Postcodes.io up to 30 days, ONS reference snapshot 2024-12',
             },
             {
                 method: 'GET',
                 path: '/v1/councils/{code}',
-                description: 'Look up a council by code.',
+                examplePath: '/v1/councils/E08000001',
+                live: true,
+                parameters: [
+                    {
+                        name: 'code',
+                        location: 'path',
+                        required: true,
+                        description:
+                            'A nine-character GSS local authority district code.',
+                    },
+                ],
+                description:
+                    'Look up a local authority district from the maintained ONS names-and-codes snapshot.',
                 coverage: 'UK',
-                source: 'Council metadata',
-                freshness: 'Up to 30 days',
+                source: 'ONS',
+                freshness: 'Reference snapshot 2024-12',
             },
         ],
     },
@@ -538,14 +574,17 @@ const allEndpointFamilies: EndpointFamily[] = [
         ],
     },
     {
-        slug: 'vat',
-        name: 'VAT',
-        summary: 'Straightforward VAT calculations for UK amounts.',
+        slug: 'calendar',
+        name: 'Calendar utilities',
+        summary:
+            'Bank holidays and bounded working-day calculations for UK divisions.',
         endpoints: [
             {
                 method: 'GET',
                 path: '/v1/bank-holidays',
-                description: 'Get bank holidays for every division.',
+                live: true,
+                description:
+                    'Get the GOV.UK bank-holiday calendar for England and Wales, Scotland, and Northern Ireland.',
                 coverage: 'UK',
                 source: 'GOV.UK',
                 freshness: '24 hours',
@@ -553,7 +592,19 @@ const allEndpointFamilies: EndpointFamily[] = [
             {
                 method: 'GET',
                 path: '/v1/bank-holidays/{division}',
-                description: 'Get holidays for one division.',
+                examplePath: '/v1/bank-holidays/england-and-wales',
+                live: true,
+                parameters: [
+                    {
+                        name: 'division',
+                        location: 'path',
+                        required: true,
+                        description:
+                            'england-and-wales, scotland, or northern-ireland.',
+                    },
+                ],
+                description:
+                    'Get bank holidays for one UK nation or nation group.',
                 coverage: 'UK',
                 source: 'GOV.UK',
                 freshness: '24 hours',
@@ -561,15 +612,51 @@ const allEndpointFamilies: EndpointFamily[] = [
             {
                 method: 'GET',
                 path: '/v1/working-days?from=&to=&division=',
-                description: 'Calculate working days.',
+                examplePath:
+                    '/v1/working-days?from=2026-04-01&to=2026-04-30&division=england-and-wales',
+                live: true,
+                parameters: [
+                    {
+                        name: 'from',
+                        location: 'query',
+                        required: true,
+                        description:
+                            'Inclusive start date in YYYY-MM-DD format.',
+                    },
+                    {
+                        name: 'to',
+                        location: 'query',
+                        required: true,
+                        description:
+                            'Inclusive end date in YYYY-MM-DD format, no more than 366 calendar days after from.',
+                    },
+                    {
+                        name: 'division',
+                        location: 'query',
+                        required: true,
+                        description:
+                            'england-and-wales, scotland, or northern-ireland.',
+                    },
+                ],
+                description:
+                    'Calculate inclusive weekdays after excluding public holidays for a UK division.',
                 coverage: 'UK divisions',
-                source: 'UKApi.co.uk',
-                freshness: 'Calculated',
+                source: 'GOV.UK + UKApi.co.uk',
+                freshness: '24 hours for holiday source, calculated result',
             },
+        ],
+    },
+    {
+        slug: 'tax',
+        name: 'Tax-year utilities',
+        summary: 'UK tax-year calendar boundaries, not tax advice.',
+        endpoints: [
             {
                 method: 'GET',
                 path: '/v1/tax-years/current',
-                description: 'Get the current tax-year identifier.',
+                live: true,
+                description:
+                    'Get the current UK tax-year boundaries as a calendar reference.',
                 coverage: 'UK',
                 source: 'UKApi.co.uk',
                 freshness: 'Calculated',
@@ -577,11 +664,30 @@ const allEndpointFamilies: EndpointFamily[] = [
             {
                 method: 'GET',
                 path: '/v1/tax-years/{year}',
-                description: 'Get tax-year boundaries.',
+                examplePath: '/v1/tax-years/2026',
+                live: true,
+                parameters: [
+                    {
+                        name: 'year',
+                        location: 'path',
+                        required: true,
+                        description:
+                            'Four-digit tax-year start year, such as 2026 for 2026-27.',
+                    },
+                ],
+                description:
+                    'Get UK tax-year boundaries for a supplied start year. This is not tax advice.',
                 coverage: 'UK',
                 source: 'UKApi.co.uk',
                 freshness: 'Calculated',
             },
+        ],
+    },
+    {
+        slug: 'vat',
+        name: 'VAT',
+        summary: 'Straightforward VAT calculations for UK amounts.',
+        endpoints: [
             {
                 method: 'GET',
                 path: '/v1/vat/calculate?amount=&rate=',

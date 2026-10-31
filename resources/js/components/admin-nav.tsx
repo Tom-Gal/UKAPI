@@ -5,6 +5,7 @@ const items = [
     ['Users', '/admin/users'],
     ['Providers', '/admin/providers'],
     ['Operations', '/admin/operations'],
+    ['Support', '/admin/support'],
     ['Testing', '/admin/testing'],
 ];
 

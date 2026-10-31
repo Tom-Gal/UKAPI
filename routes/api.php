@@ -1,18 +1,22 @@
 <?php
 
 use App\Http\Controllers\Api\OpenApiController;
+use App\Http\Controllers\Api\V1\CalendarController;
 use App\Http\Controllers\Api\V1\CompanyController;
+use App\Http\Controllers\Api\V1\CouncilController;
 use App\Http\Controllers\Api\V1\CrimeController;
 use App\Http\Controllers\Api\V1\FloodController;
 use App\Http\Controllers\Api\V1\MotHistoryController;
 use App\Http\Controllers\Api\V1\PostcodeController;
 use App\Http\Controllers\Api\V1\SicController;
 use App\Http\Controllers\Api\V1\SicExportController;
+use App\Http\Controllers\Api\V1\TaxYearController;
 use App\Http\Controllers\Api\V1\VatController;
 use App\Http\Middleware\AuthenticateApiKey;
 use App\Http\Middleware\EnforceApiRateLimit;
 use App\Http\Middleware\EnforceMonthlyQuota;
 use App\Http\Middleware\RecordApiOperation;
+use App\Http\Middleware\RecordApiRequestLog;
 use App\Http\Middleware\TrackFirstApiSuccess;
 use Illuminate\Support\Facades\Route;
 
@@ -20,6 +24,7 @@ Route::get('openapi/v1.yaml', OpenApiController::class)->name('api.openapi.v1');
 
 Route::prefix('v1')
     ->middleware([
+        RecordApiRequestLog::class,
         AuthenticateApiKey::class,
         'ukapi.feature:current_data',
         EnforceApiRateLimit::class,
@@ -113,4 +118,29 @@ Route::prefix('v1')
         Route::get('coordinates/{latitude}/{longitude}/postcode', [PostcodeController::class, 'reverse'])
             ->defaults('ukapi_endpoint', 'coordinates.postcode')
             ->name('api.v1.coordinates.postcode');
+
+        Route::get('outcodes/{outcode}', [PostcodeController::class, 'outcode'])
+            ->defaults('ukapi_endpoint', 'outcodes.show')
+            ->name('api.v1.outcodes.show');
+        Route::get('councils/postcode/{postcode}', [CouncilController::class, 'postcode'])
+            ->defaults('ukapi_endpoint', 'councils.postcode')
+            ->name('api.v1.councils.postcode');
+        Route::get('councils/{code}', [CouncilController::class, 'show'])
+            ->defaults('ukapi_endpoint', 'councils.show')
+            ->name('api.v1.councils.show');
+        Route::get('bank-holidays', [CalendarController::class, 'bankHolidays'])
+            ->defaults('ukapi_endpoint', 'calendar.bankholidays')
+            ->name('api.v1.bankholidays.index');
+        Route::get('bank-holidays/{division}', [CalendarController::class, 'bankHolidayDivision'])
+            ->defaults('ukapi_endpoint', 'calendar.bankholidays.division')
+            ->name('api.v1.bankholidays.show');
+        Route::get('working-days', [CalendarController::class, 'workingDays'])
+            ->defaults('ukapi_endpoint', 'calendar.workingdays')
+            ->name('api.v1.workingdays.calculate');
+        Route::get('tax-years/current', [TaxYearController::class, 'current'])
+            ->defaults('ukapi_endpoint', 'tax.currentyear')
+            ->name('api.v1.tax.currentyear');
+        Route::get('tax-years/{year}', [TaxYearController::class, 'show'])
+            ->defaults('ukapi_endpoint', 'tax.year')
+            ->name('api.v1.tax.year');
     });

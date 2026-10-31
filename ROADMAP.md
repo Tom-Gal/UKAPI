@@ -1,6 +1,6 @@
 # UKApi.co.uk Roadmap
 
-**Last audited:** 28 October 2026
+**Last audited:** 31 October 2026
 **Purpose:** A living, prioritised list of work that remains after comparing the current repository, production runbooks, tests, public contract, and original product reports.  
 **Governing conventions:** See `AGENTS.md`.
 
@@ -16,10 +16,10 @@
 
 The audit found a strong functional baseline:
 
-- 25 customer `/v1` routes are live.
-- All 25 runtime routes have exact path counterparts in `openapi/openapi.yaml`.
+- 33 customer `/v1` routes are live.
+- All 33 runtime routes have exact path counterparts in `openapi/openapi.yaml`.
 - Planned endpoint definitions are retained internally but filtered from the public catalogue and documentation.
-- 293 PHP tests ran with 10,267 assertions, 292 passing and one environment-dependent test skipped.
+- 305 PHP tests ran with 14,021 assertions, 304 passing and one environment-dependent test skipped.
 - PHPStan passes with no errors.
 - TypeScript checking passes.
 - The production frontend build succeeds.
@@ -143,13 +143,13 @@ Work:
 
 ### P1.10 Expand automated contract parity tests
 
-The first automated parity phase is complete. CI now fails when the 25 runtime routes, OpenAPI operations, live catalogue entries, feature entitlements, endpoint codes, usage labels, API-key scope families, route names, or OpenAPI operation IDs diverge.
+The first automated parity phase is complete. CI now fails when the runtime routes, OpenAPI operations, live catalogue entries, feature entitlements, endpoint codes, usage labels, API-key scope families, route names, or OpenAPI operation IDs diverge. The original baseline covered 25 routes; the current parity surface covers 33.
 
 The next parity slice is also complete. `ApiContractParityTest` now resolves reusable OpenAPI parameter references and checks runtime route placeholders, FormRequest fields, parameter locations and requiredness against the documented contract. It also requires reusable 200-response envelope schemas, the shared authentication/forbidden/rate-limit responses, validation responses for parameterised operations, and the complete rate/quota header declaration. Verified on 29 October 2026 with 6 tests and 4,075 assertions, plus Pint and PHPStan.
 
 Validation-bound parity is now complete. The test suite checks runtime string, integer, fixed-size, regex, date-format and numeric-range rules against OpenAPI schemas, validates documented examples against their patterns, and verifies that every configured plan page-size limit fits the documented hard maximum. The contract now documents the runtime postcode lengths, fixed identifier lengths, VAT rate range, and dynamic `max_page_size` bound. Over-escaped OpenAPI regexes were corrected. Verified on 29 October 2026 with 7 parity tests and 7,248 assertions, plus the full Composer gate.
 
-Response and header parity is now complete for the current 25-route surface. Representative runtime VAT success, removal and validation-error responses are checked against resolved OpenAPI schemas. Every live 200 response declares the seven headers applied by the API middleware, and the reusable rate-limit response includes the correlation, burst-limit, retry and quota headers. Verified on 29 October 2026 with 8 parity tests and 7,756 assertions; the full Composer gate ran 291 tests with 10,220 assertions.
+Response and header parity is now complete for the current 33-route surface. Representative runtime VAT success, removal and validation-error responses are checked against resolved OpenAPI schemas. Every live 200 response declares the seven headers applied by the API middleware, and the reusable rate-limit response includes the correlation, burst-limit, retry and quota headers. Verified on 29 October 2026 with 8 parity tests and 7,756 assertions; the full Composer gate ran 291 tests with 10,220 assertions.
 
 The current P1.10 parity scope is complete. Extend the representative runtime schema matrix when a new endpoint family or response variant is added.
 
@@ -180,6 +180,17 @@ Create an owned review cadence for each source covering:
 
 This is particularly important before expanding Companies House history, filing data, bulk exports, or Planning Data.
 
+Complete. `config/source_reviews.php` now owns the eight live source records,
+public source-register wording, review owner, cadence, last reviewed date,
+review status and required review topics. The public `/data-sources` page is
+rendered from that registry. `ukapi:sources:review --due` runs every Monday at
+09:00 with scheduler locking and fails when a source review is overdue; the
+full operator procedure is documented in `SOURCE_REVIEW.md`. Mixed source
+rights, authorised API access and bulk redistribution cases are explicitly
+marked for follow-up rather than treated as blanket permissions. Verified on
+29 October 2026, then re-verified on 31 October 2026 with the source-review
+and P2.1 focused tests.
+
 ## P2: Near-term API expansion
 
 Implement each vertical slice completely across provider/domain/controller, contract, documentation, source register, health, usage labels, fixtures, and tests.
@@ -196,7 +207,17 @@ Recommended first because they add useful breadth with relatively low operationa
 6. `GET /v1/working-days` as a bounded derived calculation.
 7. `GET /v1/tax-years/current` and `GET /v1/tax-years/{year}` as clearly scoped utilities, not tax advice.
 
-The internal endpoint catalogue already contains non-live planning entries for these routes. Review and complete them rather than creating competing definitions.
+The internal endpoint catalogue already contains planning entries for these routes. Review and complete them rather than creating competing definitions.
+
+Complete. The seven utility groups are live with typed Postcodes.io and GOV.UK
+adapters, validated positive and negative caches, the ONS December 2024 local
+authority snapshot, bounded working-day calculations, and clearly scoped
+tax-year calendar utilities. Runtime routes, endpoint labels, API-key scope
+families, OpenAPI operations, catalogue entries, source-register records,
+fixtures and focused behaviour tests are aligned. Verified on 31 October 2026
+with 305 PHP tests, 14,021 assertions, PHPStan, Pint, OpenAPI parsing, route
+caching, frontend formatting/linting, TypeScript checking and a production
+build.
 
 ### P2.2 Food hygiene family
 

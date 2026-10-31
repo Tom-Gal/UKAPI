@@ -3,7 +3,9 @@
 namespace App\Integrations\PostcodesIo;
 
 use App\Domain\Geography\Coordinates;
+use App\Domain\Geography\OutcodeData;
 use App\Domain\Geography\PostcodeData;
+use App\Domain\Geography\UkOutcode;
 use App\Domain\Geography\UkPostcode;
 use App\Integrations\Contracts\PostcodeProvider;
 use App\Support\Api\ApiException;
@@ -24,6 +26,27 @@ final class PostcodesIoPostcodeProvider implements PostcodeProvider
         }
 
         return $this->mapOne($response);
+    }
+
+    public function findOutcode(UkOutcode $outcode): OutcodeData
+    {
+        $response = $this->get('outcodes/'.rawurlencode($outcode->value()));
+
+        if ($response->status() === 404) {
+            throw ApiException::outcodeNotFound();
+        }
+
+        $result = $this->result($response);
+
+        if (! is_array($result)) {
+            throw ApiException::providerInvalidResponse();
+        }
+
+        try {
+            return OutcodeData::fromPostcodesIo($result);
+        } catch (InvalidArgumentException) {
+            throw ApiException::providerInvalidResponse();
+        }
     }
 
     public function nearby(UkPostcode $postcode, int $limit, int $radiusMetres): array

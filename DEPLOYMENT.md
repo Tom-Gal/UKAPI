@@ -134,6 +134,7 @@ Queue monitoring is waived only for the documented synchronous no-worker mode.
 - Create a named Laravel Cloud manual MySQL backup before risky migrations and follow `RECOVERY.md`; backup creation alone is not proof that restoration works.
 - With a Worker cluster, run `php artisan ukapi:queue:monitor`, confirm it reports a healthy empty backlog, and inspect Laravel Cloud worker logs. In the intentional synchronous fallback, confirm the readiness check reports the queue execution mode and backlog-monitor waiver as OK instead.
 - Run `php artisan ukapi:health:check` and confirm the MOT observation passes token acquisition and the authenticated DVSA API sample before widening access. The command never prints tokens or provider bodies.
+- Confirm the scheduled `ukapi:sources:review --due` command is registered and that `SOURCE_REVIEW.md` has an owner for each live source. Resolve any due or follow-up review before changing source coverage, caching, retention, redistribution or attribution wording.
 
 ## Dataset snapshots and change feeds
 

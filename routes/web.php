@@ -1,9 +1,11 @@
 <?php
 
 use App\Domain\Billing\PlanCatalog;
+use App\Domain\Sources\SourceRegister;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminIncidentController;
 use App\Http\Controllers\AdminSupportActionController;
+use App\Http\Controllers\AdminSupportController;
 use App\Http\Controllers\AdminTestingController;
 use App\Http\Controllers\ApiKeyController;
 use App\Http\Controllers\ApiKeySecurityExportController;
@@ -32,7 +34,9 @@ Route::inertia('/terms', 'public/legal')->defaults('document', 'terms')->name('t
 Route::inertia('/paid-plan-terms', 'public/legal')->defaults('document', 'paid-plan-terms')->name('paid-plan-terms');
 Route::inertia('/privacy', 'public/legal')->defaults('document', 'privacy')->name('privacy');
 Route::inertia('/acceptable-use', 'public/legal')->defaults('document', 'acceptable-use')->name('acceptable-use');
-Route::inertia('/data-sources', 'public/data-sources')->name('data-sources');
+Route::get('/data-sources', function (SourceRegister $sources) {
+    return Inertia::render('public/data-sources', ['sources' => $sources->publicSources()]);
+})->name('data-sources');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', DashboardController::class)->name('dashboard');
@@ -55,6 +59,10 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     Route::get('/providers', [AdminController::class, 'providers'])->name('providers');
     Route::get('/operations', [AdminController::class, 'operations'])->name('operations');
     Route::get('/testing', [AdminController::class, 'testing'])->name('testing');
+    Route::get('/support', [AdminSupportController::class, 'index'])->name('support');
+    Route::post('/support/tickets', [AdminSupportController::class, 'store'])->name('support.tickets.store');
+    Route::post('/support/tickets/{ticket}/close', [AdminSupportController::class, 'close'])
+        ->name('support.tickets.close');
     Route::post('/testing/health', [AdminTestingController::class, 'health'])->name('testing.health');
     Route::post('/incidents/{incident}/acknowledge', [AdminIncidentController::class, 'acknowledge'])
         ->name('incidents.acknowledge');

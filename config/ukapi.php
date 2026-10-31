@@ -172,6 +172,14 @@ return [
         'postcodes.nearby' => 'Nearby postcodes',
         'postcodes.show' => 'Postcode lookups',
         'coordinates.postcode' => 'Coordinate lookups',
+        'outcodes.show' => 'Outcode lookups',
+        'councils.postcode' => 'Council lookups by postcode',
+        'councils.show' => 'Council lookups',
+        'calendar.bankholidays' => 'Bank holiday calendars',
+        'calendar.bankholidays.division' => 'Bank holiday division calendars',
+        'calendar.workingdays' => 'Working-day calculations',
+        'tax.currentyear' => 'Current tax-year lookups',
+        'tax.year' => 'Tax-year lookups',
     ],
 
     /*
@@ -191,7 +199,10 @@ return [
         'sic' => ['label' => 'SIC reference', 'endpoint_prefixes' => ['sic.']],
         'crime' => ['label' => 'Police and crime', 'endpoint_prefixes' => ['crime.']],
         'flood' => ['label' => 'Flood monitoring', 'endpoint_prefixes' => ['flood.']],
-        'geography' => ['label' => 'Postcodes and coordinates', 'endpoint_prefixes' => ['postcodes.', 'coordinates.']],
+        'geography' => ['label' => 'Postcodes and coordinates', 'endpoint_prefixes' => ['postcodes.', 'coordinates.', 'outcodes.']],
+        'councils' => ['label' => 'Council reference', 'endpoint_prefixes' => ['councils.']],
+        'calendar' => ['label' => 'Calendar utilities', 'endpoint_prefixes' => ['calendar.']],
+        'tax' => ['label' => 'Tax-year utilities', 'endpoint_prefixes' => ['tax.']],
     ],
 
     'api_key_rotation_max_overlap_hours' => 24,
@@ -235,6 +246,13 @@ return [
         'timeout_seconds' => (int) env('POSTCODES_IO_TIMEOUT', 5),
         'cache_ttl_days' => (int) env('POSTCODES_IO_CACHE_TTL_DAYS', 30),
         'negative_cache_ttl_minutes' => (int) env('POSTCODES_IO_NEGATIVE_CACHE_TTL_MINUTES', 15),
+    ],
+
+    'govuk_bank_holidays' => [
+        'url' => env('GOVUK_BANK_HOLIDAYS_URL', 'https://www.gov.uk/bank-holidays.json'),
+        'connect_timeout_seconds' => (int) env('GOVUK_BANK_HOLIDAYS_CONNECT_TIMEOUT', 2),
+        'timeout_seconds' => (int) env('GOVUK_BANK_HOLIDAYS_TIMEOUT', 5),
+        'cache_ttl_hours' => (int) env('GOVUK_BANK_HOLIDAYS_CACHE_TTL_HOURS', 24),
     ],
 
     /*

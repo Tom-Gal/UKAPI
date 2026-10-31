@@ -6,12 +6,14 @@ use App\Domain\Operations\LoginAlertDecider;
 use App\Domain\Operations\NotificationDeliveryRecorder;
 use App\Domain\Operations\SafeNotificationSender;
 use App\Integrations\CompaniesHouse\CompaniesHouseCompanyProvider;
+use App\Integrations\Contracts\BankHolidayProvider;
 use App\Integrations\Contracts\CompanyProvider;
 use App\Integrations\Contracts\CrimeProvider;
 use App\Integrations\Contracts\FloodProvider;
 use App\Integrations\Contracts\MotHistoryProvider;
 use App\Integrations\Contracts\PostcodeProvider;
 use App\Integrations\EnvironmentAgency\EnvironmentAgencyFloodProvider;
+use App\Integrations\GovUk\GovUkBankHolidayProvider;
 use App\Integrations\MotHistory\MotHistoryProvider as MotHistoryProviderImplementation;
 use App\Integrations\PoliceUk\PoliceUkCrimeProvider;
 use App\Integrations\PostcodesIo\PostcodesIoPostcodeProvider;
@@ -42,6 +44,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(CrimeProvider::class, PoliceUkCrimeProvider::class);
         $this->app->bind(FloodProvider::class, EnvironmentAgencyFloodProvider::class);
         $this->app->bind(PostcodeProvider::class, PostcodesIoPostcodeProvider::class);
+        $this->app->bind(BankHolidayProvider::class, GovUkBankHolidayProvider::class);
         $this->app->bind(MotHistoryProvider::class, MotHistoryProviderImplementation::class);
     }
 

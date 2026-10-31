@@ -15,6 +15,7 @@ final class HealthStatus
         'companies' => 'Company provider',
         'mot' => 'MOT history provider',
         'sic' => 'SIC reference data',
+        'bank_holidays' => 'GOV.UK bank-holiday calendar',
     ];
 
     /** @return list<array<string, mixed>> */

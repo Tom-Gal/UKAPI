@@ -133,6 +133,12 @@ class AdminController extends Controller
                     ? 'Snapshot available'
                     : 'Snapshot missing',
             ),
+            $provider(
+                'gov_uk_bank_holidays',
+                'bank_holidays',
+                'England and Wales, Scotland, and Northern Ireland',
+                'No credential required',
+            ),
         ];
     }
 

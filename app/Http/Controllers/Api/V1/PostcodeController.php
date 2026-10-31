@@ -7,6 +7,7 @@ use App\Domain\Geography\GeographyCollection;
 use App\Domain\Geography\GeographyLookup;
 use App\Domain\Geography\GeographyService;
 use App\Domain\Geography\GeographyValidation;
+use App\Domain\Geography\UkOutcode;
 use App\Domain\Geography\UkPostcode;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\NearbyPostcodesRequest;
@@ -31,6 +32,18 @@ final class PostcodeController extends Controller
         $result = $geography->lookup(UkPostcode::from($postcode));
 
         return ApiResponse::success($request, $result->postcode->toArray(), $this->meta($result));
+    }
+
+    public function outcode(Request $request, string $outcode, GeographyService $geography): JsonResponse
+    {
+        $result = $geography->outcode(UkOutcode::from($outcode));
+
+        return ApiResponse::success($request, $result->outcode->toArray(), [
+            'cached' => $result->cached,
+            'source' => 'postcodes_io',
+            'source_updated_at' => null,
+            'coverage' => 'UK',
+        ]);
     }
 
     /**

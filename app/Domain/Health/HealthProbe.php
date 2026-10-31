@@ -2,6 +2,8 @@
 
 namespace App\Domain\Health;
 
+use App\Domain\Calendar\BankHolidayCalendar;
+use App\Domain\Calendar\BankHolidayDivision;
 use App\Domain\Companies\CompanySearchResults;
 use App\Domain\Companies\SicReference;
 use App\Domain\Crime\CrimeCategory;
@@ -31,6 +33,7 @@ final class HealthProbe
             'companies' => $this->companies(),
             'mot' => $this->mot(),
             'sic' => new ProbeResult(referenceRetrievedAt: CarbonImmutable::parse($this->sic->snapshot()->retrievedAt)),
+            'bank_holidays' => $this->bankHolidays(),
             default => throw new RuntimeException('Unknown health service.'),
         };
     }
@@ -81,6 +84,47 @@ final class HealthProbe
             }
         } catch (\Throwable) {
             // Never retain provider bodies, exception messages, URLs or credentials.
+        }
+
+        return new ProbeResult;
+    }
+
+    private function bankHolidays(): ProbeResult
+    {
+        try {
+            $response = $this->boundedRequest()
+                ->acceptJson()
+                ->get((string) config('ukapi.govuk_bank_holidays.url'));
+        } catch (ConnectionException) {
+            throw new ProbeFailure('api_unavailable');
+        }
+
+        if (! $response->successful() || ! is_array($response->json())) {
+            throw new ProbeFailure('api_unavailable');
+        }
+
+        $payload = $response->json();
+        $divisions = [];
+        foreach (['england-and-wales', 'scotland', 'northern-ireland'] as $division) {
+            $events = is_array($payload[$division] ?? null) ? ($payload[$division]['events'] ?? null) : null;
+            if (! is_array($events)) {
+                throw new ProbeFailure('invalid_response');
+            }
+
+            try {
+                $divisions[$division] = BankHolidayDivision::fromArray([
+                    'division' => $division,
+                    'events' => $events,
+                ])->toArray();
+            } catch (\InvalidArgumentException) {
+                throw new ProbeFailure('invalid_response');
+            }
+        }
+
+        try {
+            BankHolidayCalendar::fromArray(['divisions' => $divisions]);
+        } catch (\InvalidArgumentException) {
+            throw new ProbeFailure('invalid_response');
         }
 
         return new ProbeResult;

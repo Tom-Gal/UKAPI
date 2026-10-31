@@ -134,6 +134,51 @@ final class ApiException extends RuntimeException
         );
     }
 
+    public static function invalidOutcode(): self
+    {
+        return new self(
+            apiCode: 'invalid_outcode',
+            message: 'The outcode must be a valid UK postcode outward code.',
+            status: 422,
+        );
+    }
+
+    public static function outcodeNotFound(): self
+    {
+        return new self(
+            apiCode: 'outcode_not_found',
+            message: 'No outcode record was found for the supplied outcode.',
+            status: 404,
+        );
+    }
+
+    public static function invalidCouncilCode(): self
+    {
+        return new self(
+            apiCode: 'invalid_council_code',
+            message: 'The council code must be a valid nine-character GSS code.',
+            status: 422,
+        );
+    }
+
+    public static function councilNotFound(): self
+    {
+        return new self(
+            apiCode: 'council_not_found',
+            message: 'No council record was found for the supplied code or postcode.',
+            status: 404,
+        );
+    }
+
+    public static function councilReferenceUnavailable(): self
+    {
+        return new self(
+            apiCode: 'council_reference_unavailable',
+            message: 'The council reference snapshot is temporarily unavailable. Please retry shortly.',
+            status: 503,
+        );
+    }
+
     public static function invalidCoordinates(): self
     {
         return new self(
