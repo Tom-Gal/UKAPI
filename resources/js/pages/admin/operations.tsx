@@ -41,6 +41,15 @@ type FamilyLatencyMetric = {
     p50_latency_ms: number;
     p95_latency_ms: number;
 };
+type UpstreamMetric = {
+    endpoint: string;
+    requests: number;
+    upstream_errors: number;
+    unavailable: number;
+    authentication_failed: number;
+    invalid_response: number;
+    upstream_error_rate: number;
+};
 type ProviderMetric = {
     service: string;
     name: string;
@@ -118,6 +127,7 @@ type Props = {
     endpointMetrics: EndpointMetric[];
     familyLatencyMetrics: FamilyLatencyMetric[];
     cacheMetrics: CacheMetric[];
+    upstreamMetrics: UpstreamMetric[];
     providerMetrics: ProviderMetric[];
     incidents: Incident[];
     hotspots: Hotspot[];
@@ -202,6 +212,44 @@ export default function AdminOperations(props: Props) {
                             <Cell mono>≤ {metric.p50_latency_ms} ms</Cell>
                             <Cell mono>≤ {metric.p95_latency_ms} ms</Cell>
                             <Cell mono>{metric.max_latency_ms} ms</Cell>
+                        </tr>
+                    ))}
+                </OperationsTable>
+
+                <OperationsTable
+                    title="Upstream error outcomes"
+                    icon={ShieldAlert}
+                    description="Seven-day upstream error categories by endpoint. Provider response bodies and credentials are never retained."
+                    empty="No upstream error observations have been recorded yet."
+                    headers={[
+                        'Endpoint',
+                        'Requests',
+                        'Upstream errors',
+                        'Unavailable',
+                        'Auth',
+                        'Invalid/schema',
+                        'Rate',
+                    ]}
+                >
+                    {props.upstreamMetrics.map((metric) => (
+                        <tr key={metric.endpoint}>
+                            <Cell>
+                                <p className="font-medium">{metric.endpoint}</p>
+                            </Cell>
+                            <Cell mono>{metric.requests.toLocaleString()}</Cell>
+                            <Cell mono>
+                                {metric.upstream_errors.toLocaleString()}
+                            </Cell>
+                            <Cell mono>
+                                {metric.unavailable.toLocaleString()}
+                            </Cell>
+                            <Cell mono>
+                                {metric.authentication_failed.toLocaleString()}
+                            </Cell>
+                            <Cell mono>
+                                {metric.invalid_response.toLocaleString()}
+                            </Cell>
+                            <Cell mono>{metric.upstream_error_rate}%</Cell>
                         </tr>
                     ))}
                 </OperationsTable>

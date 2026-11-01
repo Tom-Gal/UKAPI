@@ -45,6 +45,7 @@ final class AdminOperations
             'endpointMetrics' => $this->endpointMetrics(),
             'familyLatencyMetrics' => $this->familyLatencyMetrics(),
             'cacheMetrics' => $this->cacheMetrics(),
+            'upstreamMetrics' => $this->upstreamMetrics(),
             'providerMetrics' => $this->providerMetrics(),
             'incidents' => $this->incidents(),
             'hotspots' => $this->hotspots(),
@@ -205,6 +206,44 @@ final class AdminOperations
         usort($metrics, static fn (array $left, array $right): int => $right['requests'] <=> $left['requests']);
 
         return $metrics;
+    }
+
+    /** @return list<array{endpoint: string, requests: int, upstream_errors: int, unavailable: int, authentication_failed: int, invalid_response: int, upstream_error_rate: float}> */
+    private function upstreamMetrics(): array
+    {
+        $rows = DB::table('api_request_logs')
+            ->where('created_at', '>=', CarbonImmutable::now('UTC')->subDays(6)->startOfDay())
+            ->get(['endpoint', 'error_code']);
+        $groups = $rows->groupBy('endpoint');
+        $upstreamCodes = [
+            'upstream_unavailable',
+            'upstream_authentication_failed',
+            'upstream_invalid_response',
+        ];
+        $metrics = [];
+
+        foreach ($groups as $endpoint => $endpointRows) {
+            $requests = $endpointRows->count();
+            $unavailable = $endpointRows->where('error_code', 'upstream_unavailable')->count();
+            $authenticationFailed = $endpointRows->where('error_code', 'upstream_authentication_failed')->count();
+            $invalidResponse = $endpointRows->where('error_code', 'upstream_invalid_response')->count();
+            $upstreamErrors = $endpointRows->filter(
+                static fn (object $row): bool => in_array($row->error_code, $upstreamCodes, true),
+            )->count();
+            $metrics[] = [
+                'endpoint' => (string) $endpoint,
+                'requests' => $requests,
+                'upstream_errors' => $upstreamErrors,
+                'unavailable' => $unavailable,
+                'authentication_failed' => $authenticationFailed,
+                'invalid_response' => $invalidResponse,
+                'upstream_error_rate' => $requests > 0 ? round(($upstreamErrors / $requests) * 100, 1) : 0.0,
+            ];
+        }
+
+        usort($metrics, static fn (array $left, array $right): int => $right['upstream_errors'] <=> $left['upstream_errors']);
+
+        return array_slice($metrics, 0, 25);
     }
 
     /** @return list<array<string, mixed>> */

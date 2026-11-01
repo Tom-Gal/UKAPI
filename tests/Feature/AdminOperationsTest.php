@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Domain\Health\HealthIncidentRecorder;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Models\AdminAuditEvent;
+use App\Models\ApiRequestLog;
 use App\Models\DatasetSnapshot;
 use App\Models\DatasetSnapshotHead;
 use App\Models\ServiceHealthCheck;
@@ -38,6 +39,20 @@ class AdminOperationsTest extends TestCase
         $this->getJson("/v1/vat/calculate?amount={$sensitiveAmount}&rate=20", $headers)->assertOk();
         $this->getJson('/v1/vat/calculate?amount=100&rate=invalid', $headers)
             ->assertUnprocessable()->assertJsonPath('error.code', 'invalid_parameter');
+
+        ApiRequestLog::query()->create([
+            'request_id' => 'req_upstreammetrics1',
+            'method' => 'GET',
+            'route_path' => 'v1/vat/calculate',
+            'route_name' => 'api.v1.vat.calculate',
+            'endpoint' => 'vat.calculate',
+            'status' => 503,
+            'duration_ms' => 120,
+            'cache_state' => null,
+            'error_code' => 'upstream_unavailable',
+            'error_reason' => 'upstream_provider',
+            'error_message' => 'The upstream data provider is temporarily unavailable. Please retry shortly.',
+        ]);
 
         DB::table('daily_usage_rejections')->insert([
             'user_id' => $customer->id,
@@ -94,6 +109,10 @@ class AdminOperationsTest extends TestCase
             ->assertJsonPath('props.familyLatencyMetrics.0.family', 'vat')
             ->assertJsonPath('props.familyLatencyMetrics.0.requests', 2)
             ->assertJsonPath('props.familyLatencyMetrics.0.p95_latency_ms', fn (mixed $value): bool => is_int($value))
+            ->assertJsonPath('props.upstreamMetrics.0.endpoint', 'vat.calculate')
+            ->assertJsonPath('props.upstreamMetrics.0.upstream_errors', 1)
+            ->assertJsonPath('props.upstreamMetrics.0.unavailable', 1)
+            ->assertJsonPath('props.upstreamMetrics.0.upstream_error_rate', 33.3)
             ->assertJsonPath('props.cacheMetrics.0.endpoint', 'vat.calculate')
             ->assertJsonPath('props.cacheMetrics.0.measured_requests', 1)
             ->assertJsonPath('props.cacheMetrics.0.fresh', 1)
