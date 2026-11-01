@@ -6,7 +6,9 @@ use App\Http\Controllers\Api\V1\CompanyController;
 use App\Http\Controllers\Api\V1\CouncilController;
 use App\Http\Controllers\Api\V1\CrimeController;
 use App\Http\Controllers\Api\V1\FloodController;
+use App\Http\Controllers\Api\V1\FoodEstablishmentController;
 use App\Http\Controllers\Api\V1\MotHistoryController;
+use App\Http\Controllers\Api\V1\PlanningController;
 use App\Http\Controllers\Api\V1\PostcodeController;
 use App\Http\Controllers\Api\V1\SicController;
 use App\Http\Controllers\Api\V1\SicExportController;
@@ -105,6 +107,20 @@ Route::prefix('v1')
             ->middleware('ukapi.feature:change_feeds')
             ->defaults('ukapi_endpoint', 'flood.stations.changes')
             ->name('api.v1.flood.stations.changes');
+
+        Route::get('food-establishments/search', [FoodEstablishmentController::class, 'search'])
+            ->defaults('ukapi_endpoint', 'food.establishments.search')
+            ->name('api.v1.food.establishments.search');
+        Route::get('food-establishments/nearby', [FoodEstablishmentController::class, 'nearby'])
+            ->defaults('ukapi_endpoint', 'food.establishments.nearby')
+            ->name('api.v1.food.establishments.nearby');
+        Route::get('food-establishments/{id}', [FoodEstablishmentController::class, 'show'])
+            ->defaults('ukapi_endpoint', 'food.establishments.show')
+            ->name('api.v1.food.establishments.show');
+
+        Route::get('planning/constraints', [PlanningController::class, 'constraints'])
+            ->defaults('ukapi_endpoint', 'planning.constraints')
+            ->name('api.v1.planning.constraints');
 
         Route::get('postcodes/{postcode}/validate', [PostcodeController::class, 'validate'])
             ->defaults('ukapi_endpoint', 'postcodes.validate')

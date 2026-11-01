@@ -1,0 +1,13 @@
+{
+    "entities": [
+        {
+            "entity": 44002870,
+            "name": "Example Conservation Area",
+            "dataset": "conservation-area",
+            "reference": "CONARA/1300",
+            "start-date": "2008-02-21",
+            "end-date": "",
+            "point": "POINT (-2.4117 53.5922)"
+        }
+    ]
+}

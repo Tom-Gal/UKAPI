@@ -179,6 +179,24 @@ final class ApiException extends RuntimeException
         );
     }
 
+    public static function invalidFoodEstablishmentId(): self
+    {
+        return new self(
+            apiCode: 'invalid_food_establishment_id',
+            message: 'The food establishment id must be a positive numeric identifier.',
+            status: 422,
+        );
+    }
+
+    public static function foodEstablishmentNotFound(): self
+    {
+        return new self(
+            apiCode: 'food_establishment_not_found',
+            message: 'No food establishment was found for the supplied id.',
+            status: 404,
+        );
+    }
+
     public static function invalidCoordinates(): self
     {
         return new self(

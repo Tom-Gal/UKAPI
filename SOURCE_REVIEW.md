@@ -44,3 +44,10 @@ The registry intentionally marks mixed-rights, authorised-access and bulk
 redistribution cases for follow-up. A source being publicly accessible does
 not by itself grant UKApi.co.uk or its customers permission to cache,
 redistribute, retain or commercially use every field.
+
+Companies House profile snapshots have an additional application gate: the
+`companies_house` record must have `review_status=reviewed` before an operator
+may run `php artisan ukapi:companies:profile-snapshot <company-number>`. This
+command stores only the normalised profile DTO. Do not enable customer-visible
+history, officer snapshots or filing-metadata snapshots until retention,
+personal-data and redistribution decisions are recorded for those datasets.

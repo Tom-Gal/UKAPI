@@ -749,24 +749,141 @@ const allEndpointFamilies: EndpointFamily[] = [
             {
                 method: 'GET',
                 path: '/v1/food-establishments/{id}',
-                description: 'Get an establishment.',
-                coverage: 'UK',
+                examplePath: '/v1/food-establishments/123456',
+                live: true,
+                parameters: [
+                    {
+                        name: 'id',
+                        location: 'path',
+                        required: true,
+                        description:
+                            'A positive FSA food establishment identifier.',
+                    },
+                ],
+                description:
+                    'Get a normalised establishment record while preserving FHRS or FHIS scheme semantics.',
+                coverage: 'UK, participating local authorities',
                 source: 'Food Standards Agency',
                 freshness: '6 hours',
             },
             {
                 method: 'GET',
                 path: '/v1/food-establishments/search?name=&postcode=&rating=',
-                description: 'Search establishments.',
-                coverage: 'UK',
+                examplePath:
+                    '/v1/food-establishments/search?name=Example%20Kitchen&scheme=FHRS&rating=5',
+                live: true,
+                parameters: [
+                    {
+                        name: 'name',
+                        location: 'query',
+                        required: false,
+                        description:
+                            'Business name search text. Required when postcode is omitted.',
+                    },
+                    {
+                        name: 'postcode',
+                        location: 'query',
+                        required: false,
+                        description:
+                            'Valid UK postcode. Required when name is omitted.',
+                    },
+                    {
+                        name: 'scheme',
+                        location: 'query',
+                        required: false,
+                        description: 'FHRS or FHIS.',
+                    },
+                    {
+                        name: 'rating',
+                        location: 'query',
+                        required: false,
+                        description:
+                            'FHRS 0-5, or an FHIS status such as Pass or ImprovementRequired.',
+                    },
+                    {
+                        name: 'rating_operator',
+                        location: 'query',
+                        required: false,
+                        description:
+                            'Equal, GreaterThanOrEqual, or LessThanOrEqual. Applies to FHRS ratings.',
+                    },
+                    {
+                        name: 'page',
+                        location: 'query',
+                        required: false,
+                        description: 'One-based page, default 1.',
+                    },
+                    {
+                        name: 'per_page',
+                        location: 'query',
+                        required: false,
+                        description:
+                            'Results per page, default 25 and maximum 100.',
+                    },
+                ],
+                description:
+                    'Search establishments by name or postcode, with explicit FHRS/FHIS and rating filters.',
+                coverage: 'UK, participating local authorities',
                 source: 'Food Standards Agency',
                 freshness: '6 hours',
             },
             {
                 method: 'GET',
                 path: '/v1/food-establishments/nearby?postcode=&radius=',
-                description: 'Find nearby establishments.',
-                coverage: 'UK',
+                examplePath:
+                    '/v1/food-establishments/nearby?postcode=BL2%206XX&radius=5',
+                live: true,
+                parameters: [
+                    {
+                        name: 'postcode',
+                        location: 'query',
+                        required: true,
+                        description:
+                            'Origin postcode used to resolve coordinates.',
+                    },
+                    {
+                        name: 'radius',
+                        location: 'query',
+                        required: true,
+                        description:
+                            'Search radius in kilometres, from 1 to 25.',
+                    },
+                    {
+                        name: 'scheme',
+                        location: 'query',
+                        required: false,
+                        description: 'FHRS or FHIS.',
+                    },
+                    {
+                        name: 'rating',
+                        location: 'query',
+                        required: false,
+                        description: 'FHRS 0-5, or an FHIS status.',
+                    },
+                    {
+                        name: 'rating_operator',
+                        location: 'query',
+                        required: false,
+                        description:
+                            'Equal, GreaterThanOrEqual, or LessThanOrEqual. Applies to FHRS ratings.',
+                    },
+                    {
+                        name: 'page',
+                        location: 'query',
+                        required: false,
+                        description: 'One-based page, default 1.',
+                    },
+                    {
+                        name: 'per_page',
+                        location: 'query',
+                        required: false,
+                        description:
+                            'Results per page, default 25 and maximum 100.',
+                    },
+                ],
+                description:
+                    'Find nearby establishments using the existing postcode geography boundary and a bounded radius.',
+                coverage: 'UK, participating local authorities',
                 source: 'Food Standards Agency',
                 freshness: '6 hours',
             },
@@ -1085,18 +1202,44 @@ const allEndpointFamilies: EndpointFamily[] = [
             {
                 method: 'GET',
                 path: '/v1/planning/constraints?postcode=',
-                description: 'Find planning constraints by postcode.',
+                examplePath:
+                    '/v1/planning/constraints?postcode=BL2%206XX&limit=25',
+                live: true,
+                parameters: [
+                    {
+                        name: 'postcode',
+                        location: 'query',
+                        required: false,
+                        description:
+                            'England postcode. Use this or the latitude and longitude pair.',
+                    },
+                    {
+                        name: 'lat',
+                        location: 'query',
+                        required: false,
+                        description:
+                            'WGS84 latitude. Required with lng when postcode is omitted.',
+                    },
+                    {
+                        name: 'lng',
+                        location: 'query',
+                        required: false,
+                        description:
+                            'WGS84 longitude. Required with lat when postcode is omitted.',
+                    },
+                    {
+                        name: 'limit',
+                        location: 'query',
+                        required: false,
+                        description:
+                            'Maximum number of constraints, from 1 to 100. Default 50.',
+                    },
+                ],
+                description:
+                    'Find a curated set of planning constraints by postcode or WGS84 coordinates. Results include dataset-specific attribution and limitations. They are not an official property search, and incomplete coverage is possible.',
                 coverage: 'England',
-                source: 'Planning Data (beta)',
-                freshness: '24 hours',
-            },
-            {
-                method: 'GET',
-                path: '/v1/planning/constraints?lat=&lng=',
-                description: 'Find planning constraints by coordinates.',
-                coverage: 'England',
-                source: 'Planning Data (beta)',
-                freshness: '24 hours',
+                source: 'Planning Data (beta), MHCLG, Historic England and Ordnance Survey',
+                freshness: 'Source-dependent; cached up to 24 hours',
             },
         ],
     },

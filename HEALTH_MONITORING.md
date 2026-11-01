@@ -2,8 +2,8 @@
 
 `php artisan ukapi:health:check` samples application dependencies and selected
 Postcodes.io, GOV.UK bank holidays, Police.uk, Environment Agency, Companies
-House and DVSA MOT History operations. It also validates the local SIC
-reference. The MOT check
+House, DVSA MOT History, Food Standards Agency food hygiene and Planning Data
+operations. It also validates the local SIC reference. The MOT check
 uses the normal cached OAuth client-credential token and samples the
 authenticated bulk-download manifest without downloading vehicle files. The
 scheduler runs it every five minutes with a distributed lock. Store the

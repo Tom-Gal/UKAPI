@@ -15,6 +15,17 @@ final class SourceRegister
         return array_values(config('source_reviews.sources', []));
     }
 
+    public function isReviewed(string $key): bool
+    {
+        foreach ($this->all() as $source) {
+            if (($source['key'] ?? null) === $key) {
+                return ($source['review_status'] ?? null) === 'reviewed';
+            }
+        }
+
+        return false;
+    }
+
     /**
      * @return list<array{
      *     key: string,

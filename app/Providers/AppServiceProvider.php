@@ -10,11 +10,15 @@ use App\Integrations\Contracts\BankHolidayProvider;
 use App\Integrations\Contracts\CompanyProvider;
 use App\Integrations\Contracts\CrimeProvider;
 use App\Integrations\Contracts\FloodProvider;
+use App\Integrations\Contracts\FoodHygieneProvider;
 use App\Integrations\Contracts\MotHistoryProvider;
+use App\Integrations\Contracts\PlanningDataProvider;
 use App\Integrations\Contracts\PostcodeProvider;
 use App\Integrations\EnvironmentAgency\EnvironmentAgencyFloodProvider;
+use App\Integrations\Food\FsaFoodHygieneProvider;
 use App\Integrations\GovUk\GovUkBankHolidayProvider;
 use App\Integrations\MotHistory\MotHistoryProvider as MotHistoryProviderImplementation;
+use App\Integrations\Planning\PlanningDataProvider as PlanningDataProviderImplementation;
 use App\Integrations\PoliceUk\PoliceUkCrimeProvider;
 use App\Integrations\PostcodesIo\PostcodesIoPostcodeProvider;
 use App\Listeners\SendSubscriptionLifecycleNotification;
@@ -45,6 +49,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(FloodProvider::class, EnvironmentAgencyFloodProvider::class);
         $this->app->bind(PostcodeProvider::class, PostcodesIoPostcodeProvider::class);
         $this->app->bind(BankHolidayProvider::class, GovUkBankHolidayProvider::class);
+        $this->app->bind(FoodHygieneProvider::class, FsaFoodHygieneProvider::class);
+        $this->app->bind(PlanningDataProvider::class, PlanningDataProviderImplementation::class);
         $this->app->bind(MotHistoryProvider::class, MotHistoryProviderImplementation::class);
     }
 

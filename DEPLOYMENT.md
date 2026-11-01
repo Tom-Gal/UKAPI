@@ -21,6 +21,8 @@ never in Git:
 - Ensure the HTTPS edge preserves `X-Forwarded-Proto` for trusted proxies and serves the `Strict-Transport-Security` response header on both `ukapi.co.uk` and `api.ukapi.co.uk`. The application emits HSTS for requests it recognises as secure.
 - `COMPANIES_HOUSE_API_KEY` from the secret manager. The previously exposed credential must not be reused.
 - DVSA MOT History `MOT_HISTORY_CLIENT_ID`, `MOT_HISTORY_CLIENT_SECRET`, `MOT_HISTORY_API_KEY`, and the issued scope/token URLs. The application obtains and caches access tokens automatically; do not maintain a long-lived `MOT_HISTORY_ACCESS_TOKEN`. Vehicle responses use a 15-minute positive cache and 10-minute not-found cache by default; tune `MOT_HISTORY_CACHE_TTL_MINUTES` and `MOT_HISTORY_NEGATIVE_CACHE_TTL_MINUTES` only with a documented operational reason.
+- Food Standards Agency ratings access uses the public API configuration in `.env.example`: `FOOD_HYGIENE_BASE_URL`, `FOOD_HYGIENE_USER_AGENT`, timeout values, cache windows and the local provider request limit. Keep the FSA API version header and user-agent behaviour intact, review the FSA terms before changing redistribution or cache policy, and do not add rating badge images to the API.
+- Planning constraints use the public Planning Data API configuration in `.env.example`: `PLANNING_DATA_BASE_URL`, `PLANNING_DATA_USER_AGENT`, timeout values, cache windows and local provider request limit. This is England-only beta data with incomplete coverage; verify the dataset-specific licence and attribution terms before launch or adding another dataset.
 - Approved `LEGAL_ENTITY_NAME`, `LEGAL_REGISTERED_OFFICE`, and `LEGAL_CONTACT_EMAIL` values. Set `LEGAL_COMPANY_NUMBER` and `LEGAL_ICO_NUMBER` when applicable; otherwise leave them empty. The readiness command rejects blanks or known placeholders for the required identity fields.
 - Set `UKAPI_SCHEDULER_ENABLED=true` when Laravel Cloud's scheduler is enabled. The current Laravel Cloud plan has no persistent worker, so use the explicit synchronous fallback: `QUEUE_CONNECTION=sync`, `UKAPI_QUEUE_WORKER_ENABLED=false`, `UKAPI_QUEUE_MONITOR_ENABLED=false`, and `UKAPI_QUEUE_MONITOR_WAIVED=true`. Keep `HEALTH_ALERT_EMAIL` valid for application and provider-health alerts. Adopt the database-worker configuration below only after a Worker cluster is available.
 - Stripe secret-manager values: `STRIPE_KEY`, `STRIPE_SECRET`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_HOBBY`, `STRIPE_PRICE_PRO`, `STRIPE_PRICE_SCALE`, `STRIPE_PRICE_HOBBY_ANNUAL`, `STRIPE_PRICE_PRO_ANNUAL`, and `STRIPE_PRICE_SCALE_ANNUAL`. Use live-mode `pk_live_`, `sk_live_`, and `price_` values in production. Run `php artisan stripe:provision-plans` against the applicable Stripe mode to create the documented GBP monthly and annual prices. The command also synchronizes the durable local plan-price catalog, while existing Stripe price IDs remain valid for current subscriptions.
@@ -130,6 +132,7 @@ Queue monitoring is waived only for the documented synchronous no-worker mode.
 - `/up` is a lightweight liveness endpoint.
 - `/ready` verifies MySQL and the configured cache without disclosing dependency details; it returns `503` when either is unavailable.
 - Run `php artisan ukapi:sic:refresh` deliberately after confirming the source and its terms. It never runs during a customer request.
+- Do not run `php artisan ukapi:companies:profile-snapshot <company-number>` until the Companies House source record is reviewed and approved for the intended retention. The command captures one normalised company profile per invocation, never officers or filing documents, and does not publish a customer-facing history feed.
 - Promote the first verified operator with `php artisan ukapi:grant-admin operator@example.com`.
 - Create a named Laravel Cloud manual MySQL backup before risky migrations and follow `RECOVERY.md`; backup creation alone is not proof that restoration works.
 - With a Worker cluster, run `php artisan ukapi:queue:monitor`, confirm it reports a healthy empty backlog, and inspect Laravel Cloud worker logs. In the intentional synchronous fallback, confirm the readiness check reports the queue execution mode and backlog-monitor waiver as OK instead.
@@ -144,11 +147,12 @@ so publishing a new source extract never rewrites history. The daily
 ukapi:snapshots:prune task removes snapshots older than
 SNAPSHOT_RETENTION_DAYS while retaining every active version.
 
-Police.uk monthly crime snapshots, Companies House SIC reference snapshots, and
-Environment Agency station-reading snapshots now use the store. Their scopes
-are respectively postcode/month, the SIC reference, and station id. Each has a
-stable record identity so deterministic added, removed, and changed diffs do
-not rely on a mutable upstream response.
+Police.uk monthly crime snapshots, Companies House SIC reference snapshots,
+Environment Agency station-reading snapshots, and the operator-controlled
+Companies House profile snapshot foundation now use the store. Their scopes are
+respectively postcode/month, the SIC reference, station id, and company number.
+Each has a stable record identity so deterministic added, removed, and changed
+diffs do not rely on a mutable upstream response.
 
 The same store can support the next datasets with different scope and identity
 rules:
@@ -158,12 +162,14 @@ rules:
   operationally sensitive and rapidly mutable, so they are explicitly excluded
   from the historical feed and must not be treated as an alerting or safety
   guarantee.
-- Companies House should start with company profile snapshots, scoped by
-  company number and capture date, then add officers and filings as separate
-  dataset names. Stable company numbers, officer appointment ids, and filing
-  transaction ids should be used as identities. The implementation must also
-  confirm Companies House API caching, retention, and redistribution terms
-  before making these snapshots customer-visible.
+- Companies House profile capture is now an explicit, one-company operator
+  command, scoped by company number with immutable capture timestamps. It is
+  blocked unless the Companies House source review is marked `reviewed`, and
+  stores only the normalised profile DTO. Add officers and filings as separate
+  dataset names only after confirming API caching, retention, personal-data and
+  redistribution terms. Stable company numbers, officer appointment ids, and
+  filing transaction ids should be used as identities before any customer-
+  visible history endpoint is designed.
 
 Both extensions should reuse SnapshotStore, but each provider should define
 its own canonical normalisation, source timestamp, identity function, and

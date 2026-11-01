@@ -139,6 +139,18 @@ class AdminController extends Controller
                 'England and Wales, Scotland, and Northern Ireland',
                 'No credential required',
             ),
+            $provider(
+                'fsa_food_hygiene',
+                'food_hygiene',
+                'England, Scotland, Wales and Northern Ireland, participating local authorities',
+                'No credential required',
+            ),
+            $provider(
+                'planning_data',
+                'planning_data',
+                'England, incomplete beta coverage',
+                'No credential required',
+            ),
         ];
     }
 

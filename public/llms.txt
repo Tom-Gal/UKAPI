@@ -1,6 +1,6 @@
 # UKApi.co.uk
 
-> A UK data API for developers. UKApi.co.uk normalises postcode, council, calendar, company, crime, flood and MOT history data into a consistent versioned API.
+> A UK data API for developers. UKApi.co.uk normalises postcode, council, calendar, company, crime, flood, food hygiene and MOT history data into a consistent versioned API.
 
 ## Public resources
 
@@ -34,6 +34,30 @@ These endpoints use the DVSA MOT History API and cover Great Britain and Norther
 Geography uses Postcodes.io and a versioned ONS local-authority reference. Bank
 holidays use the GOV.UK calendar. Coverage, freshness and source terms are
 documented on the catalogue and data-sources pages.
+
+## Food hygiene endpoints
+
+- `GET /v1/food-establishments/{id}`: One food establishment record.
+- `GET /v1/food-establishments/search`: Search by name or postcode, with explicit FHRS/FHIS and rating filters.
+- `GET /v1/food-establishments/nearby`: Search participating authorities near a postcode within a bounded radius.
+
+Food hygiene data comes from the Food Standards Agency ratings service. FHRS
+and FHIS are preserved as distinct scheme values, coverage depends on
+participating local authorities, and ordinary results may be cached for up to
+six hours. The endpoint does not provide emergency advice or imply FSA or
+local-authority affiliation.
+
+## Planning constraints
+
+- `GET /v1/planning/constraints?postcode=...`: Curated planning constraints for an England postcode.
+- `GET /v1/planning/constraints?lat=...&lng=...`: The same lookup using WGS84 coordinates.
+
+The current curated set covers conservation areas, listed buildings, green
+belts, Article 4 direction areas and tree preservation zones. Planning Data is
+England-only, incomplete and still in development. Responses include
+dataset-specific licence, attribution and limitation metadata. An empty result
+is not proof that no constraint exists, and this endpoint is not an official
+property search.
 
 ## Notes
 

@@ -1,6 +1,6 @@
 # UKApi.co.uk Roadmap
 
-**Last audited:** 31 October 2026
+**Last audited:** 1 November 2026
 **Purpose:** A living, prioritised list of work that remains after comparing the current repository, production runbooks, tests, public contract, and original product reports.  
 **Governing conventions:** See `AGENTS.md`.
 
@@ -16,10 +16,10 @@
 
 The audit found a strong functional baseline:
 
-- 33 customer `/v1` routes are live.
-- All 33 runtime routes have exact path counterparts in `openapi/openapi.yaml`.
+- 37 customer `/v1` routes are live.
+- All 37 runtime routes have exact path counterparts in `openapi/openapi.yaml`.
 - Planned endpoint definitions are retained internally but filtered from the public catalogue and documentation.
-- 305 PHP tests ran with 14,021 assertions, 304 passing and one environment-dependent test skipped.
+- 329 PHP tests ran with 17,088 assertions, 328 passing and one environment-dependent test skipped.
 - PHPStan passes with no errors.
 - TypeScript checking passes.
 - The production frontend build succeeds.
@@ -143,7 +143,7 @@ Work:
 
 ### P1.10 Expand automated contract parity tests
 
-The first automated parity phase is complete. CI now fails when the runtime routes, OpenAPI operations, live catalogue entries, feature entitlements, endpoint codes, usage labels, API-key scope families, route names, or OpenAPI operation IDs diverge. The original baseline covered 25 routes; the current parity surface covers 33.
+The first automated parity phase is complete. CI now fails when the runtime routes, OpenAPI operations, live catalogue entries, feature entitlements, endpoint codes, usage labels, API-key scope families, route names, or OpenAPI operation IDs diverge. The original baseline covered 25 routes; the current parity surface covers 37.
 
 The next parity slice is also complete. `ApiContractParityTest` now resolves reusable OpenAPI parameter references and checks runtime route placeholders, FormRequest fields, parameter locations and requiredness against the documented contract. It also requires reusable 200-response envelope schemas, the shared authentication/forbidden/rate-limit responses, validation responses for parameterised operations, and the complete rate/quota header declaration. Verified on 29 October 2026 with 6 tests and 4,075 assertions, plus Pint and PHPStan.
 
@@ -180,7 +180,7 @@ Create an owned review cadence for each source covering:
 
 This is particularly important before expanding Companies House history, filing data, bulk exports, or Planning Data.
 
-Complete. `config/source_reviews.php` now owns the eight live source records,
+Complete. `config/source_reviews.php` now owns the ten live source records,
 public source-register wording, review owner, cadence, last reviewed date,
 review status and required review topics. The public `/data-sources` page is
 rendered from that registry. `ukapi:sources:review --due` runs every Monday at
@@ -235,6 +235,21 @@ Requirements:
 - set bounded pagination/radius rules;
 - confirm attribution, caching, and redistribution terms before launch.
 
+Complete. The FSA adapter uses the versioned JSON API with bounded timeouts,
+one retry for safe reads, a local provider throttle, six-hour positive caches,
+24-hour stale fallback for ordinary upstream failures, and negative caching for
+missing establishments. FHRS and FHIS records remain distinct, optional FSA
+fields are normalised to null, ratings and scores are not conflated across
+schemes, and nearby searches reuse the postcode geography boundary with a
+1-25 kilometre public radius. The three routes are represented in the runtime
+catalogue, OpenAPI, source register, usage labels, public `llms.txt`, health
+sampling, admin provider register, fixtures and focused tests. Verified on 31
+October 2026 with 317 PHP tests, 16,301 assertions, PHPStan, Pint and contract
+parity. The 1 November 2026 source review confirms the FSA's Open Government
+Licence position for ratings data, the requirement to keep ratings current or
+dated, the FHRS-only scope of component scores, and the separate restrictions
+on FSA/FHRS imagery and branding. UKApi.co.uk does not redistribute imagery.
+
 ### P2.3 Planning constraints family
 
 Candidate endpoints:
@@ -250,9 +265,31 @@ Treat this as higher risk than calendar or food work:
 - Design stable normalised geometry/constraint identifiers before exposing the contract.
 - Review licensing, cache duration, source completeness, and outage behaviour first.
 
+In progress. `GET /v1/planning/constraints` accepts either a normalised postcode
+or a WGS84 latitude/longitude pair, applies a bounded limit of 1-100, and
+queries only the curated conservation-area, listed-building, green-belt,
+Article 4 direction-area and tree-preservation-zone datasets. The adapter
+normalises source entity IDs into dataset-qualified IDs and representative
+points, never returns raw provider geometry, applies bounded retries and local
+flow control, and uses a 24-hour cache with a 48-hour stale fallback for
+ordinary upstream unavailability. Runtime routes, OpenAPI, catalogue, usage
+labels, health/admin visibility, source register, fixtures and focused tests
+are aligned. The endpoint now exposes dataset-specific source, licence,
+attribution and limitation metadata based on the official dataset pages.
+
+The endpoint is intentionally beta-labelled and not launch-complete until the
+operator records dataset-specific licence/attribution decisions, confirms the
+current Planning Data schema and coverage for every curated dataset, and
+approves the disclaimer that an empty result is not proof of no constraint.
+The source register remains `follow_up_required` for `planning_data` until the
+operator approves the beta launch wording and confirms that the selected
+dataset metadata will be reviewed as part of the 60-day source cadence.
+
 ### P2.4 Expand historical snapshots and change feeds
 
-The snapshot store already supports SIC, crime, and flood-reading data. The next candidate is Companies House, only after confirming retention and redistribution rights.
+The snapshot store already supports SIC, crime, and flood-reading data. Companies
+House is the next candidate, but historical retention and redistribution rights
+must be confirmed before customer-visible history is enabled.
 
 Suggested order:
 
@@ -262,6 +299,26 @@ Suggested order:
 4. customer-visible history/change endpoints gated by plan.
 
 Keep warnings out of historical flood feeds unless the product, safety, and licensing implications are explicitly revisited.
+
+In progress. The first safe increment is complete: `ukapi:companies:profile-snapshot
+<company-number>` captures one normalised Companies House profile through the
+typed provider and stores it as the immutable, checksummed
+`companies_house.company_profile` dataset scoped by company number. The command
+is source-review gated, never stores raw provider payloads, does not fetch
+officers or filing documents, and is idempotent for unchanged profiles. Focused
+coverage verifies the approval gate, normalisation, duplicate suppression and
+invalid identifiers.
+
+The customer-visible history slice remains deliberately open. Before adding a
+route or plan entitlement, record approved decisions for Companies House API
+caching, retention duration, personal-data handling, attribution, redistribution
+and historical change semantics. The next implementation slice should add a
+reviewed profile-history read model or endpoint only after those decisions are
+recorded, then add officer appointment and filing-metadata snapshots separately.
+
+Verified on 1 November 2026 with the focused snapshot command tests and the
+full Composer gate: 329 PHP tests, 17,088 assertions, 328 passing and one
+environment-dependent skip. Pint and PHPStan also pass.
 
 ### P2.5 Broaden bulk export carefully
 
@@ -339,10 +396,9 @@ Continue to avoid microservices, Kafka, Kubernetes, Elasticsearch/OpenSearch, Gr
 1. Supply and approve the production legal identity and retention values.
 2. Activate the synthetic-monitor secret and perform the first isolated MySQL restore drill; record the real drill evidence in `RECOVERY.md`.
 3. When the Laravel Cloud plan provides a persistent Worker cluster, activate and verify queued notification delivery as P1.3.
-4. Expand MySQL CI only for production-specific behaviour and extend contract-parity coverage to parameters, bounds, schemas, and headers.
-5. Remove duplicated plan/pricing truth.
-6. Add low-risk outcode, council, bank-holiday, working-day, and tax-year endpoints.
-7. Implement food hygiene.
-8. Expand observability, resilience, snapshots, and customer usage insight based on production data.
-9. Add accessibility/browser coverage and approved retention/deletion operations.
-10. Approach planning, broader exports, teams, SDKs, and new datasets only after licensing review and demand validation.
+4. Resolve Planning Data dataset-specific licensing, coverage and disclaimer decisions before treating the beta endpoint as launch-ready.
+5. Resolve Companies House profile retention and redistribution terms, then add the customer-visible profile history slice with plan gating.
+6. Expand Companies House history only as separately approved officer-appointment and filing-metadata datasets.
+7. Expand observability and resilience controls where production evidence justifies them.
+8. Add accessibility/browser coverage and approved retention/deletion operations.
+9. Approach broader exports, teams, SDKs and new datasets only after licensing review and demand validation.

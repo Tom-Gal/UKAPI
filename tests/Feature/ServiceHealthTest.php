@@ -49,7 +49,7 @@ class ServiceHealthTest extends TestCase
     public function test_initial_status_is_unknown_without_probing_even_when_credentials_are_configured(): void
     {
         $response = $this->publicStatus()->assertOk();
-        foreach (range(0, 7) as $index) {
+        foreach (range(0, 9) as $index) {
             $response->assertJsonPath("props.services.{$index}.state", 'unknown')
                 ->assertJsonPath("props.services.{$index}.last_success_at", null);
         }
@@ -76,7 +76,7 @@ class ServiceHealthTest extends TestCase
         config()->set('health.sic_retrieval_max_age_days', 20);
         $this->fakeProviders();
         $this->artisan('ukapi:health:check')->assertSuccessful();
-        $this->assertDatabaseCount('service_health_checks', 8);
+        $this->assertDatabaseCount('service_health_checks', 10);
         foreach (ServiceHealthCheck::all() as $check) {
             $this->assertSame('available', $check->status);
             $this->assertNotNull($check->last_attempt_at);
@@ -90,7 +90,7 @@ class ServiceHealthTest extends TestCase
             ->assertJsonPath('props.services.5.state', 'available')
             ->assertJsonPath('props.services.6.source_freshness', 'unknown')
             ->assertJsonPath('props.services.6.reference_freshness', 'stale');
-        Http::assertSentCount(8);
+        Http::assertSentCount(10);
         Http::assertSent(fn (Request $request): bool => str_contains($request->url(), 'search/companies')
             && $request['items_per_page'] === 1
             && $request->hasHeader('Authorization', 'Basic '.base64_encode('test-secret-do-not-publish:')));
@@ -129,7 +129,7 @@ class ServiceHealthTest extends TestCase
         $this->publicStatus()->assertJsonPath('props.services.1.state', 'unknown');
         $this->travel(16)->minutes();
         $response = $this->publicStatus();
-        foreach (range(0, 7) as $index) {
+        foreach (range(0, 9) as $index) {
             $response->assertJsonPath("props.services.{$index}.state", 'stale');
         }
         $response->assertJsonPath('props.services.2.source_freshness', 'unknown');
@@ -276,7 +276,7 @@ class ServiceHealthTest extends TestCase
         config()->set('health.alerts.failure_threshold', 1);
         $this->fakeProviders(postcodes: Http::response([], 503));
         $alerts = \Mockery::mock(HealthAlerts::class);
-        $alerts->shouldReceive('send')->times(8)->andReturnUsing(function (ServiceHealthCheck $check): void {
+        $alerts->shouldReceive('send')->times(10)->andReturnUsing(function (ServiceHealthCheck $check): void {
             if ($check->service === 'postcodes') {
                 throw new \RuntimeException('private SMTP detail');
             }
@@ -349,6 +349,8 @@ class ServiceHealthTest extends TestCase
             ]),
             '*v1/trade/vehicles/bulk-download' => $motApi ?? Http::response(['bulk' => [], 'delta' => []]),
             'https://www.gov.uk/bank-holidays.json' => Http::response($this->fixture('GovUk/bank-holidays.json')),
+            '*Establishments*' => Http::response($this->fixture('Food/establishments.json')),
+            '*entity.json*' => Http::response($this->fixture('Planning/entities.json')),
         ]);
     }
 

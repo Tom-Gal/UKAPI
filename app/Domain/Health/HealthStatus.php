@@ -16,6 +16,8 @@ final class HealthStatus
         'mot' => 'MOT history provider',
         'sic' => 'SIC reference data',
         'bank_holidays' => 'GOV.UK bank-holiday calendar',
+        'food_hygiene' => 'FSA food hygiene ratings',
+        'planning_data' => 'Planning Data constraints',
     ];
 
     /** @return list<array<string, mixed>> */

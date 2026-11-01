@@ -128,7 +128,7 @@ final class RequestLogRecorder
 
         return match (true) {
             in_array($code, ['invalid_api_key', 'api_key_revoked', 'api_key_scope_forbidden', 'api_key_ip_not_allowed'], true) => 'authentication_or_authorisation',
-            in_array($code, ['invalid_parameter', 'invalid_postcode', 'invalid_outcode', 'invalid_coordinates', 'invalid_company_number', 'invalid_sic_code'], true) => 'validation',
+            in_array($code, ['invalid_parameter', 'invalid_postcode', 'invalid_outcode', 'invalid_coordinates', 'invalid_company_number', 'invalid_sic_code', 'invalid_food_establishment_id'], true) => 'validation',
             in_array($code, ['rate_limit_exceeded', 'quota_exceeded'], true) => 'access_limit',
             in_array($code, ['upstream_unavailable', 'upstream_authentication_failed', 'upstream_invalid_response'], true) => 'upstream_provider',
             $code === 'usage_unavailable' => 'usage_accounting',

@@ -8,7 +8,9 @@ use App\Domain\Companies\CompanySearchResults;
 use App\Domain\Companies\SicReference;
 use App\Domain\Crime\CrimeCategory;
 use App\Domain\Flood\FloodWarning;
+use App\Domain\Food\FoodEstablishmentData;
 use App\Domain\Geography\PostcodeData;
+use App\Domain\Planning\PlanningConstraintData;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Http\Client\ConnectionException;
@@ -34,6 +36,8 @@ final class HealthProbe
             'mot' => $this->mot(),
             'sic' => new ProbeResult(referenceRetrievedAt: CarbonImmutable::parse($this->sic->snapshot()->retrievedAt)),
             'bank_holidays' => $this->bankHolidays(),
+            'food_hygiene' => $this->foodHygiene(),
+            'planning_data' => $this->planningData(),
             default => throw new RuntimeException('Unknown health service.'),
         };
     }
@@ -125,6 +129,45 @@ final class HealthProbe
             BankHolidayCalendar::fromArray(['divisions' => $divisions]);
         } catch (\InvalidArgumentException) {
             throw new ProbeFailure('invalid_response');
+        }
+
+        return new ProbeResult;
+    }
+
+    private function foodHygiene(): ProbeResult
+    {
+        $payload = $this->get('food_hygiene', 'Establishments', [
+            'pageNumber' => 1,
+            'pageSize' => 1,
+        ])->json();
+        $items = is_array($payload) ? ($payload['establishments'] ?? null) : null;
+        $meta = is_array($payload) ? ($payload['meta'] ?? null) : null;
+
+        if (! is_array($items) || ! array_is_list($items) || ! is_array($meta)) {
+            throw new RuntimeException('Invalid food hygiene probe.');
+        }
+
+        if (isset($items[0]) && is_array($items[0])) {
+            FoodEstablishmentData::fromFsa($items[0]);
+        }
+
+        return new ProbeResult;
+    }
+
+    private function planningData(): ProbeResult
+    {
+        $payload = $this->get(
+            'planning_data',
+            'entity.json?latitude=51.5074&longitude=-0.1278&limit=1&dataset=conservation-area',
+        )->json();
+        $items = is_array($payload) ? ($payload['entities'] ?? null) : null;
+
+        if (! is_array($items) || ! array_is_list($items)) {
+            throw new RuntimeException('Invalid planning data probe.');
+        }
+
+        if (isset($items[0]) && is_array($items[0])) {
+            PlanningConstraintData::fromPlanningData($items[0]);
         }
 
         return new ProbeResult;
@@ -286,6 +329,9 @@ final class HealthProbe
         }
         if ($provider === 'companies_house') {
             $request = $request->withBasicAuth(trim($apiKey), '');
+        }
+        if ($provider === 'food_hygiene') {
+            $request = $request->withHeaders(['x-api-version' => '2']);
         }
 
         $response = $request->get($path, $query);
