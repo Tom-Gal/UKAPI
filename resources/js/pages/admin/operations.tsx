@@ -20,6 +20,7 @@ type EndpointMetric = {
     errors: number;
     error_rate: number;
     average_latency_ms: number;
+    p50_latency_ms: number;
     p95_latency_ms: number;
     max_latency_ms: number;
 };
@@ -169,6 +170,7 @@ export default function AdminOperations(props: Props) {
                         'Requests',
                         'Errors',
                         'Average',
+                        'P50',
                         'P95',
                         'Maximum',
                     ]}
@@ -188,6 +190,7 @@ export default function AdminOperations(props: Props) {
                                 %)
                             </Cell>
                             <Cell mono>{metric.average_latency_ms} ms</Cell>
+                            <Cell mono>≤ {metric.p50_latency_ms} ms</Cell>
                             <Cell mono>≤ {metric.p95_latency_ms} ms</Cell>
                             <Cell mono>{metric.max_latency_ms} ms</Cell>
                         </tr>

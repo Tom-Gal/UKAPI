@@ -90,6 +90,7 @@ class AdminOperationsTest extends TestCase
             ->assertJsonPath('props.endpointMetrics.0.endpoint', 'vat.calculate')
             ->assertJsonPath('props.endpointMetrics.0.requests', 2)
             ->assertJsonPath('props.endpointMetrics.0.errors', 1)
+            ->assertJsonPath('props.endpointMetrics.0.p50_latency_ms', fn (mixed $value): bool => is_int($value))
             ->assertJsonPath('props.cacheMetrics.0.endpoint', 'vat.calculate')
             ->assertJsonPath('props.cacheMetrics.0.measured_requests', 1)
             ->assertJsonPath('props.cacheMetrics.0.fresh', 1)

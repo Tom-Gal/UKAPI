@@ -130,6 +130,7 @@ final class AdminOperations
                 'errors' => $errors,
                 'error_rate' => $requests > 0 ? round(($errors / $requests) * 100, 1) : 0.0,
                 'average_latency_ms' => $requests > 0 ? (int) round($totalLatency / $requests) : 0,
+                'p50_latency_ms' => $this->percentileBucket($endpointRows, $requests, 0.50),
                 'p95_latency_ms' => $this->percentileBucket($endpointRows, $requests, 0.95),
                 'max_latency_ms' => (int) $endpointRows->max('max_latency_ms'),
             ];

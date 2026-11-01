@@ -19,7 +19,7 @@ The audit found a strong functional baseline:
 - 37 customer `/v1` routes are live.
 - All 37 runtime routes have exact path counterparts in `openapi/openapi.yaml`.
 - Planned endpoint definitions are retained internally but filtered from the public catalogue and documentation.
-- 330 PHP tests ran with 17,097 assertions, 329 passing and one environment-dependent test skipped.
+- 330 PHP tests ran with 17,098 assertions, 329 passing and one environment-dependent test skipped.
 - PHPStan passes with no errors.
 - TypeScript checking passes.
 - The production frontend build succeeds.
@@ -121,7 +121,11 @@ provider bodies. The admin Operations page exposes seven-day per-endpoint
 counts and hit/stale rates, and support request inspection shows the same safe
 cache state. Negative-cache measurement remains open because negative results
 currently use the standard error envelope without a public cache marker.
-Verified on 1 November 2026 with the full Composer and frontend gates.
+
+The latency view now also exposes bucketed p50 alongside average, p95 and
+maximum latency. Longer-window trends, upstream outcome dimensions and product
+KPI reporting remain open. Verified on 1 November 2026 with the full Composer
+and frontend gates.
 
 ### P1.8 Add targeted resilience controls
 
