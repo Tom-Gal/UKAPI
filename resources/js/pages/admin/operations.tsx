@@ -33,6 +33,14 @@ type CacheMetric = {
     cache_hit_rate: number;
     stale_rate: number;
 };
+type FamilyLatencyMetric = {
+    family: string;
+    label: string;
+    requests: number;
+    average_latency_ms: number;
+    p50_latency_ms: number;
+    p95_latency_ms: number;
+};
 type ProviderMetric = {
     service: string;
     name: string;
@@ -108,6 +116,7 @@ type AuditEvent = {
 
 type Props = {
     endpointMetrics: EndpointMetric[];
+    familyLatencyMetrics: FamilyLatencyMetric[];
     cacheMetrics: CacheMetric[];
     providerMetrics: ProviderMetric[];
     incidents: Incident[];
@@ -193,6 +202,29 @@ export default function AdminOperations(props: Props) {
                             <Cell mono>≤ {metric.p50_latency_ms} ms</Cell>
                             <Cell mono>≤ {metric.p95_latency_ms} ms</Cell>
                             <Cell mono>{metric.max_latency_ms} ms</Cell>
+                        </tr>
+                    ))}
+                </OperationsTable>
+
+                <OperationsTable
+                    title="30-day latency by family"
+                    icon={Activity}
+                    description="Longer-window aggregates by endpoint family. Percentiles use bounded latency buckets."
+                    empty="No family latency metrics have been recorded yet."
+                    headers={['Family', 'Requests', 'Average', 'P50', 'P95']}
+                >
+                    {props.familyLatencyMetrics.map((metric) => (
+                        <tr key={metric.family}>
+                            <Cell>
+                                <p className="font-medium">{metric.label}</p>
+                                <p className="font-mono text-xs text-slate-500">
+                                    {metric.family}
+                                </p>
+                            </Cell>
+                            <Cell mono>{metric.requests.toLocaleString()}</Cell>
+                            <Cell mono>{metric.average_latency_ms} ms</Cell>
+                            <Cell mono>≤ {metric.p50_latency_ms} ms</Cell>
+                            <Cell mono>≤ {metric.p95_latency_ms} ms</Cell>
                         </tr>
                     ))}
                 </OperationsTable>

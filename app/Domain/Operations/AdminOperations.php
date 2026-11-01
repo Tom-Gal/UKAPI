@@ -43,6 +43,7 @@ final class AdminOperations
     {
         return [
             'endpointMetrics' => $this->endpointMetrics(),
+            'familyLatencyMetrics' => $this->familyLatencyMetrics(),
             'cacheMetrics' => $this->cacheMetrics(),
             'providerMetrics' => $this->providerMetrics(),
             'incidents' => $this->incidents(),
@@ -170,6 +171,40 @@ final class AdminOperations
         usort($metrics, static fn (array $left, array $right): int => $right['measured_requests'] <=> $left['measured_requests']);
 
         return array_slice($metrics, 0, 25);
+    }
+
+    /** @return list<array{family: string, label: string, requests: int, average_latency_ms: int, p50_latency_ms: int, p95_latency_ms: int}> */
+    private function familyLatencyMetrics(): array
+    {
+        $rows = DB::table('endpoint_daily_metrics')
+            ->where('date', '>=', CarbonImmutable::now('UTC')->subDays(29)->toDateString())
+            ->get(['endpoint', 'latency_bucket_ms', 'requests', 'total_latency_ms']);
+        $groups = $rows->groupBy(fn (object $row): string => $this->endpointFamily((string) $row->endpoint)['key']);
+        $metrics = [];
+
+        foreach ($groups as $family => $familyRows) {
+            $requests = (int) $familyRows->sum('requests');
+            $definition = $this->endpointFamily((string) $familyRows->first()->endpoint);
+            $buckets = new Collection;
+            foreach ($familyRows->groupBy('latency_bucket_ms') as $bucket => $bucketRows) {
+                $bucketData = new stdClass;
+                $bucketData->latency_bucket_ms = (int) $bucket;
+                $bucketData->requests = (int) $bucketRows->sum('requests');
+                $buckets->push($bucketData);
+            }
+            $metrics[] = [
+                'family' => $definition['key'],
+                'label' => $definition['label'],
+                'requests' => $requests,
+                'average_latency_ms' => $requests > 0 ? (int) round(((int) $familyRows->sum('total_latency_ms')) / $requests) : 0,
+                'p50_latency_ms' => $this->percentileBucket($buckets, $requests, 0.50),
+                'p95_latency_ms' => $this->percentileBucket($buckets, $requests, 0.95),
+            ];
+        }
+
+        usort($metrics, static fn (array $left, array $right): int => $right['requests'] <=> $left['requests']);
+
+        return $metrics;
     }
 
     /** @return list<array<string, mixed>> */
@@ -327,6 +362,31 @@ final class AdminOperations
         }
 
         return (int) $rows->max('latency_bucket_ms');
+    }
+
+    /** @return array{key: string, label: string} */
+    private function endpointFamily(string $endpoint): array
+    {
+        $families = config('ukapi.api_endpoint_families', []);
+
+        if (is_array($families)) {
+            foreach ($families as $key => $family) {
+                if (! is_array($family) || ! is_array($family['endpoint_prefixes'] ?? null)) {
+                    continue;
+                }
+
+                foreach ($family['endpoint_prefixes'] as $prefix) {
+                    if (is_string($prefix) && str_starts_with($endpoint, $prefix)) {
+                        return [
+                            'key' => (string) $key,
+                            'label' => (string) ($family['label'] ?? $key),
+                        ];
+                    }
+                }
+            }
+        }
+
+        return ['key' => 'other', 'label' => 'Other'];
     }
 
     private function stripeCustomerUrl(?string $customerId): ?string
