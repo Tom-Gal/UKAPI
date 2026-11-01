@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $endpoint
  * @property int $status
  * @property int $duration_ms
+ * @property string|null $cache_state
  * @property string|null $error_code
  * @property string|null $error_reason
  * @property string|null $error_message

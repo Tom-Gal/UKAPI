@@ -23,6 +23,15 @@ type EndpointMetric = {
     p95_latency_ms: number;
     max_latency_ms: number;
 };
+type CacheMetric = {
+    endpoint: string;
+    measured_requests: number;
+    fresh: number;
+    cache_hits: number;
+    stale: number;
+    cache_hit_rate: number;
+    stale_rate: number;
+};
 type ProviderMetric = {
     service: string;
     name: string;
@@ -98,6 +107,7 @@ type AuditEvent = {
 
 type Props = {
     endpointMetrics: EndpointMetric[];
+    cacheMetrics: CacheMetric[];
     providerMetrics: ProviderMetric[];
     incidents: Incident[];
     hotspots: Hotspot[];
@@ -180,6 +190,42 @@ export default function AdminOperations(props: Props) {
                             <Cell mono>{metric.average_latency_ms} ms</Cell>
                             <Cell mono>≤ {metric.p95_latency_ms} ms</Cell>
                             <Cell mono>{metric.max_latency_ms} ms</Cell>
+                        </tr>
+                    ))}
+                </OperationsTable>
+
+                <OperationsTable
+                    title="Response cache state"
+                    icon={Database}
+                    description="Seven-day response cache observations. Request values and provider payloads are never retained."
+                    empty="No cache observations have been recorded yet."
+                    headers={[
+                        'Endpoint',
+                        'Measured',
+                        'Fresh',
+                        'Cache hits',
+                        'Stale',
+                        'Rates',
+                    ]}
+                >
+                    {props.cacheMetrics.map((metric) => (
+                        <tr key={metric.endpoint}>
+                            <Cell>
+                                <p className="font-medium">{metric.endpoint}</p>
+                            </Cell>
+                            <Cell mono>
+                                {metric.measured_requests.toLocaleString()}
+                            </Cell>
+                            <Cell mono>{metric.fresh.toLocaleString()}</Cell>
+                            <Cell mono>
+                                {metric.cache_hits.toLocaleString()}
+                            </Cell>
+                            <Cell mono>{metric.stale.toLocaleString()}</Cell>
+                            <Cell mono>
+                                {metric.cache_hit_rate}% hit
+                                <br />
+                                {metric.stale_rate}% stale
+                            </Cell>
                         </tr>
                     ))}
                 </OperationsTable>

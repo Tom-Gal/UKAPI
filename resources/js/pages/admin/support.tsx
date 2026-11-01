@@ -20,6 +20,7 @@ type RequestLog = {
     error_code: string | null;
     error_reason: string | null;
     error_message: string | null;
+    cache_state: 'fresh' | 'hit' | 'stale' | null;
     user: { name: string; email: string } | null;
     api_key_prefix: string | null;
     created_at: string | null;
@@ -242,6 +243,11 @@ export default function AdminSupport({
                                                 {log.error_message && (
                                                     <p className="mt-1 text-xs leading-5 text-slate-600">
                                                         {log.error_message}
+                                                    </p>
+                                                )}
+                                                {log.cache_state && (
+                                                    <p className="mt-2 font-mono text-xs text-slate-500">
+                                                        Cache: {log.cache_state}
                                                     </p>
                                                 )}
                                             </td>

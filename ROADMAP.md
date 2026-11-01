@@ -19,7 +19,7 @@ The audit found a strong functional baseline:
 - 37 customer `/v1` routes are live.
 - All 37 runtime routes have exact path counterparts in `openapi/openapi.yaml`.
 - Planned endpoint definitions are retained internally but filtered from the public catalogue and documentation.
-- 329 PHP tests ran with 17,088 assertions, 328 passing and one environment-dependent test skipped.
+- 330 PHP tests ran with 17,097 assertions, 329 passing and one environment-dependent test skipped.
 - PHPStan passes with no errors.
 - TypeScript checking passes.
 - The production frontend build succeeds.
@@ -114,6 +114,14 @@ Add privacy-conscious measurements for:
 - active API keys, returning developers, conversion, cancellation, and churn where lawful and useful.
 
 Do not record API keys, request payloads, full query values, provider bodies, or unnecessary personal data.
+
+First increment complete. API request logs now classify successful response
+metadata as `fresh`, `hit` or `stale` without storing request parameters or
+provider bodies. The admin Operations page exposes seven-day per-endpoint
+counts and hit/stale rates, and support request inspection shows the same safe
+cache state. Negative-cache measurement remains open because negative results
+currently use the standard error envelope without a public cache marker.
+Verified on 1 November 2026 with the full Composer and frontend gates.
 
 ### P1.8 Add targeted resilience controls
 

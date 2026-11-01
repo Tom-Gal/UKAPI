@@ -40,6 +40,7 @@ class AdminSupportTest extends TestCase
             'status' => 200,
             'user_id' => $customer->id,
             'error_code' => null,
+            'cache_state' => 'fresh',
         ]);
         $this->assertDatabaseHas('api_request_logs', [
             'request_id' => $errorRequestId,

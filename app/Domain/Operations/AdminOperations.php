@@ -43,6 +43,7 @@ final class AdminOperations
     {
         return [
             'endpointMetrics' => $this->endpointMetrics(),
+            'cacheMetrics' => $this->cacheMetrics(),
             'providerMetrics' => $this->providerMetrics(),
             'incidents' => $this->incidents(),
             'hotspots' => $this->hotspots(),
@@ -135,6 +136,37 @@ final class AdminOperations
         }
 
         usort($metrics, static fn (array $left, array $right): int => $right['requests'] <=> $left['requests']);
+
+        return array_slice($metrics, 0, 25);
+    }
+
+    /** @return list<array{endpoint: string, measured_requests: int, fresh: int, cache_hits: int, stale: int, cache_hit_rate: float, stale_rate: float}> */
+    private function cacheMetrics(): array
+    {
+        $rows = DB::table('api_request_logs')
+            ->where('created_at', '>=', CarbonImmutable::now('UTC')->subDays(6)->startOfDay())
+            ->whereIn('cache_state', ['fresh', 'hit', 'stale'])
+            ->get(['endpoint', 'cache_state'])
+            ->groupBy('endpoint');
+        $metrics = [];
+
+        foreach ($rows as $endpoint => $endpointRows) {
+            $measured = $endpointRows->count();
+            $fresh = $endpointRows->where('cache_state', 'fresh')->count();
+            $hits = $endpointRows->where('cache_state', 'hit')->count();
+            $stale = $endpointRows->where('cache_state', 'stale')->count();
+            $metrics[] = [
+                'endpoint' => (string) $endpoint,
+                'measured_requests' => $measured,
+                'fresh' => $fresh,
+                'cache_hits' => $hits,
+                'stale' => $stale,
+                'cache_hit_rate' => $measured > 0 ? round(($hits / $measured) * 100, 1) : 0.0,
+                'stale_rate' => $measured > 0 ? round(($stale / $measured) * 100, 1) : 0.0,
+            ];
+        }
+
+        usort($metrics, static fn (array $left, array $right): int => $right['measured_requests'] <=> $left['measured_requests']);
 
         return array_slice($metrics, 0, 25);
     }

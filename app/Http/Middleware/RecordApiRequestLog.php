@@ -20,7 +20,13 @@ final class RecordApiRequestLog
         try {
             $response = $next($request);
             $error = $this->recorder->errorFromResponse($response);
-            $this->recorder->record($request, $response->getStatusCode(), $this->elapsedMilliseconds($startedAt), $error);
+            $this->recorder->record(
+                $request,
+                $response->getStatusCode(),
+                $this->elapsedMilliseconds($startedAt),
+                $error,
+                $this->recorder->cacheStateFromResponse($response),
+            );
 
             return $response;
         } catch (Throwable $exception) {

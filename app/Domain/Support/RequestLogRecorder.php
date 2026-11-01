@@ -36,6 +36,27 @@ final class RequestLogRecorder
         ];
     }
 
+    public function cacheStateFromResponse(Response $response): ?string
+    {
+        if ($response->getStatusCode() >= 400) {
+            return null;
+        }
+
+        $content = $response->getContent();
+        $payload = is_string($content) ? json_decode($content, true) : null;
+        $meta = is_array($payload) && is_array($payload['meta'] ?? null) ? $payload['meta'] : [];
+
+        if (($meta['stale'] ?? null) === true) {
+            return 'stale';
+        }
+
+        if (($meta['cached'] ?? null) === true) {
+            return 'hit';
+        }
+
+        return ($meta['cached'] ?? null) === false ? 'fresh' : null;
+    }
+
     /**
      * @return array{status: int, code: string, reason: string, message: string}
      */
@@ -91,7 +112,7 @@ final class RequestLogRecorder
     /**
      * @param  array{code?: string|null, reason?: string|null, message?: string|null}  $error
      */
-    public function record(Request $request, int $status, int $durationMs, array $error): void
+    public function record(Request $request, int $status, int $durationMs, array $error, ?string $cacheState = null): void
     {
         try {
             $route = $request->route();
@@ -108,6 +129,7 @@ final class RequestLogRecorder
                     : 'unknown',
                 'status' => max(100, min(599, $status)),
                 'duration_ms' => max(0, min(600_000, $durationMs)),
+                'cache_state' => $cacheState,
                 'error_code' => $error['code'] ?? null,
                 'error_reason' => $error['reason'] ?? null,
                 'error_message' => $error['message'] ?? null,

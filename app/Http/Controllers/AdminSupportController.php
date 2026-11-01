@@ -141,6 +141,7 @@ final class AdminSupportController extends Controller
             'error_code' => $log->error_code,
             'error_reason' => $log->error_reason,
             'error_message' => $log->error_message,
+            'cache_state' => $log->cache_state,
             'user' => $log->user ? [
                 'name' => $log->user->name,
                 'email' => $log->user->email,
