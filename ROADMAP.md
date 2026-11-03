@@ -1,6 +1,6 @@
 # UKApi.co.uk Roadmap
 
-**Last audited:** 1 November 2026
+**Last audited:** 3 November 2026
 **Purpose:** A living, prioritised list of work that remains after comparing the current repository, production runbooks, tests, public contract, and original product reports.  
 **Governing conventions:** See `AGENTS.md`.
 
@@ -19,7 +19,7 @@ The audit found a strong functional baseline:
 - 37 customer `/v1` routes are live.
 - All 37 runtime routes have exact path counterparts in `openapi/openapi.yaml`.
 - Planned endpoint definitions are retained internally but filtered from the public catalogue and documentation.
-- 330 PHP tests ran with 17,105 assertions, 329 passing and one environment-dependent test skipped.
+- 331 PHP tests ran with 17,110 assertions, 330 passing and one environment-dependent test skipped.
 - PHPStan passes with no errors.
 - TypeScript checking passes.
 - The production frontend build succeeds.
@@ -133,6 +133,16 @@ latency correlation and broader product KPI reporting remain open. Verified on
 ### P1.8 Add targeted resilience controls
 
 Provider adapters have bounded timeouts and retries, but customer-path request coalescing and circuit breaking are not currently implemented.
+
+First incident-driven increment complete: the scheduled FSA health probe now
+uses a bounded local-authority query because the provider rejects unfiltered
+`Establishments` probes as CPU-intensive. Shared health-probe HTTP responses
+now classify provider throttling and server failures as `api_unavailable`,
+without retaining response bodies. The Environment Agency probe remains a
+bounded one-item warnings check and treats an empty warning list as valid.
+Verified on 3 November 2026 with the focused service-health suite, Pint and
+PHPStan. Customer-path coalescing, circuit breaking and concurrency caps
+remain open for further production evidence.
 
 Work incrementally where production evidence justifies it:
 

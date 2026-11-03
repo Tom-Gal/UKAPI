@@ -137,6 +137,8 @@ final class HealthProbe
     private function foodHygiene(): ProbeResult
     {
         $payload = $this->get('food_hygiene', 'Establishments', [
+            'localAuthorityId' => max(1, (int) config('health.food_hygiene_probe_local_authority_id')),
+            'sortOptionKey' => 'relevance',
             'pageNumber' => 1,
             'pageSize' => 1,
         ])->json();
@@ -335,7 +337,18 @@ final class HealthProbe
         }
 
         $response = $request->get($path, $query);
-        if (! $response->successful() || strlen($response->body()) > $maxBytes) {
+        if (! $response->successful()) {
+            if ($provider === 'companies_house' && in_array($response->status(), [401, 403], true)) {
+                throw new ProbeFailure('credentials_rejected');
+            }
+
+            if (in_array($response->status(), [403, 429], true) || $response->serverError()) {
+                throw new ProbeFailure('api_unavailable');
+            }
+
+            throw new ProbeFailure('invalid_response');
+        }
+        if (strlen($response->body()) > $maxBytes) {
             throw new RuntimeException('Provider probe failed.');
         }
 

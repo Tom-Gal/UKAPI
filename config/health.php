@@ -7,6 +7,8 @@ return [
     'stale_after_seconds' => (int) env('HEALTH_STALE_AFTER_SECONDS', 900),
     'connect_timeout_seconds' => (int) env('HEALTH_CONNECT_TIMEOUT_SECONDS', 2),
     'timeout_seconds' => (int) env('HEALTH_TIMEOUT_SECONDS', 5),
+    // The FSA rejects unfiltered Establishments probes as CPU-intensive.
+    'food_hygiene_probe_local_authority_id' => (int) env('HEALTH_FOOD_HYGIENE_PROBE_LOCAL_AUTHORITY_ID', 107),
     'max_response_bytes' => 262_144,
     // Police.uk reports the month of the latest data, not its publication time.
     'crime_source_max_age_days' => (int) env('HEALTH_CRIME_SOURCE_MAX_AGE_DAYS', 120),

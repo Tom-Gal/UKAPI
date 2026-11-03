@@ -94,6 +94,11 @@ class ServiceHealthTest extends TestCase
         Http::assertSent(fn (Request $request): bool => str_contains($request->url(), 'search/companies')
             && $request['items_per_page'] === 1
             && $request->hasHeader('Authorization', 'Basic '.base64_encode('test-secret-do-not-publish:')));
+        Http::assertSent(fn (Request $request): bool => str_contains($request->url(), 'Establishments')
+            && str_contains($request->url(), 'localAuthorityId=107')
+            && str_contains($request->url(), 'pageSize=1'));
+        Http::assertSent(fn (Request $request): bool => str_contains($request->url(), 'id/floods')
+            && str_contains($request->url(), '_limit=1'));
     }
 
     public function test_failed_checks_preserve_last_success_and_do_not_leak_provider_payloads(): void
@@ -112,13 +117,28 @@ class ServiceHealthTest extends TestCase
         $this->assertNotNull($check->latency_ms);
         $this->assertDatabaseHas('service_health_incidents', [
             'service' => 'postcodes',
-            'failure_reason' => 'probe_failed',
+            'failure_reason' => 'api_unavailable',
             'occurrences' => 1,
         ]);
         $response = $this->publicStatus()->assertJsonPath('props.services.1.state', 'unavailable');
         foreach (['test-secret-do-not-publish', 'private-upstream-error', 'Authorization', 'incident_notified_at', 'snapshot_path'] as $private) {
             $this->assertStringNotContainsString($private, $response->getContent());
         }
+    }
+
+    public function test_provider_throttling_is_reported_as_unavailable_without_leaking_the_response(): void
+    {
+        $this->fakeProviders(food: Http::response(['Message' => 'private provider detail'], 403));
+
+        $this->artisan('ukapi:health:check')->assertFailed();
+
+        $this->assertDatabaseHas('service_health_checks', [
+            'service' => 'food_hygiene',
+            'failure_reason' => 'api_unavailable',
+        ]);
+        $response = $this->publicStatus()
+            ->assertJsonPath('props.services.8.detail', 'Check failed: provider unavailable');
+        $this->assertStringNotContainsString('private provider detail', $response->getContent());
     }
 
     public function test_stopped_scheduler_and_interrupted_attempt_cannot_leave_green_status(): void
@@ -334,6 +354,7 @@ class ServiceHealthTest extends TestCase
         mixed $crimeCategories = null,
         mixed $motToken = null,
         mixed $motApi = null,
+        mixed $food = null,
     ): void {
         Http::swap(new Factory);
         Http::preventStrayRequests();
@@ -349,7 +370,7 @@ class ServiceHealthTest extends TestCase
             ]),
             '*v1/trade/vehicles/bulk-download' => $motApi ?? Http::response(['bulk' => [], 'delta' => []]),
             'https://www.gov.uk/bank-holidays.json' => Http::response($this->fixture('GovUk/bank-holidays.json')),
-            '*Establishments*' => Http::response($this->fixture('Food/establishments.json')),
+            '*Establishments*' => $food ?? Http::response($this->fixture('Food/establishments.json')),
             '*entity.json*' => Http::response($this->fixture('Planning/entities.json')),
         ]);
     }

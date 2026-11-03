@@ -34,6 +34,13 @@ sends after two consecutive failures, repeats
 after six hours, and sends one recovery message. Alert state is durable in
 MySQL, so clearing cache does not duplicate an incident notification.
 
+The FSA food-hygiene probe deliberately filters to one configured local
+authority (`HEALTH_FOOD_HYGIENE_PROBE_LOCAL_AUTHORITY_ID`, default `107`) and
+requests one result. The FSA rejects unfiltered `Establishments` probes as
+CPU-intensive, so this check is an availability sample and does not claim
+complete food-data coverage. Environment Agency flood checks use a one-item
+warnings query and accept an empty warning list as a valid response.
+
 ## Independent synthetic monitoring
 
 `.github/workflows/production-monitor.yml` runs outside Laravel Cloud every five
