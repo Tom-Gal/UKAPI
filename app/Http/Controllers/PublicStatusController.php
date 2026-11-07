@@ -13,6 +13,7 @@ final class PublicStatusController extends Controller
     {
         $response = Inertia::render('public/status', [
             'services' => $health->services(),
+            'incidents' => $health->incidents(),
             'measured_at' => now()->toIso8601String(),
         ])->toResponse($request);
         $response->headers->set('Cache-Control', 'no-store');

@@ -58,7 +58,7 @@ export function UkapiMark({
                             inverse ? 'text-[#8fb49f]' : 'text-slate-500',
                         )}
                     >
-                        Data field service
+                        UK data API
                     </span>
                 </span>
             )}

@@ -156,8 +156,8 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                     <div>
                         <UkapiMark tone="inverse" />
                         <p className="mt-5 max-w-md text-sm leading-6 text-[#cbd2c7]">
-                            Useful UK data through one predictable API. Built
-                            for developers, with source limits left in view.
+                            Postcodes, companies, crime, flood, MOT history and
+                            more through one documented API.
                         </p>
                         <p className="mt-4 max-w-md text-xs leading-5 text-[#aeb8af]">
                             {legal.entityName ?? 'UKAPI'}

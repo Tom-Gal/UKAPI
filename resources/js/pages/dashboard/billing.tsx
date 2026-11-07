@@ -30,14 +30,14 @@ export default function Billing({
             <DashboardPageHeader
                 eyebrow="Billing"
                 title="Plan & billing"
-                description="Manage your subscription through Stripe. Plan limits update after Stripe confirms the subscription webhook."
+                description="View your current plan, compare upgrades and open the Stripe billing portal."
             />
             <main className="space-y-6 p-5 lg:p-8">
                 {checkoutStatus === 'success' && (
                     <Notice>
                         {checkoutSynchronized
                             ? 'Your subscription is active and your plan has been updated.'
-                            : 'Thanks — Stripe is confirming your subscription. Your plan will update here as soon as the webhook arrives.'}
+                            : 'Thanks. Your payment is being confirmed and your new plan will appear here shortly.'}
                     </Notice>
                 )}
                 {checkoutStatus === 'cancelled' && (
@@ -56,8 +56,8 @@ export default function Billing({
                         requests/second
                     </p>
                     <p className="mt-3 text-sm text-slate-600">
-                        Monthly quotas are hard. Requests stop at the included
-                        allowance; there is no overage billing at launch.
+                        Requests pause when you reach the monthly allowance.
+                        There are no overage charges.
                     </p>
                     <div className="mt-4 flex flex-wrap gap-2 text-xs text-slate-600">
                         {plan.features.map((feature) => (

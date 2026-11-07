@@ -28,7 +28,7 @@ export default function Welcome({ plans }: { plans: PublicPlan[] }) {
             <Head title="One clean route into useful UK data">
                 <meta
                     name="description"
-                    content="Postcodes, companies, crime, flood, MOT history and more through one carefully normalised API."
+                    content="Postcodes, companies, crime, flood, MOT history and more through one consistent API."
                 />
             </Head>
 
@@ -41,9 +41,7 @@ export default function Welcome({ plans }: { plans: PublicPlan[] }) {
                     <div className="flex flex-col justify-center border-slate-950 py-16 lg:border-r lg:py-24 lg:pr-14">
                         <div className="ukapi-enter flex items-center gap-3">
                             <span className="h-px w-10 bg-[#2563c7]" />
-                            <p className="atlas-kicker">
-                                The UK data field service
-                            </p>
+                            <p className="atlas-kicker">One API for UK data</p>
                         </div>
                         <h1 className="ukapi-enter ukapi-enter-delay-1 mt-7 max-w-3xl text-[clamp(3rem,7vw,6.5rem)] leading-[0.92] font-semibold tracking-[-0.06em]">
                             UK data, one clean API.
@@ -65,7 +63,7 @@ export default function Welcome({ plans }: { plans: PublicPlan[] }) {
                                 href="/docs"
                                 className="atlas-button-secondary w-full sm:w-auto"
                             >
-                                Open the field guide{' '}
+                                Read the documentation{' '}
                                 <BookOpen className="size-4" />
                             </Link>
                         </div>
@@ -113,14 +111,13 @@ export default function Welcome({ plans }: { plans: PublicPlan[] }) {
             <section className="atlas-shell py-20 lg:py-28">
                 <div className="grid gap-12 lg:grid-cols-[.7fr_1.3fr]">
                     <div>
-                        <p className="atlas-kicker">Coverage index</p>
+                        <p className="atlas-kicker">API catalogue</p>
                         <h2 className="mt-5 text-4xl leading-[1.02] font-semibold tracking-[-0.04em] sm:text-5xl">
-                            The useful parts, catalogued clearly.
+                            Find the data you need.
                         </h2>
                         <p className="mt-6 max-w-md leading-7 text-slate-600">
-                            One account and one response shape. Source,
-                            freshness and geographic limits remain attached to
-                            every route.
+                            Browse live endpoints for geography, companies,
+                            transport, crime, flood, food hygiene and planning.
                         </p>
                         <Link
                             href="/api-catalogue"
@@ -156,15 +153,14 @@ export default function Welcome({ plans }: { plans: PublicPlan[] }) {
             <section className="border-y border-slate-950 bg-[#dbe4cd]">
                 <div className="atlas-shell grid lg:grid-cols-[.72fr_1.28fr]">
                     <div className="border-b border-slate-950 py-14 lg:border-r lg:border-b-0 lg:py-20 lg:pr-14">
-                        <p className="atlas-kicker">Contract field notes</p>
+                        <p className="atlas-kicker">One API contract</p>
                         <h2 className="mt-5 max-w-lg text-4xl leading-[1.02] font-semibold tracking-[-0.04em] sm:text-5xl">
-                            Upstream complexity stays upstream.
+                            Consistent requests. Clear sources.
                         </h2>
                         <p className="mt-6 max-w-lg text-base leading-7 text-slate-700">
-                            Providers disagree on authentication, schemas,
-                            coverage and freshness. UKApi.co.uk turns those
-                            differences into one documented contract while
-                            keeping the important limits attached to the data.
+                            Use the same authentication and response shape for
+                            every dataset. Each response identifies its source,
+                            coverage and update date where available.
                         </p>
                         <Link
                             href="/data-sources"
@@ -192,15 +188,15 @@ export default function Welcome({ plans }: { plans: PublicPlan[] }) {
                             </div>
                             <ContractField
                                 field="source"
-                                value="Named provider, never an anonymous payload"
+                                value="The publisher is named in the response"
                             />
                             <ContractField
                                 field="coverage"
-                                value="UK, Great Britain, England or partial, stated plainly"
+                                value="UK, Great Britain, England or partial coverage"
                             />
                             <ContractField
                                 field="freshness"
-                                value="Source timestamp and cache state where available"
+                                value="Source date and cache state where available"
                             />
                             <ContractField
                                 field="request_id"
@@ -225,15 +221,14 @@ export default function Welcome({ plans }: { plans: PublicPlan[] }) {
                 <div className="atlas-shell py-20 lg:py-28">
                     <div className="grid gap-8 border-b border-slate-950 pb-10 lg:grid-cols-[1fr_auto] lg:items-end">
                         <div>
-                            <p className="atlas-kicker">Usage bands</p>
+                            <p className="atlas-kicker">Plans</p>
                             <h2 className="mt-5 text-4xl leading-none font-semibold tracking-[-0.04em] sm:text-5xl">
-                                Start useful. Scale plainly.
+                                Choose a monthly allowance.
                             </h2>
                             <p className="mt-5 max-w-2xl leading-7 text-slate-600">
-                                Every live endpoint counts as one request. Pick
-                                a monthly allowance; the API contract stays the
-                                same. Quotas are hard at launch, with no overage
-                                billing.
+                                Every live endpoint counts as one request. The
+                                API stays the same on every plan, and there are
+                                no overage charges.
                             </p>
                         </div>
                         <Link
@@ -257,7 +252,7 @@ export default function Welcome({ plans }: { plans: PublicPlan[] }) {
                                         </h3>
                                         {plan.emphasis && (
                                             <span className="font-mono text-[9px] font-bold tracking-[0.12em] text-[#8fb49f] uppercase">
-                                                Most useful
+                                                Popular
                                             </span>
                                         )}
                                     </div>
@@ -301,7 +296,7 @@ export default function Welcome({ plans }: { plans: PublicPlan[] }) {
                         <div className="grid border-r border-b border-slate-950 bg-[#dbe4cd] lg:grid-cols-[.65fr_1.35fr_auto] lg:items-center">
                             <div className="border-b border-slate-950 p-6 sm:p-7 lg:border-r lg:border-b-0">
                                 <p className="font-mono text-[10px] font-bold tracking-[0.16em] text-[#2563c7] uppercase">
-                                    Custom route
+                                    Enterprise
                                 </p>
                                 <h3 className="mt-2 text-2xl font-semibold tracking-tight">
                                     {enterprisePlan.name}
@@ -333,10 +328,10 @@ export default function Welcome({ plans }: { plans: PublicPlan[] }) {
                 <div className="atlas-shell flex flex-col items-start justify-between gap-8 py-14 md:flex-row md:items-end">
                     <div>
                         <p className="font-mono text-[11px] font-bold tracking-[0.16em] uppercase">
-                            Ready for first contact?
+                            Get started
                         </p>
                         <h2 className="mt-4 max-w-2xl text-4xl leading-none font-semibold tracking-[-0.04em] sm:text-5xl">
-                            Make a successful request in minutes.
+                            Make your first API request in minutes.
                         </h2>
                     </div>
                     <Link

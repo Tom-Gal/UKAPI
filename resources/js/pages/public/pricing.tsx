@@ -21,8 +21,8 @@ export default function Pricing({ plans }: { plans: PublicPlan[] }) {
             </Head>
             <PageHero
                 eyebrow="Pricing"
-                title="Pay for more headroom, not a more complicated product."
-                description="Every MVP endpoint counts as one request. Monthly quotas are hard, with no launch overages or surprise usage charges. Upgrade when your quota needs to grow."
+                title="Choose your monthly request allowance."
+                description="Each API request counts once. There are no overage charges: requests pause at the monthly quota until you upgrade or the quota resets."
             />
             <div className="atlas-shell pb-24">
                 <div className="grid border-t border-l border-slate-950 md:grid-cols-2 lg:grid-cols-5">
@@ -116,8 +116,8 @@ export default function Pricing({ plans }: { plans: PublicPlan[] }) {
                 </div>
                 <p className="mt-8 max-w-2xl text-sm leading-6 text-slate-500">
                     The Free plan is available when you create an account. Paid
-                    plans are managed securely through Stripe. Requests stop at
-                    the included monthly quota; upgrade or wait for reset.
+                    plans are managed through Stripe. Upgrade at any time or
+                    stay on your current allowance.
                 </p>
             </div>
         </>

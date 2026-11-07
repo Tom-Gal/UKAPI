@@ -24,8 +24,8 @@ export default function DataSources({ sources }: { sources: Source[] }) {
             </Head>
             <PageHero
                 eyebrow="Data sources & attribution"
-                title="Public data still has provenance, terms and limits."
-                description="UKApi.co.uk is a normalisation layer, not the authority for these datasets. Coverage and freshness are exposed alongside endpoint responses."
+                title="Where the data comes from."
+                description="See who publishes each dataset, what it covers, which licence applies and where to read the source documentation."
             />
             <div className="atlas-shell pb-24">
                 <div className="overflow-x-auto border border-slate-950 bg-white shadow-[5px_5px_0_#d7d2c3]">

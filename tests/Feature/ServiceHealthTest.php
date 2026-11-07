@@ -53,6 +53,7 @@ class ServiceHealthTest extends TestCase
             $response->assertJsonPath("props.services.{$index}.state", 'unknown')
                 ->assertJsonPath("props.services.{$index}.last_success_at", null);
         }
+        $response->assertJsonCount(0, 'props.incidents');
         $this->assertStringContainsString('no-store', (string) $response->headers->get('Cache-Control'));
         Http::assertNothingSent();
     }
@@ -120,10 +121,34 @@ class ServiceHealthTest extends TestCase
             'failure_reason' => 'api_unavailable',
             'occurrences' => 1,
         ]);
-        $response = $this->publicStatus()->assertJsonPath('props.services.1.state', 'unavailable');
+        $response = $this->publicStatus()
+            ->assertJsonPath('props.services.1.state', 'unavailable')
+            ->assertJsonPath('props.services.1.status_label', 'Service disruption')
+            ->assertJsonPath('props.services.1.detail', 'The source did not respond successfully.')
+            ->assertJsonPath('props.services.1.impact', 'Postcode endpoints may return an upstream unavailable error.')
+            ->assertJsonPath('props.incidents.0.name', 'Postcodes.io')
+            ->assertJsonPath('props.incidents.0.state', 'open')
+            ->assertJsonPath('props.incidents.0.occurrences', 1);
         foreach (['test-secret-do-not-publish', 'private-upstream-error', 'Authorization', 'incident_notified_at', 'snapshot_path'] as $private) {
             $this->assertStringNotContainsString($private, $response->getContent());
         }
+    }
+
+    public function test_public_status_includes_recent_resolved_incidents(): void
+    {
+        $this->fakeProviders(postcodes: Http::response([], 503));
+        $this->artisan('ukapi:health:check')->assertFailed();
+        $this->travel(5)->minutes();
+        $this->fakeProviders();
+        $this->artisan('ukapi:health:check')->assertSuccessful();
+
+        $this->publicStatus()
+            ->assertJsonPath('props.services.1.state', 'available')
+            ->assertJsonPath('props.incidents.0.name', 'Postcodes.io')
+            ->assertJsonPath('props.incidents.0.state', 'resolved')
+            ->assertJsonPath('props.incidents.0.detail', 'The source did not respond successfully.')
+            ->assertJsonPath('props.incidents.0.occurrences', 1)
+            ->assertJsonPath('props.incidents.0.recovered_at', now()->toIso8601String());
     }
 
     public function test_provider_throttling_is_reported_as_unavailable_without_leaking_the_response(): void
@@ -137,7 +162,7 @@ class ServiceHealthTest extends TestCase
             'failure_reason' => 'api_unavailable',
         ]);
         $response = $this->publicStatus()
-            ->assertJsonPath('props.services.8.detail', 'Check failed: provider unavailable');
+            ->assertJsonPath('props.services.8.detail', 'The source did not respond successfully.');
         $this->assertStringNotContainsString('private provider detail', $response->getContent());
     }
 
@@ -260,7 +285,7 @@ class ServiceHealthTest extends TestCase
             'failure_reason' => 'api_unavailable',
         ]);
         $response = $this->publicStatus()
-            ->assertJsonPath('props.services.5.detail', 'Check failed: provider unavailable');
+            ->assertJsonPath('props.services.5.detail', 'The source did not respond successfully.');
         foreach (['mot-api-key-do-not-publish', 'mot-client-secret-do-not-publish', 'health-token-do-not-publish', 'provider-body-secret'] as $private) {
             $this->assertStringNotContainsString($private, $response->getContent());
         }
@@ -332,7 +357,11 @@ class ServiceHealthTest extends TestCase
     public function test_missing_health_storage_returns_unknown_public_status_and_nonzero_command(): void
     {
         Schema::drop('service_health_checks');
-        $this->publicStatus()->assertOk()->assertJsonPath('props.services.0.state', 'unknown');
+        Schema::drop('service_health_incidents');
+        $this->publicStatus()
+            ->assertOk()
+            ->assertJsonPath('props.services.0.state', 'unknown')
+            ->assertJsonCount(0, 'props.incidents');
         $this->artisan('ukapi:health:check')->assertFailed();
         Http::assertNothingSent();
     }

@@ -79,7 +79,7 @@ export default function Usage({
             <DashboardPageHeader
                 eyebrow="Usage"
                 title="Request usage"
-                description="Track aggregate request volume without storing request payloads, query values, response bodies, or API-key secrets."
+                description="See this month's request total, remaining allowance and busiest endpoints."
             />
             <main className="p-5 lg:p-8">
                 {cancelledPlanEndsAt && (

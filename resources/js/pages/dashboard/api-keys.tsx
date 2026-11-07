@@ -103,7 +103,7 @@ export default function ApiKeys({
             <DashboardPageHeader
                 eyebrow="Credentials"
                 title="API keys"
-                description="A focused register for the credentials that connect your systems to UKApi.co.uk."
+                description="Create, review and rotate the API keys used by your applications."
                 action={
                     <Button
                         type="button"
@@ -125,8 +125,8 @@ export default function ApiKeys({
                                 Your keys
                             </h2>
                             <p className="mt-1 text-sm text-slate-600">
-                                Prefixes and activity are visible here. Policy
-                                settings stay one click away.
+                                Check when each key was last used, change its
+                                restrictions or revoke it.
                             </p>
                         </div>
                         <span className="font-mono text-xs text-slate-500">

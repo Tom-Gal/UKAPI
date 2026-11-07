@@ -13,8 +13,8 @@ export default function ApiCatalogue() {
             </Head>
             <PageHero
                 eyebrow="API catalogue · v1"
-                title="The UK data field index."
-                description="Live endpoints grouped by the job they do. Coverage, source and freshness remain visible at the point of use."
+                title="Browse every live endpoint."
+                description="Find endpoints by task, with source, coverage and update information alongside each one."
             />
             <section className="atlas-shell pb-24">
                 <div className="border-t border-l border-slate-950">

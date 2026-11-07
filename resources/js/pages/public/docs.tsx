@@ -77,7 +77,7 @@ export default function Docs({ section }: DocsProps) {
                                 <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-600">
                                     Everything needed to make a first request,
                                     handle failures and understand the live
-                                    endpoints—on one page.
+                                    endpoints, all on one page.
                                 </p>
                             </header>
 
@@ -278,7 +278,7 @@ Accept: application/json`}
                                             <ErrorRow
                                                 status="429"
                                                 code="quota_exceeded"
-                                                action="Upgrade your plan or wait for the next monthly reset; launch overages are not billed."
+                                                action="Upgrade your plan or wait for the next monthly reset. There are no overage charges."
                                             />
                                             <ErrorRow
                                                 status="503"
@@ -330,7 +330,7 @@ Retry-After: 12`}
                                     validation errors. When the hard allowance
                                     is exhausted, requests are blocked until the
                                     next monthly reset or after a plan upgrade.
-                                    There is no overage billing at launch.
+                                    There are no overage charges.
                                 </p>
                             </DocSection>
 
